@@ -11,14 +11,25 @@ import {
   Activity,
   BarChart3,
   Settings,
-  ChevronLeft,
-  ChevronRight,
   Briefcase,
   Headphones,
   CreditCard,
   Building2,
   Sparkles,
 } from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuBadge,
+} from "@/components/ui/sidebar";
 
 interface NavItem {
   title: string;
@@ -65,109 +76,71 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-export function Sidebar({
-  collapsed,
-  setCollapsed,
-}: {
-  collapsed: boolean;
-  setCollapsed: (collapsed: boolean) => void;
-}) {
+export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside
-      className={cn(
-        "relative flex flex-col border-r bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))] transition-all duration-300 z-30 h-screen sticky top-0",
-        collapsed ? "w-20" : "w-64"
-      )}
-    >
-      {/* Brand Header */}
-      <div className="flex h-16 items-center justify-between px-4 border-b border-[hsl(var(--sidebar-border))]">
-        <Link href="/" className="flex items-center gap-3 overflow-hidden">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 text-white shadow-md shadow-violet-500/20">
-            <Sparkles className="h-5 w-5" />
-          </div>
-          {!collapsed && (
-            <div className="flex flex-col">
-              <span className="font-bold text-base tracking-tight leading-none text-[hsl(var(--sidebar-foreground))]">
-                Apex CRM
-              </span>
-              <span className="text-xs text-[hsl(var(--muted-foreground))] font-medium mt-1">
-                Admin Theme
-              </span>
-            </div>
-          )}
-        </Link>
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="hidden md:flex h-7 w-7 items-center justify-center rounded-md border border-[hsl(var(--sidebar-border))] hover:bg-[hsl(var(--sidebar-accent))] transition-colors"
-          aria-label="Toggle Sidebar"
-        >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </button>
-      </div>
-
-      {/* Navigation Links */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" render={
+              <Link href="/">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-tr from-primary to-primary/80 text-sidebar-primary-foreground shadow-md shadow-primary/20">
+                  <Sparkles className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-bold">Apex CRM</span>
+                  <span className="truncate text-xs">Admin Theme</span>
+                </div>
+              </Link>
+            } />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      
+      <SidebarContent>
         {navGroups.map((group, idx) => (
-          <div key={idx} className="space-y-1">
-            {!collapsed && (
-              <h3 className="px-3 text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))] mb-2">
-                {group.group}
-              </h3>
-            )}
-            {group.items.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all group relative",
-                    isActive
-                      ? "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] shadow-sm"
-                      : "text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-accent-foreground))]"
-                  )}
-                  title={collapsed ? item.title : undefined}
-                >
-                  <Icon className={cn("h-5 w-5 shrink-0", isActive ? "text-[hsl(var(--primary-foreground))]" : "text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--sidebar-accent-foreground))]")} />
-                  {!collapsed && (
-                    <span className="flex-1 truncate">{item.title}</span>
-                  )}
-                  {!collapsed && item.badge && (
-                    <span
-                      className={cn(
-                        "rounded-full px-2 py-0.5 text-xs font-semibold",
-                        isActive
-                          ? "bg-white/20 text-white"
-                          : "bg-[hsl(var(--primary))/10] text-[hsl(var(--primary))]"
+          <SidebarGroup key={idx}>
+            <SidebarGroupLabel>{group.group}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton isActive={isActive} tooltip={item.title} render={
+                        <Link href={item.href}>
+                          <Icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      } />
+                      {item.badge && (
+                        <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
                       )}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         ))}
-      </div>
+      </SidebarContent>
 
-      {/* Pro Banner / Footer */}
-      {!collapsed && (
-        <div className="p-3 border-t border-[hsl(var(--sidebar-border))]">
-          <div className="rounded-xl bg-gradient-to-br from-violet-600/10 via-indigo-600/10 to-transparent p-3.5 border border-violet-500/20">
+      <SidebarFooter>
+         <div className="p-3 group-data-[collapsible=icon]:hidden">
+          <div className="rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-3.5 border border-primary/20">
             <div className="flex items-center gap-2 mb-1">
               <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wide">Commercial Ready</span>
+              <span className="text-xs font-bold text-primary uppercase tracking-wide">Commercial Ready</span>
             </div>
-            <p className="text-xs text-[hsl(var(--muted-foreground))] leading-relaxed">
-              Theme tokens configured in <code className="text-xs font-mono bg-violet-500/10 px-1 py-0.5 rounded">app/globals.css</code>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Theme tokens configured in <code className="text-xs font-mono bg-primary/10 px-1 py-0.5 rounded">app/globals.css</code>
             </p>
           </div>
         </div>
-      )}
-    </aside>
+      </SidebarFooter>
+    </Sidebar>
   );
 }

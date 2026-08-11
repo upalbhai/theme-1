@@ -6,14 +6,22 @@ import {
   Mail,
   Calendar,
   FileText,
-  Plus,
   Send,
   User,
   Clock,
-  Filter,
-  CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface Activity {
   id: string;
@@ -90,7 +98,7 @@ export default function ActivityTimelinePage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Customer Interactions & Feed</h1>
-          <p className="text-sm text-[hsl(var(--muted-foreground))]">
+          <p className="text-sm text-muted-foreground">
             Chronological audit log of calls, emails, meetings, and team notes.
           </p>
         </div>
@@ -101,85 +109,73 @@ export default function ActivityTimelinePage() {
       </div>
 
       {/* Quick Activity Logger Box */}
-      <div className="rounded-xl border bg-[hsl(var(--card))] p-4 shadow-xs space-y-3">
-        <h3 className="font-semibold text-xs uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
-          Quick Log New Interaction
-        </h3>
-        <textarea
-          rows={2}
-          placeholder="Log a call outcome, meeting note, or customer email summary..."
-          value={noteContent}
-          onChange={(e) => setNoteContent(e.target.value)}
-          className="w-full rounded-lg border bg-[hsl(var(--background))] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
-        />
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t">
-          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 rounded-md border bg-[hsl(var(--background))] px-2.5 py-1 text-xs font-medium hover:bg-[hsl(var(--accent))]">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-xs uppercase tracking-wider text-muted-foreground">
+            Quick Log New Interaction
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            rows={2}
+            placeholder="Log a call outcome, meeting note, or customer email summary..."
+            value={noteContent}
+            onChange={(e) => setNoteContent(e.target.value)}
+            className="w-full resize-none"
+          />
+        </CardContent>
+        <CardFooter className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t mt-2">
+          <div className="flex items-center gap-2 pt-2">
+            <Button variant="outline" size="sm" className="gap-1.5 h-8">
               <PhoneCall className="h-3.5 w-3.5 text-blue-500" /> Log Call
-            </button>
-            <button className="flex items-center gap-1.5 rounded-md border bg-[hsl(var(--background))] px-2.5 py-1 text-xs font-medium hover:bg-[hsl(var(--accent))]">
+            </Button>
+            <Button variant="outline" size="sm" className="gap-1.5 h-8">
               <Mail className="h-3.5 w-3.5 text-purple-500" /> Log Email
-            </button>
-            <button className="flex items-center gap-1.5 rounded-md border bg-[hsl(var(--background))] px-2.5 py-1 text-xs font-medium hover:bg-[hsl(var(--accent))]">
+            </Button>
+            <Button variant="outline" size="sm" className="gap-1.5 h-8">
               <Calendar className="h-3.5 w-3.5 text-emerald-500" /> Meeting
-            </button>
+            </Button>
           </div>
-          <button className="flex items-center gap-1.5 rounded-lg bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] px-3.5 py-1.5 text-xs font-semibold shadow-sm hover:opacity-90 transition-opacity">
+          <Button size="sm" className="gap-1.5 h-8 mt-2">
             <Send className="h-3.5 w-3.5" /> Post Activity
-          </button>
-        </div>
-      </div>
+          </Button>
+        </CardFooter>
+      </Card>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 border-b pb-3">
-        <button
+      <div className="flex flex-wrap items-center gap-2 border-b pb-3">
+        <Button
+          variant={activeTab === "all" ? "default" : "ghost"}
+          size="sm"
           onClick={() => setActiveTab("all")}
-          className={cn(
-            "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
-            activeTab === "all"
-              ? "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
-              : "text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))]"
-          )}
         >
           All Activity Log ({initialActivities.length})
-        </button>
-        <button
+        </Button>
+        <Button
+          variant={activeTab === "call" ? "default" : "ghost"}
+          size="sm"
           onClick={() => setActiveTab("call")}
-          className={cn(
-            "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
-            activeTab === "call"
-              ? "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
-              : "text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))]"
-          )}
         >
           Calls Only
-        </button>
-        <button
+        </Button>
+        <Button
+          variant={activeTab === "email" ? "default" : "ghost"}
+          size="sm"
           onClick={() => setActiveTab("email")}
-          className={cn(
-            "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
-            activeTab === "email"
-              ? "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
-              : "text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))]"
-          )}
         >
           Emails
-        </button>
-        <button
+        </Button>
+        <Button
+          variant={activeTab === "meeting" ? "default" : "ghost"}
+          size="sm"
           onClick={() => setActiveTab("meeting")}
-          className={cn(
-            "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
-            activeTab === "meeting"
-              ? "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
-              : "text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))]"
-          )}
         >
           Meetings
-        </button>
+        </Button>
       </div>
 
       {/* Activity Timeline List */}
-      <div className="relative pl-6 space-y-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-[hsl(var(--border))]">
+      <div className="relative pl-6 space-y-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
         {filteredActivities.map((act) => {
           const Config = activityTypeConfig[act.type];
           const Icon = Config.icon;
@@ -188,7 +184,7 @@ export default function ActivityTimelinePage() {
               {/* Timeline Icon Badge */}
               <div
                 className={cn(
-                  "absolute -left-6 top-1.5 flex h-6 w-6 -translate-x-1/2 items-center justify-center rounded-full border shadow-xs transition-transform group-hover:scale-110",
+                  "absolute -left-6 top-1.5 flex h-6 w-6 -translate-x-1/2 items-center justify-center rounded-full border shadow-xs transition-transform group-hover:scale-110 bg-background",
                   Config.color
                 )}
               >
@@ -196,30 +192,34 @@ export default function ActivityTimelinePage() {
               </div>
 
               {/* Activity Card */}
-              <div className="rounded-xl border bg-[hsl(var(--card))] p-4 shadow-xs transition-all hover:shadow-md hover:border-[hsl(var(--primary))/40]">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-2">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-bold text-sm text-[hsl(var(--foreground))]">{act.title}</h4>
-                    <span className="text-xs font-semibold text-[hsl(var(--primary))]">
-                      • {act.company}
+              <Card className="transition-all hover:shadow-md hover:border-primary/40">
+                <CardHeader className="pb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-sm">{act.title}</CardTitle>
+                      <Badge variant="secondary" className="text-[10px] py-0">
+                        {act.company}
+                      </Badge>
+                    </div>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" /> {act.timestamp}
                     </span>
                   </div>
-                  <span className="flex items-center gap-1 text-xs text-[hsl(var(--muted-foreground))]">
-                    <Clock className="h-3 w-3" /> {act.timestamp}
-                  </span>
-                </div>
-
-                <p className="text-xs text-[hsl(var(--muted-foreground))] leading-relaxed mb-3">
-                  {act.details}
-                </p>
-
-                <div className="flex items-center justify-between text-[11px] pt-2 border-t text-[hsl(var(--muted-foreground))]">
-                  <span className="flex items-center gap-1 font-medium">
-                    <User className="h-3 w-3" /> Contact: <strong className="text-[hsl(var(--foreground))]">{act.contact}</strong>
-                  </span>
-                  <span>Logged by {act.user}</span>
-                </div>
-              </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-xs leading-relaxed text-foreground">
+                    {act.details}
+                  </CardDescription>
+                </CardContent>
+                <CardFooter className="pt-2 pb-3 border-t">
+                  <div className="flex w-full items-center justify-between text-[11px] text-muted-foreground">
+                    <span className="flex items-center gap-1 font-medium">
+                      <User className="h-3 w-3" /> Contact: <strong className="text-foreground">{act.contact}</strong>
+                    </span>
+                    <span>Logged by {act.user}</span>
+                  </div>
+                </CardFooter>
+              </Card>
             </div>
           );
         })}

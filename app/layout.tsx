@@ -1,7 +1,24 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ThemeProvider } from "@/components/providers/theme-provider";
+import { Providers } from "@/components/providers/providers";
 import { AppShell } from "@/components/layout/app-shell";
+import { Inter, Outfit, Geist_Mono } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+});
 
 export const metadata: Metadata = {
   title: "Apex CRM - Commercial Next.js Admin Theme",
@@ -14,16 +31,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={cn(inter.variable, outfit.variable, geistMono.variable)}>
       <body className="antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <Providers>
           <AppShell>{children}</AppShell>
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

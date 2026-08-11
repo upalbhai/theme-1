@@ -17,6 +17,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DataTable, ColumnDef } from "@/components/ui/data-table";
+import { Button } from "@/components/ui/button";
 
 interface Customer {
   id: string;
@@ -106,6 +108,79 @@ const statusBadgeStyles = {
   Churned: "bg-slate-500/10 text-slate-600 border-slate-500/20",
 };
 
+const columns: ColumnDef<Customer>[] = [
+  {
+    header: "Customer",
+    render: (row) => (
+      <div className="flex items-center gap-3">
+        <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white font-bold text-xs shadow-xs", row.avatarBg)}>
+          {row.name.substring(0, 2).toUpperCase()}
+        </div>
+        <div className="flex flex-col">
+          <span className="font-bold text-sm text-foreground transition-colors">
+            {row.name}
+          </span>
+          <span className="text-xs text-muted-foreground">{row.email}</span>
+        </div>
+      </div>
+    ),
+  },
+  {
+    header: "Company",
+    render: (row) => (
+      <div className="flex items-center gap-1.5 font-medium text-foreground">
+        <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+        {row.company}
+      </div>
+    ),
+  },
+  {
+    header: "Status",
+    render: (row) => (
+      <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold border", statusBadgeStyles[row.status])}>
+        {row.status}
+      </span>
+    ),
+  },
+  {
+    header: "Lifetime Value (LTV)",
+    render: (row) => (
+      <span className="font-bold text-emerald-600 dark:text-emerald-400">
+        ${row.ltv.toLocaleString()}
+      </span>
+    ),
+  },
+  {
+    header: "Deals",
+    render: (row) => (
+      <span className="font-medium">
+        {row.dealsCount} {row.dealsCount === 1 ? "Deal" : "Deals"}
+      </span>
+    ),
+  },
+  {
+    header: "Last Contacted",
+    render: (row) => <span className="text-muted-foreground">{row.lastContacted}</span>,
+  },
+  {
+    header: <div className="text-right">Actions</div>,
+    className: "text-right",
+    render: (row) => (
+      <div className="flex items-center justify-end gap-1">
+        <Button variant="outline" size="icon" className="h-7 w-7 border" title="Send Email">
+          <Mail className="h-3.5 w-3.5" />
+        </Button>
+        <Button variant="outline" size="icon" className="h-7 w-7 border" title="Call Contact">
+          <Phone className="h-3.5 w-3.5" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-7 w-7">
+          <MoreVertical className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    ),
+  },
+];
+
 export default function CustomersDirectoryPage() {
   const [searchQuery, setSearchQuery] = React.useState("");
 
@@ -122,138 +197,33 @@ export default function CustomersDirectoryPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Customer Directory</h1>
-          <p className="text-sm text-[hsl(var(--muted-foreground))]">
+          <p className="text-sm text-muted-foreground">
             Complete database of client relationships, lifetime value, and communication history.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 rounded-lg border bg-[hsl(var(--card))] px-3 py-2 text-sm font-medium hover:bg-[hsl(var(--accent))] transition-colors">
+          <Button variant="outline" size="sm" className="gap-1.5">
             <Download className="h-4 w-4" /> Export Contacts CSV
-          </button>
-          <button className="flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] px-3.5 py-2 text-sm font-medium shadow-sm hover:opacity-90 transition-opacity">
+          </Button>
+          <Button size="sm" className="gap-1.5">
             <Plus className="h-4 w-4" /> Add Customer
-          </button>
+          </Button>
         </div>
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-xl border bg-[hsl(var(--card))] p-4 shadow-xs">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--muted-foreground))]" />
-          <input
-            type="text"
-            placeholder="Search by customer name, company, or email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-9 w-full rounded-lg border bg-[hsl(var(--background))] pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 rounded-lg border bg-[hsl(var(--background))] px-3 py-1.5 text-xs font-medium hover:bg-[hsl(var(--accent))]">
+      {/* Reusable Data Table component */}
+      <DataTable
+        columns={columns}
+        data={filteredCustomers}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        placeholderText="Search by customer name, company, or email..."
+        filters={
+          <Button variant="outline" size="sm" className="h-9 gap-1.5 text-xs">
             <Filter className="h-3.5 w-3.5" /> All Statuses
-          </button>
-          <span className="text-xs text-[hsl(var(--muted-foreground))]">
-            Showing <span className="font-semibold text-[hsl(var(--foreground))]">{filteredCustomers.length}</span> contacts
-          </span>
-        </div>
-      </div>
-
-      {/* High Density Customer Data Table */}
-      <div className="rounded-xl border bg-[hsl(var(--card))] shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="border-b bg-[hsl(var(--muted))/40] text-[hsl(var(--muted-foreground))] uppercase font-semibold">
-              <tr>
-                <th className="py-3 px-4">Customer</th>
-                <th className="py-3 px-4">Company</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Lifetime Value (LTV)</th>
-                <th className="py-3 px-4">Deals</th>
-                <th className="py-3 px-4">Last Contacted</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {filteredCustomers.map((cust) => (
-                <tr key={cust.id} className="hover:bg-[hsl(var(--accent))] transition-colors group">
-                  {/* Customer Info */}
-                  <td className="py-3.5 px-4">
-                    <div className="flex items-center gap-3">
-                      <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white font-bold text-xs shadow-xs", cust.avatarBg)}>
-                        {cust.name.substring(0, 2).toUpperCase()}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-sm text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--primary))] transition-colors">
-                          {cust.name}
-                        </span>
-                        <span className="text-xs text-[hsl(var(--muted-foreground))]">{cust.email}</span>
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Company */}
-                  <td className="py-3.5 px-4 font-medium text-[hsl(var(--foreground))]">
-                    <div className="flex items-center gap-1.5">
-                      <Building2 className="h-3.5 w-3.5 text-[hsl(var(--muted-foreground))]" />
-                      {cust.company}
-                    </div>
-                  </td>
-
-                  {/* Status Badge */}
-                  <td className="py-3.5 px-4">
-                    <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold border", statusBadgeStyles[cust.status])}>
-                      {cust.status}
-                    </span>
-                  </td>
-
-                  {/* LTV */}
-                  <td className="py-3.5 px-4 font-bold text-emerald-600 dark:text-emerald-400">
-                    ${cust.ltv.toLocaleString()}
-                  </td>
-
-                  {/* Deals Count */}
-                  <td className="py-3.5 px-4 font-medium">
-                    {cust.dealsCount} {cust.dealsCount === 1 ? "Deal" : "Deals"}
-                  </td>
-
-                  {/* Last Contacted */}
-                  <td className="py-3.5 px-4 text-[hsl(var(--muted-foreground))]">
-                    {cust.lastContacted}
-                  </td>
-
-                  {/* Actions */}
-                  <td className="py-3.5 px-4 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <button className="flex h-7 w-7 items-center justify-center rounded-md border hover:bg-[hsl(var(--background))]" title="Send Email">
-                        <Mail className="h-3.5 w-3.5" />
-                      </button>
-                      <button className="flex h-7 w-7 items-center justify-center rounded-md border hover:bg-[hsl(var(--background))]" title="Call Contact">
-                        <Phone className="h-3.5 w-3.5" />
-                      </button>
-                      <button className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-[hsl(var(--background))]">
-                        <MoreVertical className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Table Footer Pagination */}
-        <div className="flex items-center justify-between p-4 border-t bg-[hsl(var(--card))] text-xs text-[hsl(var(--muted-foreground))]">
-          <span>Page 1 of 12 (72 Total Customers)</span>
-          <div className="flex items-center gap-2">
-            <button className="flex h-8 w-8 items-center justify-center rounded-md border hover:bg-[hsl(var(--accent))]" disabled>
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button className="flex h-8 w-8 items-center justify-center rounded-md border hover:bg-[hsl(var(--accent))]">
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </div>
+          </Button>
+        }
+      />
     </div>
   );
 }

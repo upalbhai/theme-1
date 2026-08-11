@@ -2,157 +2,169 @@
 
 import * as React from "react";
 import { useTheme } from "next-themes";
-import { useThemePreset, ThemePreset } from "@/components/providers/theme-provider";
 import {
   Search,
   Bell,
   Sun,
   Moon,
-  Paintbrush,
-  Menu,
-  Check,
   User,
   ShieldCheck,
   LogOut,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-interface TopbarProps {
-  onMobileMenuToggle: () => void;
-}
+import { useRouter } from "next/navigation";
+import {
+  CommandDialog,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandSeparator,
+} from "@/components/ui/command";
 
-const themePresets: { id: ThemePreset; label: string; color: string }[] = [
-  { id: "violet", label: "Violet (Default)", color: "#8b5cf6" },
-  { id: "emerald", label: "Emerald Green", color: "#10b981" },
-  { id: "blue", label: "Royal Blue", color: "#3b82f6" },
-  { id: "amber", label: "Sunset Amber", color: "#f59e0b" },
-  { id: "rose", label: "Passion Rose", color: "#f43f5e" },
-];
-
-export function Topbar({ onMobileMenuToggle }: TopbarProps) {
+export function Topbar() {
   const { theme, setTheme } = useTheme();
-  const { preset, setPreset } = useThemePreset();
-  const [showColorPicker, setShowColorPicker] = React.useState(false);
-  const [showProfileMenu, setShowProfileMenu] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+  const router = useRouter();
+
+  React.useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
+
+  const runCommand = React.useCallback((command: () => void) => {
+    setOpen(false);
+    command();
+  }, []);
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b bg-[hsl(var(--background))/80] px-4 md:px-6 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b bg-background/80 px-4 md:px-6 backdrop-blur-md transition-colors">
       {/* Search Input & Mobile Toggle */}
       <div className="flex items-center gap-3 flex-1 max-w-md">
-        <button
-          onClick={onMobileMenuToggle}
-          className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg border hover:bg-[hsl(var(--accent))]"
-          aria-label="Open Mobile Menu"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
+        <SidebarTrigger className="md:hidden" />
 
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--muted-foreground))]" />
-          <input
-            type="text"
-            placeholder="Search deals, contacts, leads... (Press ⌘K)"
-            className="h-9 w-full rounded-lg border bg-[hsl(var(--card))] pl-9 pr-12 text-sm placeholder:text-[hsl(var(--muted-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] transition-all"
-          />
-          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 rounded border bg-[hsl(var(--muted))] px-1.5 py-0.5 text-[10px] font-medium text-[hsl(var(--muted-foreground))]">
+        <button
+          onClick={() => setOpen(true)}
+          className="relative w-full text-left focus:outline-none"
+        >
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="flex h-9 w-full rounded-lg border border-input bg-muted/30 pl-9 pr-12 text-sm text-muted-foreground items-center">
+            Search deals, contacts, leads...
+          </div>
+          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 rounded border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
             ⌘K
           </kbd>
-        </div>
+        </button>
       </div>
 
       {/* Action Buttons */}
       <div className="flex items-center gap-2">
-        {/* Theme Accent Color Picker Dropdown */}
-        <div className="relative">
-          <button
-            onClick={() => setShowColorPicker(!showColorPicker)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border hover:bg-[hsl(var(--accent))] transition-colors relative"
-            title="Customize Theme Accent Color"
-          >
-            <Paintbrush className="h-4 w-4 text-[hsl(var(--primary))]" />
-          </button>
-
-          {showColorPicker && (
-            <div className="absolute right-0 mt-2 w-56 rounded-xl border bg-[hsl(var(--card))] p-3 shadow-lg ring-1 ring-black/5 z-50 animate-in fade-in zoom-in-95">
-              <div className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-2">
-                Select Accent Preset
-              </div>
-              <div className="space-y-1">
-                {themePresets.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => {
-                      setPreset(p.id);
-                      setShowColorPicker(false);
-                    }}
-                    className={cn(
-                      "flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-[hsl(var(--accent))]",
-                      preset === p.id && "bg-[hsl(var(--accent))]"
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="h-3.5 w-3.5 rounded-full shadow-sm"
-                        style={{ backgroundColor: p.color }}
-                      />
-                      <span>{p.label}</span>
-                    </div>
-                    {preset === p.id && <Check className="h-3.5 w-3.5 text-[hsl(var(--primary))]" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Light / Dark Mode Toggle */}
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border hover:bg-[hsl(var(--accent))] transition-colors"
           title="Toggle Light/Dark Theme"
         >
           <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-amber-500" />
           <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-indigo-400" />
-        </button>
+        </Button>
 
         {/* Notifications Icon */}
-        <button className="relative flex h-9 w-9 items-center justify-center rounded-lg border hover:bg-[hsl(var(--accent))] transition-colors">
+        <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-4 w-4" />
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[hsl(var(--primary))]" />
-        </button>
+          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
+        </Button>
 
         {/* User Profile Avatar */}
-        <div className="relative ml-2">
-          <button
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex items-center gap-2 rounded-full border p-1 hover:bg-[hsl(var(--accent))] transition-colors"
-          >
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-xs font-bold text-[hsl(var(--primary-foreground))]">
-              AD
-            </div>
-          </button>
-
-          {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-56 rounded-xl border bg-[hsl(var(--card))] p-2 shadow-lg ring-1 ring-black/5 z-50">
-              <div className="px-3 py-2 border-b">
-                <p className="text-sm font-semibold">Alex Morgan</p>
-                <p className="text-xs text-[hsl(var(--muted-foreground))]">alex.m@apex-crm.com</p>
+        <DropdownMenu>
+          <DropdownMenuTrigger render={<button className="relative h-8 w-8 rounded-full ml-2 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" />}>
+            <Avatar className="h-8 w-8 border border-border">
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">AD</AvatarFallback>
+            </Avatar>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end">
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">Alex Morgan</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  alex.m@apex-crm.com
+                </p>
               </div>
-              <div className="py-1">
-                <button className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium hover:bg-[hsl(var(--accent))]">
-                  <User className="h-3.5 w-3.5" /> Profile Settings
-                </button>
-                <button className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium hover:bg-[hsl(var(--accent))]">
-                  <ShieldCheck className="h-3.5 w-3.5" /> Team Permissions
-                </button>
-                <button className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30">
-                  <LogOut className="h-3.5 w-3.5" /> Sign Out
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/settings")}>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/settings")}>
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              <span>Team Permissions</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer" onClick={() => router.push("/settings")}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sign Out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
+
+      {/* Command Palette Modal */}
+      <CommandDialog open={open} onOpenChange={setOpen}>
+        <CommandInput placeholder="Type a command or search..." />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup heading="CRM Navigation">
+            <CommandItem onSelect={() => runCommand(() => router.push("/"))}>
+              <Search className="mr-2 h-4 w-4" />
+              <span>Dashboard Overview</span>
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push("/crm/deals"))}>
+              <Search className="mr-2 h-4 w-4" />
+              <span>Deals Pipeline</span>
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push("/crm/customers"))}>
+              <Search className="mr-2 h-4 w-4" />
+              <span>Customer Registry</span>
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push("/crm/activities"))}>
+              <Search className="mr-2 h-4 w-4" />
+              <span>Interactions & Feed</span>
+            </CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
+          <CommandGroup heading="System Preferences">
+            <CommandItem onSelect={() => runCommand(() => router.push("/settings"))}>
+              <User className="mr-2 h-4 w-4" />
+              <span>Settings & Security</span>
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => setTheme(theme === "dark" ? "light" : "dark"))}>
+              {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+              <span>Toggle Light/Dark Mode</span>
+            </CommandItem>
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
     </header>
   );
 }
