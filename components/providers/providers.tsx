@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { ThemeProvider as NextThemesProvider } from 'next-themes';
+import { ThemeProvider } from '@/components/providers/theme-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 import { store } from '@/store';
@@ -15,23 +15,16 @@ export interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
-  // Use a ref to ensure the QueryClient is only created once per component lifecycle
-  // This is safe for both Client Components and SSR.
   const [queryClient] = React.useState(() => createQueryClient());
 
   return (
     <ReduxProvider store={store}>
       <QueryClientProvider client={queryClient}>
-        <NextThemesProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider>
           <TooltipProvider>
             {children}
           </TooltipProvider>
-        </NextThemesProvider>
+        </ThemeProvider>
         {/* TanStack Query Devtools (only visible in development) */}
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>

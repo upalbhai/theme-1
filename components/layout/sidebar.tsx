@@ -10,12 +10,14 @@ import {
   Users,
   Activity,
   BarChart3,
-  Settings,
-  Briefcase,
-  Headphones,
-  CreditCard,
-  Building2,
   Sparkles,
+  CheckSquare,
+  MessageSquare,
+  Settings,
+  CalendarDays,
+  FileText,
+  FolderOpen,
+  PieChart,
 } from "lucide-react";
 import {
   Sidebar,
@@ -47,7 +49,7 @@ const navGroups: NavGroup[] = [
   {
     group: "Overview",
     items: [
-      { title: "Dashboard", href: "/", icon: LayoutDashboard },
+      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { title: "Sales Analytics", href: "/analytics", icon: BarChart3 },
     ],
   },
@@ -57,20 +59,33 @@ const navGroups: NavGroup[] = [
       { title: "Deals Pipeline", href: "/crm/deals", icon: Kanban, badge: "Live" },
       { title: "Customers", href: "/crm/customers", icon: Users },
       { title: "Activities & Feed", href: "/crm/activities", icon: Activity },
-      { title: "Companies", href: "/crm/companies", icon: Building2 },
     ],
   },
   {
-    group: "Client Portal",
+    group: "Workspace",
     items: [
-      { title: "Support Tickets", href: "/portal/tickets", icon: Headphones, badge: "3 New" },
-      { title: "Invoices & Billing", href: "/portal/billing", icon: CreditCard },
-      { title: "Contracts", href: "/portal/contracts", icon: Briefcase },
+      { title: "Calendar", href: "/calendar", icon: CalendarDays },
+      { title: "Tasks & Todos", href: "/tasks", icon: CheckSquare },
+      { title: "Messages", href: "/messages", icon: MessageSquare, badge: "3 New" },
+      { title: "Documents", href: "/documents", icon: FolderOpen },
     ],
   },
   {
-    group: "System",
+    group: "Finance",
     items: [
+      { title: "Invoices", href: "/invoices", icon: FileText, badge: "Action Needed" },
+    ],
+  },
+  {
+    group: "Reports",
+    items: [
+      { title: "Leads Report", href: "/reports/leads", icon: PieChart },
+    ],
+  },
+  {
+    group: "Account",
+    items: [
+      { title: "User Profile", href: "/profile", icon: Users },
       { title: "Settings", href: "/settings", icon: Settings },
     ],
   },
@@ -85,7 +100,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={
-              <Link href="/">
+              <Link href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-tr from-primary to-primary/80 text-sidebar-primary-foreground shadow-md shadow-primary/20">
                   <Sparkles className="size-4" />
                 </div>
@@ -98,7 +113,7 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      
+
       <SidebarContent>
         {navGroups.map((group, idx) => (
           <SidebarGroup key={idx}>
@@ -129,7 +144,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-         <div className="p-3 group-data-[collapsible=icon]:hidden">
+        <div className="p-3 group-data-[collapsible=icon]:hidden">
           <div className="rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-3.5 border border-primary/20">
             <div className="flex items-center gap-2 mb-1">
               <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />

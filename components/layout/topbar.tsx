@@ -4,7 +4,6 @@ import * as React from "react";
 import { useTheme } from "next-themes";
 import {
   Search,
-  Bell,
   Sun,
   Moon,
   User,
@@ -12,6 +11,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { NotificationPopover } from "@/components/layout/notification-popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +21,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -67,11 +68,11 @@ export function Topbar() {
           className="relative w-full text-left focus:outline-none"
         >
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <div className="flex h-9 w-full rounded-lg border border-input bg-muted/30 pl-9 pr-12 text-sm text-muted-foreground items-center">
+          <div className="flex h-10 w-full rounded-lg border border-input bg-muted/30 pl-9 pr-12 text-[15px] text-muted-foreground items-center">
             Search deals, contacts, leads...
           </div>
-          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 rounded border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-            ⌘K
+          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 rounded border bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
+            K
           </kbd>
         </button>
       </div>
@@ -85,34 +86,33 @@ export function Topbar() {
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           title="Toggle Light/Dark Theme"
         >
-          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-amber-500" />
-          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-indigo-400" />
+          <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-amber-500" />
+          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-indigo-400" />
         </Button>
 
-        {/* Notifications Icon */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-4 w-4" />
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
-        </Button>
+        {/* Notifications Popover */}
+        <NotificationPopover />
 
         {/* User Profile Avatar */}
         <DropdownMenu>
-          <DropdownMenuTrigger render={<button className="relative h-8 w-8 rounded-full ml-2 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" />}>
-            <Avatar className="h-8 w-8 border border-border">
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">AD</AvatarFallback>
+          <DropdownMenuTrigger render={<button className="relative h-10 w-10 rounded-full ml-2 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" />}>
+            <Avatar className="h-10 w-10 border border-border">
+              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-bold">AD</AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end">
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Alex Morgan</p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  alex.m@apex-crm.com
-                </p>
-              </div>
-            </DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">Alex Morgan</p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    alex.m@apex-crm.com
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/settings")}>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/profile")}>
               <User className="mr-2 h-4 w-4" />
               <span>Profile Settings</span>
             </DropdownMenuItem>
@@ -154,9 +154,9 @@ export function Topbar() {
           </CommandGroup>
           <CommandSeparator />
           <CommandGroup heading="System Preferences">
-            <CommandItem onSelect={() => runCommand(() => router.push("/settings"))}>
+            <CommandItem onSelect={() => runCommand(() => router.push("/profile"))}>
               <User className="mr-2 h-4 w-4" />
-              <span>Settings & Security</span>
+              <span>User Profile & Security</span>
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => setTheme(theme === "dark" ? "light" : "dark"))}>
               {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}

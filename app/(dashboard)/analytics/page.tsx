@@ -36,7 +36,7 @@ import {
 
 export default function AnalyticsPage() {
   const [activeSegment, setActiveSegment] = React.useState<{ name: string; value: number } | null>(null);
-  const totalPipelineValue = segmentData.reduce((sum, item) => sum + item.value, 0);
+  const totalPipelineValue = segmentData.reduce((sum: number, item: any) => sum + item.value, 0);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -165,7 +165,7 @@ export default function AnalyticsPage() {
             </Select>
           </CardHeader>
           <CardContent className="h-[280px] w-full pt-2">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
               <BarChart data={monthlyConversionsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                 <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
@@ -197,7 +197,7 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center flex-1 py-4">
             <div className="h-[180px] w-full relative">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <PieChart>
                   <Pie
                     data={segmentData}
@@ -210,7 +210,7 @@ export default function AnalyticsPage() {
                     onMouseEnter={(_, index) => setActiveSegment(segmentData[index])}
                     onMouseLeave={() => setActiveSegment(null)}
                   >
-                    {segmentData.map((entry, index) => (
+                    {segmentData.map((entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={entry.color} className="outline-none" />
                     ))}
                   </Pie>
@@ -227,7 +227,7 @@ export default function AnalyticsPage() {
             </div>
             {/* Custom Legend */}
             <div className="grid grid-cols-3 gap-2 w-full text-center mt-2 pt-2 border-t">
-              {segmentData.map((item) => (
+              {segmentData.map((item: any) => (
                 <div key={item.name} className="flex flex-col items-center">
                   <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground">
                     <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
@@ -266,7 +266,7 @@ export default function AnalyticsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {topPerformers.map((rep, idx) => (
+                  {topPerformers.map((rep: any, idx: number) => (
                     <TableRow key={idx}>
                       <TableCell className="font-semibold text-xs py-3">{rep.name}</TableCell>
                       <TableCell className="text-muted-foreground text-xs py-3">{rep.deals}</TableCell>
@@ -311,8 +311,8 @@ export default function AnalyticsPage() {
           </CardHeader>
 
           <CardContent className="space-y-5 py-4 my-auto">
-            {pipelineStages.map((item) => {
-              const maxValue = Math.max(...pipelineStages.map((p) => p.value));
+            {pipelineStages.map((item: any) => {
+              const maxValue = Math.max(...pipelineStages.map((p: any) => p.value));
               const percentage = (item.value / maxValue) * 100;
               return (
                 <div key={item.stage} className="space-y-1.5 group">

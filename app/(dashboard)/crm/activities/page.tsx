@@ -22,6 +22,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Activity {
   id: string;
@@ -143,35 +144,15 @@ export default function ActivityTimelinePage() {
       </Card>
 
       {/* Filter Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b pb-3">
-        <Button
-          variant={activeTab === "all" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setActiveTab("all")}
-        >
-          All Activity Log ({initialActivities.length})
-        </Button>
-        <Button
-          variant={activeTab === "call" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setActiveTab("call")}
-        >
-          Calls Only
-        </Button>
-        <Button
-          variant={activeTab === "email" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setActiveTab("email")}
-        >
-          Emails
-        </Button>
-        <Button
-          variant={activeTab === "meeting" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setActiveTab("meeting")}
-        >
-          Meetings
-        </Button>
+      <div className="border-b pb-3 overflow-x-auto">
+        <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)}>
+          <TabsList className="bg-transparent h-9 border p-1 border-border/50 shadow-sm gap-1">
+            <TabsTrigger value="all" className="rounded-[min(var(--radius-md),12px)] h-7 px-3 data-active:bg-primary data-active:text-primary-foreground data-active:shadow-sm">All Activity Log ({initialActivities.length})</TabsTrigger>
+            <TabsTrigger value="call" className="rounded-[min(var(--radius-md),12px)] h-7 px-3 data-active:bg-primary data-active:text-primary-foreground data-active:shadow-sm">Calls Only</TabsTrigger>
+            <TabsTrigger value="email" className="rounded-[min(var(--radius-md),12px)] h-7 px-3 data-active:bg-primary data-active:text-primary-foreground data-active:shadow-sm">Emails</TabsTrigger>
+            <TabsTrigger value="meeting" className="rounded-[min(var(--radius-md),12px)] h-7 px-3 data-active:bg-primary data-active:text-primary-foreground data-active:shadow-sm">Meetings</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Activity Timeline List */}
