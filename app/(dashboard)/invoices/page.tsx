@@ -146,9 +146,7 @@ export default function InvoicesPage() {
                   </div>
                 </div>
                 <DialogFooter className="pt-4">
-                  <DialogClose asChild>
-                    <Button type="button" variant="ghost">Cancel</Button>
-                  </DialogClose>
+                  <DialogClose render={<Button type="button" variant="ghost">Cancel</Button>} />
                   <Button type="submit" disabled={!newClient.trim() || !newAmount.trim()}>Generate Invoice</Button>
                 </DialogFooter>
               </form>

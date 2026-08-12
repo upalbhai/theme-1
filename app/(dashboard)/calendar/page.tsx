@@ -155,9 +155,7 @@ export default function CalendarPage() {
                   </div>
                 </div>
                 <DialogFooter className="pt-4">
-                  <DialogClose asChild>
-                    <Button type="button" variant="ghost">Cancel</Button>
-                  </DialogClose>
+                  <DialogClose render={<Button type="button" variant="ghost">Cancel</Button>} />
                   <Button type="submit" disabled={!newTitle.trim()}>Save Event</Button>
                 </DialogFooter>
               </form>

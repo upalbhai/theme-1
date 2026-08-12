@@ -120,9 +120,7 @@ export default function TasksPage() {
                 </div>
               </div>
               <DialogFooter className="pt-4">
-                <DialogClose asChild>
-                  <Button type="button" variant="ghost">Cancel</Button>
-                </DialogClose>
+                <DialogClose render={<Button type="button" variant="ghost">Cancel</Button>} />
                 <Button type="submit" disabled={!newTaskTitle.trim()}>Create Task</Button>
               </DialogFooter>
             </form>

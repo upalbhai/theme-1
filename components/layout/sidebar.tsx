@@ -18,6 +18,10 @@ import {
   FileText,
   FolderOpen,
   PieChart,
+  Briefcase,
+  StickyNote,
+  HardDrive,
+  FileSpreadsheet,
 } from "lucide-react";
 import {
   Sidebar,
@@ -64,22 +68,29 @@ const navGroups: NavGroup[] = [
   {
     group: "Workspace",
     items: [
+      { title: "Projects", href: "/projects", icon: Briefcase },
       { title: "Calendar", href: "/calendar", icon: CalendarDays },
       { title: "Tasks & Todos", href: "/tasks", icon: CheckSquare },
+      { title: "Notes", href: "/notes", icon: StickyNote },
       { title: "Messages", href: "/messages", icon: MessageSquare, badge: "3 New" },
       { title: "Documents", href: "/documents", icon: FolderOpen },
+      { title: "Storage Drive", href: "/storage", icon: HardDrive },
     ],
   },
   {
     group: "Finance",
     items: [
+      { title: "Proposals", href: "/proposals", icon: FileSpreadsheet },
       { title: "Invoices", href: "/invoices", icon: FileText, badge: "Action Needed" },
     ],
   },
   {
     group: "Reports",
     items: [
+      { title: "Sales Report", href: "/reports/sales", icon: BarChart3 },
       { title: "Leads Report", href: "/reports/leads", icon: PieChart },
+      { title: "Project Report", href: "/reports/project", icon: Activity },
+      { title: "Timesheets Report", href: "/reports/timesheets", icon: Sparkles },
     ],
   },
   {
