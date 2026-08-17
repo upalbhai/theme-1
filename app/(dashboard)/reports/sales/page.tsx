@@ -269,6 +269,7 @@ export default function SalesReportPage() {
                   <YAxis tickLine={false} axisLine={false} className="text-xs text-muted-foreground" />
                   <Tooltip 
                     contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', borderRadius: '8px', border: 'none', color: '#fff' }}
+                    cursor={{ fill: 'var(--accent)' }}
                   />
                   <Bar dataKey="leads" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Leads Generated" />
                   <Bar dataKey="closed" fill="#10b981" radius={[4, 4, 0, 0]} name="Deals Closed" />

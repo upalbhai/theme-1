@@ -56,6 +56,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Proposal {
   id: string;
@@ -221,15 +228,19 @@ export default function ProposalsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Initial Status</Label>
-                  <select 
+                  <Select 
                     value={newStatus} 
-                    onChange={e => setNewStatus(e.target.value as Proposal["status"])}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+                    onValueChange={value => setNewStatus(value as Proposal["status"])}
                   >
-                    <option value="Pending">Pending Review</option>
-                    <option value="Accepted">Accepted</option>
-                    <option value="Draft">Draft</option>
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Pending">Pending Review</SelectItem>
+                      <SelectItem value="Accepted">Accepted</SelectItem>
+                      <SelectItem value="Draft">Draft</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

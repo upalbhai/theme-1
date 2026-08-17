@@ -79,7 +79,7 @@ const DUMMY_USER = {
       title: 'Updated Lead Qualification Matrix',
       description: 'Adjusted scoring algorithm for Enterprise leads',
       time: 'Yesterday at 11:30 AM',
-      color: 'bg-indigo-500',
+      color: 'bg-primary',
       textColor: 'text-muted-foreground'
     },
     {
@@ -122,7 +122,7 @@ export default function ProfilePage() {
       {/* Top Banner & Header */}
       <div className="relative rounded-2xl border bg-card text-card-foreground shadow-sm">
         {/* Cover Photo Gradient */}
-        <div className="h-40 md:h-52 w-full rounded-t-2xl bg-gradient-to-r from-primary via-indigo-600 to-purple-600 relative overflow-hidden">
+        <div className="h-40 md:h-52 w-full rounded-t-2xl bg-gradient-to-r from-primary via-blue-600 to-sky-500 relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/10 via-transparent to-black/20" />
           <Button
             variant="secondary"
@@ -141,7 +141,7 @@ export default function ProfilePage() {
             {/* Avatar with Camera Icon - Pulled up individually */}
             <div className="relative group -mt-20 md:-mt-24 sm:mb-2">
               <Avatar className="h-28 w-28 md:h-36 md:w-36 border-4 border-background shadow-xl ring-2 ring-primary/20 bg-background">
-                <AvatarFallback className="bg-gradient-to-tr from-primary to-indigo-600 text-white font-bold text-3xl md:text-4xl">
+                <AvatarFallback className="bg-gradient-to-tr from-primary to-sky-500 text-white font-bold text-3xl md:text-4xl">
                   {DUMMY_USER.profile.avatarInitials}
                 </AvatarFallback>
               </Avatar>

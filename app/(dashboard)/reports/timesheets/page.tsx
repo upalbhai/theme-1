@@ -179,7 +179,10 @@ export default function TimesheetsReportPage() {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted" />
                   <XAxis dataKey="day" tickLine={false} axisLine={false} className="text-xs text-muted-foreground" />
                   <YAxis tickLine={false} axisLine={false} className="text-xs text-muted-foreground" />
-                  <Tooltip contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', borderRadius: '8px', border: 'none', color: '#fff' }} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', borderRadius: '8px', border: 'none', color: '#fff' }} 
+                    cursor={{ fill: 'var(--accent)' }}
+                  />
                   <Bar dataKey="regular" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Regular Hours" />
                   <Bar dataKey="overtime" fill="#f59e0b" radius={[4, 4, 0, 0]} name="Overtime Hours" />
                 </BarChart>
