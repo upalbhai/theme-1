@@ -44,6 +44,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DataTable, ColumnDef } from "@/components/ui/data-table";
 import { 
   BarChart, 
   Bar, 
@@ -160,6 +161,183 @@ const projectLeads = [
     progressColor: "text-orange-500",
     strokeColor: "#f97316"
   }
+];
+
+interface LeadStatus {
+  name: string;
+  initials: string;
+  date: string;
+  status: string;
+  statusColor: string;
+  value: string;
+}
+
+const leadStatusColumns: ColumnDef<LeadStatus>[] = [
+  {
+    header: "NAME",
+    className: "w-[200px] pl-6",
+    render: (lead) => (
+      <div className="flex items-center gap-3">
+        <Avatar className="h-8 w-8">
+          <AvatarFallback className="bg-primary/10 text-primary text-xs">{lead.initials}</AvatarFallback>
+        </Avatar>
+        {lead.name}
+      </div>
+    ),
+  },
+  {
+    header: "SALE REP.",
+    render: () => (
+      <div className="flex -space-x-2">
+        <Avatar className="border-2 border-background w-7 h-7"><AvatarFallback className="text-[10px] bg-blue-100">A</AvatarFallback></Avatar>
+        <Avatar className="border-2 border-background w-7 h-7"><AvatarFallback className="text-[10px] bg-orange-100">B</AvatarFallback></Avatar>
+      </div>
+    ),
+  },
+  {
+    header: "CONTACTED",
+    accessorKey: "date",
+    className: "text-muted-foreground",
+  },
+  {
+    header: "STATUS",
+    render: (lead) => (
+      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${lead.statusColor}`}>
+        {lead.status}
+      </span>
+    ),
+  },
+  {
+    header: "VALUE",
+    accessorKey: "value",
+    className: "text-right font-semibold pr-6",
+  },
+];
+
+const projectLeadColumns: ColumnDef<any>[] = [
+  {
+    header: "Project ID & Title",
+    className: "w-[300px] pl-6",
+    render: (project) => {
+      const StatusIcon = project.statusIcon;
+      return (
+        <div className="flex items-start gap-3">
+          <div className={`p-2 rounded-lg flex flex-col items-center justify-center shrink-0 w-[90px] h-[90px] ${project.badgeColor} border border-current/10`}>
+            <StatusIcon className="h-6 w-6 mb-1" />
+            <span className="text-[10px] font-bold text-center leading-tight">{project.statusBadge}</span>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground font-medium mb-1">{project.id}</p>
+            <h4 className="font-semibold text-sm line-clamp-2">{project.title}</h4>
+          </div>
+        </div>
+      );
+    },
+  },
+  {
+    header: "Contact Details",
+    className: "min-w-[200px]",
+    render: (project) => (
+      <div className="space-y-1.5">
+        <div className="flex items-center text-xs text-muted-foreground">
+          <Phone className="h-3.5 w-3.5 mr-2 shrink-0" />
+          <span>{project.phone}</span>
+        </div>
+        <div className="flex items-center text-xs text-muted-foreground">
+          <Mail className="h-3.5 w-3.5 mr-2 shrink-0" />
+          <span className="truncate">{project.email}</span>
+        </div>
+        <div className="flex items-center text-xs text-muted-foreground">
+          <MapPin className="h-3.5 w-3.5 mr-2 shrink-0" />
+          <span className="truncate">{project.address}</span>
+        </div>
+      </div>
+    ),
+  },
+  {
+    header: "",
+    render: () => (
+      <Button variant="link" className="text-blue-600 p-0 h-auto text-sm font-semibold">Show More</Button>
+    ),
+  },
+  {
+    header: "Est. Revenue",
+    render: (project) => (
+      <span className="font-bold text-sm">{project.revenue}</span>
+    ),
+  },
+  {
+    header: "Sales Rep",
+    render: () => (
+      <div className="flex items-center gap-1">
+        <div className="flex -space-x-2">
+          <Avatar className="border-2 border-background w-7 h-7"><AvatarFallback className="text-[10px] bg-slate-200">A</AvatarFallback></Avatar>
+          <Avatar className="border-2 border-background w-7 h-7"><AvatarFallback className="text-[10px] bg-slate-200">B</AvatarFallback></Avatar>
+        </div>
+        <span className="text-xs text-muted-foreground font-medium bg-muted px-1.5 py-0.5 rounded-md">35+</span>
+      </div>
+    ),
+  },
+  {
+    header: "Status",
+    render: (project) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger render={
+          <Button variant="outline" size="sm" className="h-8 rounded-full gap-2 text-xs font-semibold px-3">
+            <span className={`w-2 h-2 rounded-full ${project.statusDot}`} />
+            {project.status}
+          </Button>
+        } />
+        <DropdownMenuContent>
+          <DropdownMenuItem>Inprogress</DropdownMenuItem>
+          <DropdownMenuItem>Completed</DropdownMenuItem>
+          <DropdownMenuItem>Upcoming</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
+  },
+  {
+    header: "Progress",
+    render: (project) => (
+      <div className="flex items-center justify-center">
+        <div className="relative w-16 h-16 flex items-center justify-center">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+            <path
+              className="text-muted/30"
+              strokeWidth="3"
+              stroke="currentColor"
+              fill="none"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+            <path
+              stroke={project.strokeColor}
+              strokeWidth="3"
+              strokeDasharray={`${project.progressValue}, 100`}
+              strokeLinecap="round"
+              fill="none"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+          </svg>
+          <div className={`absolute inset-0 flex items-center justify-center flex-col`}>
+            <span className={`text-[10px] font-bold ${project.progressColor}`}>{project.progressText}</span>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    header: "",
+    className: "text-right pr-6",
+    render: (project) => (
+      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary rounded-full"><ImageIcon className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary rounded-full"><Pencil className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-full"><Trash2 className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary rounded-full"><LayoutGrid className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary rounded-full"><MoreVertical className="h-4 w-4" /></Button>
+      </div>
+    ),
+  },
 ];
 
 export default function LeadsReportPage() {
@@ -299,44 +477,12 @@ export default function LeadsReportPage() {
             </DropdownMenu>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader className="bg-muted/50">
-                <TableRow>
-                  <TableHead className="w-[200px]">NAME</TableHead>
-                  <TableHead>SALE REP.</TableHead>
-                  <TableHead>CONTACTED</TableHead>
-                  <TableHead>STATUS</TableHead>
-                  <TableHead className="text-right">VALUE</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {leadsStatusData.map((lead, idx) => (
-                  <TableRow key={idx}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-primary/10 text-primary text-xs">{lead.initials}</AvatarFallback>
-                        </Avatar>
-                        {lead.name}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex -space-x-2">
-                        <Avatar className="border-2 border-background w-7 h-7"><AvatarFallback className="text-[10px] bg-blue-100">A</AvatarFallback></Avatar>
-                        <Avatar className="border-2 border-background w-7 h-7"><AvatarFallback className="text-[10px] bg-orange-100">B</AvatarFallback></Avatar>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{lead.date}</TableCell>
-                    <TableCell>
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${lead.statusColor}`}>
-                        {lead.status}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">{lead.value}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DataTable
+              columns={leadStatusColumns}
+              data={leadsStatusData}
+              className="border-none shadow-none bg-transparent"
+              hidePagination
+            />
             <div className="p-4 text-xs text-muted-foreground border-t">
               UPDATE: 30 MIN AGO
             </div>
@@ -398,126 +544,12 @@ export default function LeadsReportPage() {
           </DropdownMenu>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableBody>
-                {projectLeads.map((project, idx) => (
-                  <TableRow key={idx} className="group">
-                    <TableCell className="w-[300px]">
-                      <div className="flex items-start gap-3">
-                        <div className={`p-2 rounded-lg flex flex-col items-center justify-center shrink-0 w-[90px] h-[90px] ${project.badgeColor} border border-current/10`}>
-                          <project.statusIcon className="h-6 w-6 mb-1" />
-                          <span className="text-[10px] font-bold text-center leading-tight">{project.statusBadge}</span>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground font-medium mb-1">{project.id}</p>
-                          <h4 className="font-semibold text-sm line-clamp-2">{project.title}</h4>
-                        </div>
-                      </div>
-                    </TableCell>
-                    
-                    <TableCell className="min-w-[200px]">
-                      <div className="space-y-1.5">
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <Phone className="h-3.5 w-3.5 mr-2 shrink-0" />
-                          <span>{project.phone}</span>
-                        </div>
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <Mail className="h-3.5 w-3.5 mr-2 shrink-0" />
-                          <span className="truncate">{project.email}</span>
-                        </div>
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <MapPin className="h-3.5 w-3.5 mr-2 shrink-0" />
-                          <span className="truncate">{project.address}</span>
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <Button variant="link" className="text-blue-600 p-0 h-auto text-sm font-semibold">Show More</Button>
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="space-y-1">
-                        <p className="text-xs text-muted-foreground uppercase font-medium">Est. Revenue</p>
-                        <p className="font-bold">{project.revenue}</p>
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="space-y-1">
-                        <p className="text-xs text-muted-foreground uppercase font-medium mb-2">Sale Rep.</p>
-                        <div className="flex items-center gap-1">
-                          <div className="flex -space-x-2">
-                            <Avatar className="border-2 border-background w-7 h-7"><AvatarFallback className="text-[10px] bg-slate-200">A</AvatarFallback></Avatar>
-                            <Avatar className="border-2 border-background w-7 h-7"><AvatarFallback className="text-[10px] bg-slate-200">B</AvatarFallback></Avatar>
-                          </div>
-                          <span className="text-xs text-muted-foreground font-medium bg-muted px-1.5 py-0.5 rounded-md">35+</span>
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="space-y-1">
-                        <p className="text-xs text-muted-foreground uppercase font-medium mb-2">Project Info</p>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger render={
-                            <Button variant="outline" size="sm" className="h-8 rounded-full gap-2 text-xs font-semibold px-3">
-                              <span className={`w-2 h-2 rounded-full ${project.statusDot}`} />
-                              {project.status}
-                            </Button>
-                          } />
-                          <DropdownMenuContent>
-                            <DropdownMenuItem>Inprogress</DropdownMenuItem>
-                            <DropdownMenuItem>Completed</DropdownMenuItem>
-                            <DropdownMenuItem>Upcoming</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="flex items-center justify-center">
-                        <div className="relative w-16 h-16 flex items-center justify-center">
-                          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                            <path
-                              className="text-muted/30"
-                              strokeWidth="3"
-                              stroke="currentColor"
-                              fill="none"
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                            />
-                            <path
-                              stroke={project.strokeColor}
-                              strokeWidth="3"
-                              strokeDasharray={`${project.progressValue}, 100`}
-                              strokeLinecap="round"
-                              fill="none"
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                            />
-                          </svg>
-                          <div className={`absolute inset-0 flex items-center justify-center flex-col`}>
-                            <span className={`text-[10px] font-bold ${project.progressColor}`}>{project.progressText}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    
-                    <TableCell>
-                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary rounded-full"><ImageIcon className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary rounded-full"><Pencil className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-full"><Trash2 className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary rounded-full"><LayoutGrid className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary rounded-full"><MoreVertical className="h-4 w-4" /></Button>
-                      </div>
-                    </TableCell>
-
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <DataTable
+            columns={projectLeadColumns}
+            data={projectLeads}
+            className="border-none shadow-none bg-transparent"
+            hidePagination
+          />
         </CardContent>
       </Card>
 

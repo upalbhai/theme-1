@@ -338,7 +338,7 @@ export function DataTable<T>({
                   <React.Fragment key={rowKey}>
                     <TableRow
                       className={cn(
-                        "border-border hover:bg-muted/40 transition-colors",
+                        "border-border hover:bg-muted/40 transition-colors group",
                         onRowClick && "cursor-pointer"
                       )}
                       onClick={() => onRowClick?.(row)}

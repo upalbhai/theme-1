@@ -48,14 +48,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DataTable, ColumnDef } from "@/components/ui/data-table";
 import {
   Select,
   SelectContent,
@@ -136,6 +129,73 @@ export default function ProposalsPage() {
     const matchesStatus = statusFilter === "All" || p.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const proposalColumns: ColumnDef<Proposal>[] = [
+    {
+      header: "Proposal ID & Title",
+      className: "pl-6",
+      render: (prop) => (
+        <div className="space-y-0.5">
+          <span className="font-mono text-xs text-muted-foreground font-semibold block">{prop.id}</span>
+          <span className="font-bold text-sm text-foreground line-clamp-1">{prop.title}</span>
+        </div>
+      ),
+    },
+    {
+      header: "Client & Company",
+      render: (prop) => (
+        <div className="flex items-center gap-2">
+          <Avatar className="h-7 w-7">
+            <AvatarFallback className="text-[10px] bg-primary/10 text-primary">{prop.avatar}</AvatarFallback>
+          </Avatar>
+          <div>
+            <span className="font-semibold text-xs block leading-tight">{prop.client}</span>
+            <span className="text-[10px] text-muted-foreground">{prop.company}</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Value",
+      accessorKey: "amount",
+      className: "font-bold text-sm",
+    },
+    {
+      header: "Created Date",
+      accessorKey: "date",
+      className: "text-xs text-muted-foreground",
+    },
+    {
+      header: "Valid Until",
+      accessorKey: "validUntil",
+      className: "text-xs text-muted-foreground",
+    },
+    {
+      header: "Status",
+      render: (prop) => getStatusBadge(prop.status),
+    },
+    {
+      header: "Action",
+      className: "text-right pr-6",
+      render: (prop) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger render={
+            <Button variant="ghost" size="icon-sm">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          } />
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> Preview Proposal</DropdownMenuItem>
+            <DropdownMenuItem className="gap-2"><Send className="h-4 w-4" /> Send to Client</DropdownMenuItem>
+            <DropdownMenuItem className="gap-2"><Copy className="h-4 w-4" /> Duplicate</DropdownMenuItem>
+            <DropdownMenuItem className="gap-2 text-rose-600" onClick={() => deleteProposal(prop.id)}>
+              <Trash2 className="h-4 w-4" /> Delete Proposal
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
 
   const getStatusBadge = (status: Proposal["status"]) => {
     switch (status) {
@@ -347,71 +407,12 @@ export default function ProposalsPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/30">
-                <TableHead>Proposal ID & Title</TableHead>
-                <TableHead>Client & Company</TableHead>
-                <TableHead>Value</TableHead>
-                <TableHead>Created Date</TableHead>
-                <TableHead>Valid Until</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProposals.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No proposals found matching your filter criteria.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredProposals.map((prop) => (
-                  <TableRow key={prop.id} className="hover:bg-muted/40">
-                    <TableCell>
-                      <div className="space-y-0.5">
-                        <span className="font-mono text-xs text-muted-foreground font-semibold block">{prop.id}</span>
-                        <span className="font-bold text-sm text-foreground line-clamp-1">{prop.title}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-7 w-7">
-                          <AvatarFallback className="text-[10px] bg-primary/10 text-primary">{prop.avatar}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <span className="font-semibold text-xs block leading-tight">{prop.client}</span>
-                          <span className="text-[10px] text-muted-foreground">{prop.company}</span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-bold text-sm">{prop.amount}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{prop.date}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{prop.validUntil}</TableCell>
-                    <TableCell>{getStatusBadge(prop.status)}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger render={
-                          <Button variant="ghost" size="icon-sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        } />
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> Preview Proposal</DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2"><Send className="h-4 w-4" /> Send to Client</DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2"><Copy className="h-4 w-4" /> Duplicate</DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2 text-rose-600" onClick={() => deleteProposal(prop.id)}>
-                            <Trash2 className="h-4 w-4" /> Delete Proposal
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={proposalColumns}
+            data={filteredProposals}
+            className="border-none shadow-none bg-transparent"
+            hidePagination
+          />
         </CardContent>
       </Card>
 

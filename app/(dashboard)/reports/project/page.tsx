@@ -36,14 +36,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DataTable, ColumnDef } from "@/components/ui/data-table";
 import { 
   BarChart, 
   Bar, 
@@ -129,6 +122,66 @@ const upcomingEvents = [
   { title: "Sprint Review & Demo", time: "10:00 AM - 11:30 AM", date: "TODAY", type: "Demo" },
   { title: "Client Architecture Sync", time: "02:00 PM - 03:00 PM", date: "OCT 14", type: "Sync" },
   { title: "Q4 Roadmap Brainstorming", time: "11:00 AM - 12:30 PM", date: "OCT 16", type: "Planning" },
+];
+
+interface ProjectReportItem {
+  id: string;
+  title: string;
+  client: string;
+  budget: string;
+  stage: string;
+  status: string;
+  statusColor: string;
+}
+
+const projectReportColumns: ColumnDef<ProjectReportItem>[] = [
+  {
+    header: "Project Code",
+    accessorKey: "id",
+    className: "font-mono text-xs font-semibold pl-6",
+  },
+  {
+    header: "Title",
+    accessorKey: "title",
+    className: "font-semibold text-sm",
+  },
+  {
+    header: "Client",
+    accessorKey: "client",
+    className: "text-xs text-muted-foreground",
+  },
+  {
+    header: "Budget",
+    accessorKey: "budget",
+    className: "font-bold text-sm",
+  },
+  {
+    header: "Status",
+    render: (p) => (
+      <Badge className={`text-[11px] border-none font-medium px-2 py-0.5 ${p.statusColor}`}>
+        {p.status}
+      </Badge>
+    ),
+  },
+  {
+    header: "",
+    id: "actions",
+    className: "text-right pr-6",
+    render: (p) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger render={
+          <Button variant="ghost" size="icon-sm">
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        } />
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> Details</DropdownMenuItem>
+          <DropdownMenuItem className="gap-2"><Pencil className="h-4 w-4" /> Edit</DropdownMenuItem>
+          <DropdownMenuItem className="gap-2 text-rose-600"><Trash2 className="h-4 w-4" /> Delete</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
+  },
 ];
 
 export default function ProjectReportPage() {
@@ -402,47 +455,12 @@ export default function ProjectReportPage() {
             <Button variant="outline" size="sm">Export Report</Button>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/30">
-                  <TableHead>Project Code</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Budget</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {projectsTable.map((p) => (
-                  <TableRow key={p.id} className="hover:bg-muted/40">
-                    <TableCell className="font-mono text-xs font-semibold">{p.id}</TableCell>
-                    <TableCell className="font-semibold text-sm">{p.title}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{p.client}</TableCell>
-                    <TableCell className="font-bold text-sm">{p.budget}</TableCell>
-                    <TableCell>
-                      <Badge className={`text-[11px] border-none font-medium px-2 py-0.5 ${p.statusColor}`}>
-                        {p.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger render={
-                          <Button variant="ghost" size="icon-sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        } />
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> Details</DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2"><Pencil className="h-4 w-4" /> Edit</DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2 text-rose-600"><Trash2 className="h-4 w-4" /> Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DataTable
+              columns={projectReportColumns}
+              data={projectsTable}
+              className="border-none shadow-none bg-transparent"
+              hidePagination
+            />
           </CardContent>
         </Card>
 

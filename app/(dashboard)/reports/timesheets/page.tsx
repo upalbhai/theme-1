@@ -38,14 +38,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DataTable, ColumnDef } from "@/components/ui/data-table";
 import { 
   BarChart, 
   Bar, 
@@ -106,6 +99,78 @@ const detailedTimesheetTable = [
   { id: "TS-903", project: "Stripe Billing Integration", user: "Emma Watson", avatar: "EW", dateRange: "Oct 06 - Oct 12", hoursLogged: "29H:30M", status: "Pending Review", statusColor: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
   { id: "TS-904", project: "DevOps Infrastructure Setup", user: "David Ray", avatar: "DR", dateRange: "Oct 06 - Oct 12", hoursLogged: "45H:45M", status: "Approved", statusColor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
   { id: "TS-905", project: "UI Redesign & Testing", user: "Alexandra Wright", avatar: "AW", dateRange: "Oct 06 - Oct 12", hoursLogged: "18H:20M", status: "Draft", statusColor: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300" },
+];
+
+interface TimesheetReportItem {
+  id: string;
+  project: string;
+  user: string;
+  avatar: string;
+  dateRange: string;
+  hoursLogged: string;
+  status: string;
+  statusColor: string;
+}
+
+const timesheetReportColumns: ColumnDef<TimesheetReportItem>[] = [
+  {
+    header: "Timesheet ID",
+    accessorKey: "id",
+    className: "font-mono text-xs font-semibold pl-6",
+  },
+  {
+    header: "Team Member",
+    render: (ts) => (
+      <div className="flex items-center gap-2">
+        <Avatar className="h-6 w-6">
+          <AvatarFallback className="text-[10px] bg-primary/10 text-primary">{ts.avatar}</AvatarFallback>
+        </Avatar>
+        <span className="font-semibold text-sm">{ts.user}</span>
+      </div>
+    ),
+  },
+  {
+    header: "Project",
+    accessorKey: "project",
+    className: "text-xs text-muted-foreground",
+  },
+  {
+    header: "Date Range",
+    accessorKey: "dateRange",
+    className: "text-xs",
+  },
+  {
+    header: "Hours Logged",
+    accessorKey: "hoursLogged",
+    className: "font-bold text-sm text-blue-600 dark:text-blue-400",
+  },
+  {
+    header: "Approval Status",
+    render: (ts) => (
+      <Badge className={`text-[11px] border-none font-medium px-2 py-0.5 ${ts.statusColor}`}>
+        {ts.status}
+      </Badge>
+    ),
+  },
+  {
+    header: "",
+    id: "actions",
+    className: "text-right pr-6",
+    render: (ts) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger render={
+          <Button variant="ghost" size="icon-sm">
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        } />
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> View Log</DropdownMenuItem>
+          <DropdownMenuItem className="gap-2"><Pencil className="h-4 w-4" /> Approve</DropdownMenuItem>
+          <DropdownMenuItem className="gap-2 text-rose-600"><Trash2 className="h-4 w-4" /> Reject</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
+  },
 ];
 
 export default function TimesheetsReportPage() {
@@ -329,56 +394,12 @@ export default function TimesheetsReportPage() {
           <Button variant="outline" size="sm">Export All</Button>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/30">
-                <TableHead>Timesheet ID</TableHead>
-                <TableHead>Team Member</TableHead>
-                <TableHead>Project</TableHead>
-                <TableHead>Date Range</TableHead>
-                <TableHead>Hours Logged</TableHead>
-                <TableHead>Approval Status</TableHead>
-                <TableHead className="text-right">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {detailedTimesheetTable.map((ts) => (
-                <TableRow key={ts.id} className="hover:bg-muted/40">
-                  <TableCell className="font-mono text-xs font-semibold">{ts.id}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarFallback className="text-[10px] bg-primary/10 text-primary">{ts.avatar}</AvatarFallback>
-                      </Avatar>
-                      <span className="font-semibold text-sm">{ts.user}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{ts.project}</TableCell>
-                  <TableCell className="text-xs">{ts.dateRange}</TableCell>
-                  <TableCell className="font-bold text-sm text-blue-600 dark:text-blue-400">{ts.hoursLogged}</TableCell>
-                  <TableCell>
-                    <Badge className={`text-[11px] border-none font-medium px-2 py-0.5 ${ts.statusColor}`}>
-                      {ts.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger render={
-                        <Button variant="ghost" size="icon-sm">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      } />
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> View Log</DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2"><Pencil className="h-4 w-4" /> Approve</DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2 text-rose-600"><Trash2 className="h-4 w-4" /> Reject</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={timesheetReportColumns}
+            data={detailedTimesheetTable}
+            className="border-none shadow-none bg-transparent"
+            hidePagination
+          />
         </CardContent>
       </Card>
 

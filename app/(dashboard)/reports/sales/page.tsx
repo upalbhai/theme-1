@@ -38,14 +38,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DataTable, ColumnDef } from "@/components/ui/data-table";
 import { 
   BarChart, 
   Bar, 
@@ -171,6 +164,79 @@ const contactLeads = [
   { id: 3, name: "Elena Rostova", company: "CyberShield Security", amount: "$24,500", stage: 40, status: "Discovery", statusColor: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
   { id: 4, name: "Jonathan Sterling", company: "Vanguard Capital", amount: "$58,000", stage: 95, status: "Closing", statusColor: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
   { id: 5, name: "Sophia Chen", company: "BioHealth Diagnostics", amount: "$19,800", stage: 25, status: "Qualified Lead", statusColor: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400" },
+];
+
+interface ContactLead {
+  id: number;
+  name: string;
+  company: string;
+  amount: string;
+  stage: number;
+  status: string;
+  statusColor: string;
+}
+
+const contactLeadsColumns: ColumnDef<ContactLead>[] = [
+  {
+    header: "Contact Name",
+    accessorKey: "name",
+    className: "font-semibold text-sm pl-6",
+  },
+  {
+    header: "Company",
+    accessorKey: "company",
+    className: "text-xs text-muted-foreground",
+  },
+  {
+    header: "Est. Value",
+    accessorKey: "amount",
+    className: "font-bold text-sm",
+  },
+  {
+    header: "Stage",
+    className: "w-[140px]",
+    render: (lead) => (
+      <div className="space-y-1">
+        <div className="flex justify-between text-[10px] text-muted-foreground">
+          <span>Progress</span>
+          <span>{lead.stage}%</span>
+        </div>
+        <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-blue-600 rounded-full" 
+            style={{ width: `${lead.stage}%` }}
+          ></div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    header: "Status",
+    render: (lead) => (
+      <Badge className={`text-[11px] border-none font-medium px-2 py-0.5 ${lead.statusColor}`}>
+        {lead.status}
+      </Badge>
+    ),
+  },
+  {
+    header: "",
+    id: "actions",
+    className: "text-right pr-6",
+    render: (lead) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger render={
+          <Button variant="ghost" size="icon-sm">
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        } />
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> View Details</DropdownMenuItem>
+          <DropdownMenuItem className="gap-2"><Pencil className="h-4 w-4" /> Edit Lead</DropdownMenuItem>
+          <DropdownMenuItem className="gap-2 text-rose-600"><Trash2 className="h-4 w-4" /> Delete</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
+  },
 ];
 
 export default function SalesReportPage() {
@@ -433,60 +499,12 @@ export default function SalesReportPage() {
             <Button variant="outline" size="sm">Export CSV</Button>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/30">
-                  <TableHead className="w-[180px]">Contact Name</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Est. Value</TableHead>
-                  <TableHead>Stage</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {contactLeads.map((lead) => (
-                  <TableRow key={lead.id} className="hover:bg-muted/40">
-                    <TableCell className="font-semibold text-sm">{lead.name}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{lead.company}</TableCell>
-                    <TableCell className="font-bold text-sm">{lead.amount}</TableCell>
-                    <TableCell className="w-[140px]">
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[10px] text-muted-foreground">
-                          <span>Progress</span>
-                          <span>{lead.stage}%</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-blue-600 rounded-full" 
-                            style={{ width: `${lead.stage}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={`text-[11px] border-none font-medium px-2 py-0.5 ${lead.statusColor}`}>
-                        {lead.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger render={
-                          <Button variant="ghost" size="icon-sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        } />
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> View Details</DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2"><Pencil className="h-4 w-4" /> Edit Lead</DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2 text-rose-600"><Trash2 className="h-4 w-4" /> Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DataTable
+              columns={contactLeadsColumns}
+              data={contactLeads}
+              className="border-none shadow-none bg-transparent"
+              hidePagination
+            />
           </CardContent>
         </Card>
       </div>

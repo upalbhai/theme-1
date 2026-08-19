@@ -49,6 +49,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { DataTable, ColumnDef } from "@/components/ui/data-table";
 
 interface ProjectItem {
   id: string;
@@ -120,6 +121,75 @@ export default function ProjectsPage() {
     const matchesStatus = statusFilter === "All" || p.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const projectColumns: ColumnDef<ProjectItem>[] = [
+    {
+      header: "Project ID & Title",
+      className: "p-4 font-semibold pl-6",
+      render: (prj) => (
+        <>
+          <span className="text-xs font-mono text-muted-foreground block">{prj.id}</span>
+          {prj.title}
+        </>
+      ),
+    },
+    {
+      header: "Client",
+      accessorKey: "client",
+      className: "p-4 text-muted-foreground text-xs",
+    },
+    {
+      header: "Category",
+      className: "p-4 text-xs",
+      render: (prj) => <Badge variant="outline">{prj.category}</Badge>,
+    },
+    {
+      header: "Budget",
+      accessorKey: "budget",
+      className: "p-4 font-bold",
+    },
+    {
+      header: "Deadline",
+      accessorKey: "deadline",
+      className: "p-4 text-xs text-muted-foreground",
+    },
+    {
+      header: "Progress",
+      className: "p-4 w-36",
+      render: (prj) => (
+        <div className="space-y-1">
+          <span className="text-[10px] font-bold block">{prj.progress}%</span>
+          <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+            <div className="h-full bg-blue-600 rounded-full" style={{ width: `${prj.progress}%` }}></div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Status",
+      className: "p-4",
+      render: (prj) => getStatusBadge(prj.status),
+    },
+    {
+      header: "Action",
+      className: "p-4 text-right pr-6",
+      render: (prj) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger render={
+            <Button variant="ghost" size="icon-sm">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          } />
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> Details</DropdownMenuItem>
+            <DropdownMenuItem className="gap-2 text-rose-600" onClick={() => deleteProject(prj.id)}>
+              <Trash2 className="h-4 w-4" /> Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
 
   const getStatusBadge = (status: ProjectItem["status"]) => {
     switch (status) {
@@ -412,60 +482,12 @@ export default function ProjectsPage() {
         /* Table View */
         <Card className="shadow-sm border border-border/60">
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-border/60 bg-muted/30 text-xs font-semibold text-muted-foreground">
-                    <th className="p-4">Project ID & Title</th>
-                    <th className="p-4">Client</th>
-                    <th className="p-4">Category</th>
-                    <th className="p-4">Budget</th>
-                    <th className="p-4">Deadline</th>
-                    <th className="p-4">Progress</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/40 text-sm">
-                  {filteredProjects.map((prj) => (
-                    <tr key={prj.id} className="hover:bg-muted/40 transition-colors">
-                      <td className="p-4 font-semibold">
-                        <span className="text-xs font-mono text-muted-foreground block">{prj.id}</span>
-                        {prj.title}
-                      </td>
-                      <td className="p-4 text-muted-foreground text-xs">{prj.client}</td>
-                      <td className="p-4 text-xs"><Badge variant="outline">{prj.category}</Badge></td>
-                      <td className="p-4 font-bold">{prj.budget}</td>
-                      <td className="p-4 text-xs text-muted-foreground">{prj.deadline}</td>
-                      <td className="p-4 w-36">
-                        <div className="space-y-1">
-                          <span className="text-[10px] font-bold block">{prj.progress}%</span>
-                          <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                            <div className="h-full bg-blue-600 rounded-full" style={{ width: `${prj.progress}%` }}></div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-4">{getStatusBadge(prj.status)}</td>
-                      <td className="p-4 text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger render={
-                            <Button variant="ghost" size="icon-sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          } />
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> Details</DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2 text-rose-600" onClick={() => deleteProject(prj.id)}>
-                              <Trash2 className="h-4 w-4" /> Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              columns={projectColumns}
+              data={filteredProjects}
+              className="border-none shadow-none bg-transparent"
+              hidePagination
+            />
           </CardContent>
         </Card>
       )}

@@ -23,9 +23,9 @@ import {
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DataTable, ColumnDef } from "@/components/ui/data-table";
 
 import {
   monthlyConversionsData,
@@ -33,6 +33,65 @@ import {
   pipelineStages,
   topPerformers,
 } from "@/lib/dashboard-data";
+
+interface Performer {
+  name: string;
+  deals: number;
+  revenue: string;
+  achievement: number;
+  status: string;
+}
+
+const performerColumns: ColumnDef<Performer>[] = [
+  {
+    header: "Sales Rep",
+    accessorKey: "name",
+    className: "font-semibold text-xs py-3 pl-6",
+  },
+  {
+    header: "Deals Closed",
+    accessorKey: "deals",
+    className: "text-muted-foreground text-xs py-3",
+  },
+  {
+    header: "Revenue Generated",
+    accessorKey: "revenue",
+    className: "font-medium text-xs py-3",
+  },
+  {
+    header: "Target Achievement",
+    className: "py-3",
+    render: (rep) => (
+      <div className="flex items-center gap-2">
+        <div className="h-1.5 w-24 rounded-full bg-secondary overflow-hidden">
+          <div
+            className="h-full rounded-full bg-primary"
+            style={{ width: `${Math.min(rep.achievement, 100)}%` }}
+          />
+        </div>
+        <span className="text-xs font-semibold text-foreground">{rep.achievement}%</span>
+      </div>
+    ),
+  },
+  {
+    header: "Status",
+    className: "text-right py-3 pr-6",
+    render: (rep) => (
+      <Badge
+        variant="outline"
+        className={`border-none font-semibold text-[10px] py-0.5 ${
+          rep.status === "Exceeded"
+            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+            : rep.status === "On Target"
+              ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+              : "bg-destructive/10 text-destructive"
+        }`}
+      >
+        {rep.status}
+      </Badge>
+    ),
+  },
+];
 
 export default function AnalyticsPage() {
   const [activeSegment, setActiveSegment] = React.useState<{ name: string; value: number } | null>(null);
@@ -253,53 +312,13 @@ export default function AnalyticsPage() {
               <CardDescription className="text-xs">Sales targets achieved by representative this quarter</CardDescription>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-muted/30">
-                  <TableRow>
-                    <TableHead className="text-xs font-semibold text-muted-foreground">Sales Rep</TableHead>
-                    <TableHead className="text-xs font-semibold text-muted-foreground">Deals Closed</TableHead>
-                    <TableHead className="text-xs font-semibold text-muted-foreground">Revenue Generated</TableHead>
-                    <TableHead className="text-xs font-semibold text-muted-foreground">Target Achievement</TableHead>
-                    <TableHead className="text-xs font-semibold text-muted-foreground text-right">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {topPerformers.map((rep: any, idx: number) => (
-                    <TableRow key={idx}>
-                      <TableCell className="font-semibold text-xs py-3">{rep.name}</TableCell>
-                      <TableCell className="text-muted-foreground text-xs py-3">{rep.deals}</TableCell>
-                      <TableCell className="font-medium text-xs py-3">{rep.revenue}</TableCell>
-                      <TableCell className="py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-24 rounded-full bg-secondary overflow-hidden">
-                            <div
-                              className="h-full rounded-full bg-primary"
-                              style={{ width: `${Math.min(rep.achievement, 100)}%` }}
-                            />
-                          </div>
-                          <span className="text-xs font-semibold text-foreground">{rep.achievement}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right py-3">
-                        <Badge
-                          variant="outline"
-                          className={`border-none font-semibold text-[10px] py-0.5 ${rep.status === "Exceeded"
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                            : rep.status === "On Target"
-                              ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                              : "bg-destructive/10 text-destructive"
-                            }`}
-                        >
-                          {rep.status}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+          <CardContent className="p-0">
+            <DataTable
+              columns={performerColumns}
+              data={topPerformers}
+              className="border-none shadow-none bg-transparent"
+              hidePagination
+            />
           </CardContent>
         </Card>
 

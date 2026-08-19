@@ -20,6 +20,13 @@ const mockMessagesState: Record<number, any[]> = {
   ],
 };
 
+let mockChannelsState = [
+  { id: 1, project_id: 0, name: 'General', type: 'internal' as const, members: [{id: 1, name: 'Sarah Jenkins'}, {id: 2, name: 'David Chen'}], created_at: new Date().toISOString() },
+  { id: 2, project_id: 0, name: 'Marketing', type: 'internal' as const, members: [{id: 1, name: 'Sarah Jenkins'}, {id: 3, name: 'Emma Wilson'}], created_at: new Date().toISOString() },
+  { id: 3, project_id: 0, name: 'Sarah Jenkins', type: 'direct' as const, members: [{id: 1, name: 'Sarah Jenkins'}, {id: 2, name: 'David Chen', profile_picture: 'https://i.pravatar.cc/150?u=david'}], created_at: new Date().toISOString() },
+  { id: 4, project_id: 0, name: 'Emily Davis', type: 'direct' as const, members: [{id: 1, name: 'Sarah Jenkins'}, {id: 4, name: 'Emily Davis', profile_picture: 'https://i.pravatar.cc/150?u=emily'}], created_at: new Date().toISOString() },
+];
+
 const mockApi: ChatApi = {
   config: {
     queryKeys: {
@@ -40,15 +47,25 @@ const mockApi: ChatApi = {
     }
   },
   getChatChannels: async () => ({
-    data: [
-      { id: 1, project_id: 0, name: 'General', type: 'internal', members: [{id: 1, name: 'Sarah Jenkins'}, {id: 2, name: 'David Chen'}], created_at: new Date().toISOString() },
-      { id: 2, project_id: 0, name: 'Marketing', type: 'internal', members: [{id: 1, name: 'Sarah Jenkins'}, {id: 3, name: 'Emma Wilson'}], created_at: new Date().toISOString() },
-      { id: 3, project_id: 0, name: 'Sarah Jenkins', type: 'direct', members: [{id: 1, name: 'Sarah Jenkins'}, {id: 2, name: 'David Chen', profile_picture: 'https://i.pravatar.cc/150?u=david'}], created_at: new Date().toISOString() },
-      { id: 4, project_id: 0, name: 'Emily Davis', type: 'direct', members: [{id: 1, name: 'Sarah Jenkins'}, {id: 4, name: 'Emily Davis', profile_picture: 'https://i.pravatar.cc/150?u=emily'}], created_at: new Date().toISOString() },
-    ],
-    meta: { total_items: 4, total_pages: 1, current_page: 1, items_per_page: 10 }
+    data: mockChannelsState,
+    meta: { total_items: mockChannelsState.length, total_pages: 1, current_page: 1, items_per_page: 10 }
   }),
-  createChatChannel: async () => ({ data: { id: 5, project_id: 0, name: 'New Channel', type: 'internal', members: [], created_at: new Date().toISOString() } }),
+  createChatChannel: async (payload: any) => {
+    const newChannel = {
+      id: Date.now(),
+      project_id: payload.project_id || 0,
+      name: payload.name || 'New Channel',
+      type: payload.type || 'internal',
+      members: [],
+      created_at: new Date().toISOString()
+    };
+    mockChannelsState.push(newChannel);
+    return { data: newChannel };
+  },
+  deleteChatChannel: async (id: number) => {
+    mockChannelsState = mockChannelsState.filter(c => c.id !== id);
+    return { message: 'Channel deleted' };
+  },
   getChatMessages: async (id: number) => {
     if (!mockMessagesState[id]) {
       mockMessagesState[id] = [

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { DataTable, ColumnDef } from "@/components/ui/data-table";
 
 const INITIAL_INVOICES = [
   { id: "INV-2026-001", client: "Acme Corporation", amount: 12500, date: "Sep 12, 2026", status: "Paid" },
@@ -81,6 +82,72 @@ export default function InvoicesPage() {
     inv.client.toLowerCase().includes(searchTerm.toLowerCase()) || 
     inv.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const invoiceColumns: ColumnDef<(typeof INITIAL_INVOICES)[0]>[] = [
+    {
+      header: "Invoice ID",
+      className: "px-6 py-4 font-medium pl-6",
+      render: (invoice) => (
+        <div className="flex items-center gap-2">
+          <FileText className="h-4 w-4 text-muted-foreground" /> {invoice.id}
+        </div>
+      ),
+    },
+    {
+      header: "Client",
+      accessorKey: "client",
+      className: "px-6 py-4 font-semibold",
+    },
+    {
+      header: "Amount",
+      className: "px-6 py-4 font-medium",
+      render: (invoice) => formatCurrency(invoice.amount),
+    },
+    {
+      header: "Date Issued",
+      accessorKey: "date",
+      className: "px-6 py-4 text-muted-foreground",
+    },
+    {
+      header: "Status",
+      className: "px-6 py-4",
+      render: (invoice) => (
+        <Badge variant="outline" className={`gap-1.5 font-medium ${getStatusBadge(invoice.status)}`}>
+          {getStatusIcon(invoice.status)}
+          {invoice.status}
+        </Badge>
+      ),
+    },
+    {
+      header: "",
+      id: "actions",
+      className: "px-6 py-4 text-right pr-6",
+      render: (invoice) => (
+        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {invoice.status !== "Paid" && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => markAsPaid(invoice.id)} 
+              className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
+              title="Mark as Paid"
+            >
+              <Check className="h-4 w-4" />
+            </Button>
+          )}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => deleteInvoice(invoice.id)} 
+            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+            title="Delete Invoice"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
   
   const totalOutstanding = invoices.filter(i => i.status !== "Paid").reduce((acc, curr) => acc + curr.amount, 0);
   const totalOverdue = invoices.filter(i => i.status === "Overdue").reduce((acc, curr) => acc + curr.amount, 0);
@@ -210,69 +277,12 @@ export default function InvoicesPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-muted-foreground uppercase bg-muted/20 border-y">
-                <tr>
-                  <th className="px-6 py-4 font-semibold">Invoice ID</th>
-                  <th className="px-6 py-4 font-semibold">Client</th>
-                  <th className="px-6 py-4 font-semibold">Amount</th>
-                  <th className="px-6 py-4 font-semibold">Date Issued</th>
-                  <th className="px-6 py-4 font-semibold">Status</th>
-                  <th className="px-6 py-4 font-semibold text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filteredInvoices.map((invoice) => (
-                  <tr key={invoice.id} className="hover:bg-muted/10 transition-colors group">
-                    <td className="px-6 py-4 font-medium flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-muted-foreground" /> {invoice.id}
-                    </td>
-                    <td className="px-6 py-4 font-semibold">{invoice.client}</td>
-                    <td className="px-6 py-4 font-medium">{formatCurrency(invoice.amount)}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{invoice.date}</td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className={`gap-1.5 font-medium ${getStatusBadge(invoice.status)}`}>
-                        {getStatusIcon(invoice.status)}
-                        {invoice.status}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {invoice.status !== "Paid" && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => markAsPaid(invoice.id)} 
-                            className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
-                            title="Mark as Paid"
-                          >
-                            <Check className="h-4 w-4" />
-                          </Button>
-                        )}
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => deleteInvoice(invoice.id)} 
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          title="Delete Invoice"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {filteredInvoices.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                      No invoices found matching your search.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            columns={invoiceColumns}
+            data={filteredInvoices}
+            className="border-none shadow-none bg-transparent"
+            hidePagination
+          />
         </CardContent>
       </Card>
     </div>

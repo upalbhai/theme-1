@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ChatChannel, ChatMember } from '@/types/chat';
 import { useChatApi } from '@/context/ChatApiContext';
 import { useAuth } from '@/context/AuthContext';
@@ -99,46 +100,25 @@ export function ChannelMembersPanel({ channel, onClose, onDeleteSuccess }: Chann
 
         {canDelete && (
           <div className="p-5 border-t border-border bg-surface shrink-0">
-            {showConfirm ? (
-              <div className="flex flex-col gap-3 p-4 bg-error/5 border border-error/20 rounded-2xl animate-fade-in">
-                <p className="text-[12.5px] text-text font-medium leading-relaxed">
-                  Are you sure you want to permanently delete this channel? This will delete all message history.
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => deleteMutation.mutate()}
-                    disabled={deleteMutation.isPending}
-                    className="flex-1 bg-error hover:bg-red-700 text-white text-[12px] py-2 px-3 rounded-lg font-semibold transition cursor-pointer flex items-center justify-center gap-1.5"
-                  >
-                    {deleteMutation.isPending ? (
-                      <span className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      'Yes, Delete'
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirm(false)}
-                    disabled={deleteMutation.isPending}
-                    className="flex-1 bg-bg hover:bg-bg-hover text-text border border-border text-[12px] py-2 px-3 rounded-lg font-semibold transition cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowConfirm(true)}
-                className="w-full bg-error/10 hover:bg-error/20 text-error border border-error/20 text-[12.5px] py-2.5 px-4 rounded-xl font-semibold transition cursor-pointer flex items-center justify-center gap-2"
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete Channel
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => setShowConfirm(true)}
+              className="w-full bg-error/10 hover:bg-error/20 text-error border border-error/20 text-[12.5px] py-2.5 px-4 rounded-xl font-semibold transition cursor-pointer flex items-center justify-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Channel
+            </button>
           </div>
         )}
+
+        <ConfirmDialog
+          open={showConfirm}
+          onOpenChange={setShowConfirm}
+          onConfirm={() => deleteMutation.mutate()}
+          isLoading={deleteMutation.isPending}
+          title="Delete Chat Channel?"
+          description="Are you sure you want to permanently delete this channel? This will delete all message history."
+        />
       </div>
     </div>
   );

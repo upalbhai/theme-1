@@ -30,9 +30,50 @@ import {
 } from "@/lib/dashboard-data";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DataTable, ColumnDef } from "@/components/ui/data-table";
+
+interface RecentDeal {
+  company: string;
+  contact: string;
+  val: string;
+  stage: string;
+  stageColor: string;
+  date: string;
+}
+
+const recentDealsColumns: ColumnDef<RecentDeal>[] = [
+  {
+    header: "Company",
+    accessorKey: "company",
+    className: "font-semibold text-xs py-3 pl-6",
+  },
+  {
+    header: "Contact",
+    accessorKey: "contact",
+    className: "text-muted-foreground text-xs py-3",
+  },
+  {
+    header: "Value",
+    accessorKey: "val",
+    className: "font-medium text-xs py-3",
+  },
+  {
+    header: "Stage",
+    className: "py-3",
+    render: (deal) => (
+      <Badge variant="outline" className={`${deal.stageColor} border-none font-semibold text-[10px] py-0.5`}>
+        {deal.stage}
+      </Badge>
+    ),
+  },
+  {
+    header: "Updated",
+    className: "text-right text-muted-foreground text-xs py-3 pr-6",
+    render: (deal) => deal.date,
+  },
+];
 
 export default function SalesAnalyticsDashboard() {
   return (
@@ -239,35 +280,13 @@ export default function SalesAnalyticsDashboard() {
               View All Deals
             </Button>
           </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-muted/30">
-                  <TableRow>
-                    <TableHead className="text-xs font-semibold text-muted-foreground">Company</TableHead>
-                    <TableHead className="text-xs font-semibold text-muted-foreground">Contact</TableHead>
-                    <TableHead className="text-xs font-semibold text-muted-foreground">Value</TableHead>
-                    <TableHead className="text-xs font-semibold text-muted-foreground">Stage</TableHead>
-                    <TableHead className="text-xs font-semibold text-muted-foreground text-right">Updated</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentDeals.map((deal, idx) => (
-                    <TableRow key={idx} className="cursor-pointer">
-                      <TableCell className="font-semibold text-xs py-3">{deal.company}</TableCell>
-                      <TableCell className="text-muted-foreground text-xs py-3">{deal.contact}</TableCell>
-                      <TableCell className="font-medium text-xs py-3">{deal.val}</TableCell>
-                      <TableCell className="py-3">
-                        <Badge variant="outline" className={`${deal.stageColor} border-none font-semibold text-[10px] py-0.5`}>
-                          {deal.stage}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right text-muted-foreground text-xs py-3">{deal.date}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+          <CardContent className="p-0">
+            <DataTable
+              columns={recentDealsColumns}
+              data={recentDeals}
+              className="border-none shadow-none bg-transparent"
+              hidePagination
+            />
           </CardContent>
         </Card>
 

@@ -46,14 +46,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DataTable, ColumnDef } from "@/components/ui/data-table";
 
 interface StorageFile {
   id: string;
@@ -131,6 +124,64 @@ export default function StoragePage() {
         return <FileText className="h-4 w-4 text-blue-500" />;
     }
   };
+
+  const storageFileColumns: ColumnDef<StorageFile>[] = [
+    {
+      header: "File Name & Type",
+      className: "pl-6",
+      render: (file) => (
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-muted/60 rounded-lg">
+            {getFileIcon(file.type)}
+          </div>
+          <div>
+            <span className="font-bold text-sm block leading-tight">{file.name}</span>
+            <span className="text-[10px] font-mono text-muted-foreground">{file.id}</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Category",
+      render: (file) => <Badge variant="outline" className="text-xs">{file.type}</Badge>,
+    },
+    {
+      header: "File Size",
+      accessorKey: "size",
+      className: "font-semibold text-xs text-muted-foreground",
+    },
+    {
+      header: "Last Modified",
+      accessorKey: "updated",
+      className: "text-xs text-muted-foreground",
+    },
+    {
+      header: "Owner",
+      accessorKey: "owner",
+      className: "text-xs font-medium",
+    },
+    {
+      header: "",
+      id: "actions",
+      className: "text-right pr-6",
+      render: (file) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger render={
+            <Button variant="ghost" size="icon-sm">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          } />
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem className="gap-2"><Download className="h-4 w-4" /> Download</DropdownMenuItem>
+            <DropdownMenuItem className="gap-2"><Share2 className="h-4 w-4" /> Share Link</DropdownMenuItem>
+            <DropdownMenuItem className="gap-2 text-rose-600" onClick={() => deleteFile(file.id)}>
+              <Trash2 className="h-4 w-4" /> Delete File
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
 
   return (
     <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 max-w-[1600px] mx-auto w-full bg-slate-50/50 dark:bg-slate-950/20">
@@ -288,63 +339,12 @@ export default function StoragePage() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/30">
-                <TableHead>File Name & Type</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>File Size</TableHead>
-                <TableHead>Last Modified</TableHead>
-                <TableHead>Owner</TableHead>
-                <TableHead className="text-right">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredFiles.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    No files found matching search query.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredFiles.map((file) => (
-                  <TableRow key={file.id} className="hover:bg-muted/40">
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-muted/60 rounded-lg">
-                          {getFileIcon(file.type)}
-                        </div>
-                        <div>
-                          <span className="font-bold text-sm block leading-tight">{file.name}</span>
-                          <span className="text-[10px] font-mono text-muted-foreground">{file.id}</span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell><Badge variant="outline" className="text-xs">{file.type}</Badge></TableCell>
-                    <TableCell className="font-semibold text-xs text-muted-foreground">{file.size}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{file.updated}</TableCell>
-                    <TableCell className="text-xs font-medium">{file.owner}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger render={
-                          <Button variant="ghost" size="icon-sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        } />
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem className="gap-2"><Download className="h-4 w-4" /> Download</DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2"><Share2 className="h-4 w-4" /> Share Link</DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2 text-rose-600" onClick={() => deleteFile(file.id)}>
-                            <Trash2 className="h-4 w-4" /> Delete File
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={storageFileColumns}
+            data={filteredFiles}
+            className="border-none shadow-none bg-transparent"
+            hidePagination
+          />
         </CardContent>
       </Card>
 
