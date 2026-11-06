@@ -11,6 +11,7 @@ import {
   Activity,
   BarChart3,
   Sparkles,
+  Layers,
   CheckSquare,
   MessageSquare,
   Settings,
@@ -35,6 +36,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuBadge,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 interface NavItem {
@@ -55,6 +57,8 @@ const navGroups: NavGroup[] = [
     items: [
       { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { title: "Sales Analytics", href: "/analytics", icon: BarChart3 },
+      { title: "All Components", href: "/components", icon: Layers, badge: "Design" },
+      { title: "Motion Primitives", href: "/motion-primitives", icon: Sparkles, badge: "New" },
     ],
   },
   {
@@ -104,6 +108,7 @@ const navGroups: NavGroup[] = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { setOpenMobile, isMobile } = useSidebar();
 
   return (
     <Sidebar collapsible="icon">
@@ -111,7 +116,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={
-              <Link href="/dashboard">
+              <Link href="/dashboard" onClick={() => { if (isMobile) setOpenMobile(false); }}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-tr from-primary to-primary/80 text-sidebar-primary-foreground shadow-md shadow-primary/20">
                   <Sparkles className="size-4" />
                 </div>
@@ -137,7 +142,7 @@ export function AppSidebar() {
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton isActive={isActive} tooltip={item.title} render={
-                        <Link href={item.href}>
+                        <Link href={item.href} onClick={() => { if (isMobile) setOpenMobile(false); }}>
                           <Icon />
                           <span>{item.title}</span>
                         </Link>

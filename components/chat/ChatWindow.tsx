@@ -26,7 +26,6 @@ import { ReadLaterModal } from '@/components/chat/ReadLaterModal';
 import { ChannelMembersPanel } from '@/components/chat/ChannelMembersPanel';
 import { formatChatDayLabel, isSameCalendarDay, getChannelDisplayName } from '@/utils/format';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
-import 'react-photo-view/dist/react-photo-view.css';
 import toast from 'react-hot-toast';
 
 const useWebSocket = () => ({

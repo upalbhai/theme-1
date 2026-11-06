@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { AnimatedGroup } from "@/components/core/animated-group";
+import { AnimatedNumber } from "@/components/core/animated-number";
+import { Magnetic } from "@/components/core/magnetic";
 
 const INITIAL_TASKS = [
   { id: 1, title: "Review Q3 Marketing Strategy", category: "Marketing", date: "Today", priority: "High", completed: false },
@@ -74,9 +77,11 @@ export default function TasksPage() {
         
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger render={
-            <Button className="gap-2 shadow-md shadow-primary/20 shrink-0">
-              <Plus className="h-4 w-4" /> New Task
-            </Button>
+            <Magnetic springOptions={{ bounce: 0.1 }}>
+              <Button className="gap-2 shadow-md shadow-primary/20 shrink-0">
+                <Plus className="h-4 w-4" /> New Task
+              </Button>
+            </Magnetic>
           } />
           <DialogContent>
             <DialogHeader>
@@ -131,33 +136,39 @@ export default function TasksPage() {
       <Card className="border-border/50 shadow-sm">
         <CardHeader>
           <CardTitle>My Tasks</CardTitle>
-          <CardDescription>You have {tasks.filter(t => !t.completed).length} incomplete tasks remaining.</CardDescription>
+          <CardDescription className="flex items-center gap-1">
+            <span>You have</span>
+            <span className="font-semibold text-foreground"><AnimatedNumber value={tasks.filter(t => !t.completed).length} /></span>
+            <span>incomplete tasks remaining.</span>
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {tasks.map((task) => (
-            <div key={task.id} className={`group flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border transition-all hover:shadow-sm gap-4 ${task.completed ? 'bg-muted/30 opacity-70' : 'bg-card'}`}>
-              <div className="flex gap-4 items-start sm:items-center w-full">
-                <button onClick={() => toggleTask(task.id)} className="mt-0.5 sm:mt-0 text-muted-foreground hover:text-primary transition-colors focus:outline-none shrink-0">
-                  {task.completed ? <CheckCircle2 className="h-5 w-5 text-emerald-500" /> : <Circle className="h-5 w-5" />}
-                </button>
-                <div className="space-y-1 flex-1">
-                  <p className={`text-sm font-medium leading-none ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
-                    {task.title}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-3 pt-2 sm:pt-1.5 text-xs text-muted-foreground">
-                    <Badge variant="outline" className="text-[10px] font-normal rounded-md bg-muted/50">{task.category}</Badge>
-                    <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {task.date}</span>
+        <CardContent>
+          <AnimatedGroup preset="blur-slide" className="space-y-3">
+            {tasks.map((task) => (
+              <div key={task.id} className={`group flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border transition-all hover:shadow-sm gap-4 ${task.completed ? 'bg-muted/30 opacity-70' : 'bg-card'}`}>
+                <div className="flex gap-4 items-start sm:items-center w-full">
+                  <button onClick={() => toggleTask(task.id)} className="mt-0.5 sm:mt-0 text-muted-foreground hover:text-primary transition-colors focus:outline-none shrink-0">
+                    {task.completed ? <CheckCircle2 className="h-5 w-5 text-emerald-500" /> : <Circle className="h-5 w-5" />}
+                  </button>
+                  <div className="space-y-1 flex-1">
+                    <p className={`text-sm font-medium leading-none ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                      {task.title}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-3 pt-2 sm:pt-1.5 text-xs text-muted-foreground">
+                      <Badge variant="outline" className="text-[10px] font-normal rounded-md bg-muted/50">{task.category}</Badge>
+                      <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {task.date}</span>
+                    </div>
                   </div>
                 </div>
+                <div className="flex items-center gap-3 justify-end sm:w-auto w-full pl-9 sm:pl-0">
+                  {!task.completed && <Badge variant="outline" className={`text-[10px] uppercase tracking-wider font-semibold ${getPriorityColor(task.priority)}`}>{task.priority}</Badge>}
+                  <Button variant="ghost" size="icon" onClick={() => deleteTask(task.id)} className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-3 justify-end sm:w-auto w-full pl-9 sm:pl-0">
-                {!task.completed && <Badge variant="outline" className={`text-[10px] uppercase tracking-wider font-semibold ${getPriorityColor(task.priority)}`}>{task.priority}</Badge>}
-                <Button variant="ghost" size="icon" onClick={() => deleteTask(task.id)} className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </AnimatedGroup>
           {tasks.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
               <CheckCircle2 className="h-12 w-12 mx-auto mb-3 opacity-20" />

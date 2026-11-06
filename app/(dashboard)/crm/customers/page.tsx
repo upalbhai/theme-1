@@ -33,6 +33,10 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import { AnimatedNumber } from "@/components/core/animated-number";
+import { AnimatedGroup } from "@/components/core/animated-group";
+import { Magnetic } from "@/components/core/magnetic";
+import { Tilt } from "@/components/core/tilt";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Select,
@@ -279,6 +283,9 @@ export default function CustomersDirectoryPage() {
     setEditingCustomerId(null);
   };
 
+  const totalLtv = customers.reduce((acc, c) => acc + c.ltv, 0);
+  const activeCustomersCount = customers.filter((c) => c.status === "Active Customer").length;
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Top Header */}
@@ -296,9 +303,11 @@ export default function CustomersDirectoryPage() {
           
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger render={
-              <Button size="sm" className="gap-1.5">
-                <Plus className="h-4 w-4" /> Add Customer
-              </Button>
+              <Magnetic springOptions={{ bounce: 0.1 }}>
+                <Button size="sm" className="gap-1.5 shadow-xs">
+                  <Plus className="h-4 w-4" /> Add Customer
+                </Button>
+              </Magnetic>
             } />
             <DialogContent className="sm:max-w-[425px]">
               <form onSubmit={handleSaveCustomer}>
@@ -390,6 +399,31 @@ export default function CustomersDirectoryPage() {
           />
         </div>
       </div>
+
+      {/* Quick Summary Metrics */}
+      <AnimatedGroup preset="scale" className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-xl border border-border/60 bg-card p-4 shadow-2xs">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Accounts</span>
+          <div className="text-2xl font-bold tracking-tight mt-1 text-foreground">
+            <AnimatedNumber value={customers.length} />
+          </div>
+          <span className="text-[11px] text-muted-foreground">Registered in CRM</span>
+        </div>
+        <div className="rounded-xl border border-border/60 bg-card p-4 shadow-2xs">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Active Clients</span>
+          <div className="text-2xl font-bold tracking-tight mt-1 text-emerald-600 dark:text-emerald-400">
+            <AnimatedNumber value={activeCustomersCount} />
+          </div>
+          <span className="text-[11px] text-muted-foreground">High-engagement contracts</span>
+        </div>
+        <div className="rounded-xl border border-border/60 bg-card p-4 shadow-2xs">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cumulative LTV</span>
+          <div className="text-2xl font-bold tracking-tight mt-1 text-primary flex items-center">
+            $<AnimatedNumber value={totalLtv} />
+          </div>
+          <span className="text-[11px] text-muted-foreground">Portfolio lifetime value</span>
+        </div>
+      </AnimatedGroup>
 
       {/* Reusable Data Table component */}
       <DataTable

@@ -118,7 +118,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full min-w-0">
       {/* Top Banner & Header */}
       <div className="relative rounded-2xl border bg-card text-card-foreground shadow-sm">
         {/* Cover Photo Gradient */}
@@ -184,7 +184,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Quick Header Actions */}
-          <div className="flex items-center justify-center gap-3 md:pb-2">
+          <div className="flex flex-wrap items-center justify-center gap-3 md:pb-2">
             <Button variant="outline" size="sm" className="gap-2">
               <Globe className="h-4 w-4" /> Public View
             </Button>
@@ -257,9 +257,9 @@ export default function ProfilePage() {
       {/* Main Content Layout (Sidebar Card + Tabs Content) */}
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Left Side Profile Overview */}
-        <div className="lg:col-span-4 space-y-6">
+        <div className="lg:col-span-4 space-y-6 min-w-0">
           {/* Profile Completion Card */}
-          <Card>
+          <Card className="min-w-0">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-semibold">Profile Strength</CardTitle>
@@ -293,33 +293,33 @@ export default function ProfilePage() {
           </Card>
 
           {/* Quick Contact & Bio Card */}
-          <Card>
+          <Card className="min-w-0">
             <CardHeader>
               <CardTitle className="text-base font-semibold">About & Contact</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-              <p className="text-muted-foreground text-xs leading-relaxed">
+            <CardContent className="space-y-4 text-sm min-w-0">
+              <p className="text-muted-foreground text-xs leading-relaxed break-words">
                 {formData.bio}
               </p>
               
               <Separator />
 
-              <div className="space-y-3 text-xs">
-                <div className="flex items-center gap-3">
+              <div className="space-y-3 text-xs min-w-0">
+                <div className="flex items-center gap-3 min-w-0">
                   <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="truncate font-medium">{formData.email}</span>
+                  <span className="truncate font-medium flex-1">{formData.email}</span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="font-medium">{formData.phone}</span>
+                  <span className="truncate font-medium flex-1">{formData.phone}</span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="font-medium">{formData.location}</span>
+                  <span className="truncate font-medium flex-1">{formData.location}</span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="font-medium">{formData.timezone}</span>
+                  <span className="truncate font-medium flex-1" title={formData.timezone}>{formData.timezone}</span>
                 </div>
               </div>
 
@@ -339,19 +339,19 @@ export default function ProfilePage() {
         </div>
 
         {/* Right Side Main Tabbed Settings */}
-        <div className="lg:col-span-8">
+        <div className="lg:col-span-8 min-w-0">
           <Tabs defaultValue="general" className="space-y-6">
-            <TabsList className="w-full justify-start overflow-x-auto bg-muted/60 p-1">
-              <TabsTrigger value="general" className="gap-2">
+            <TabsList className="w-full justify-start overflow-x-auto flex whitespace-nowrap bg-muted/60 p-1 scrollbar-none">
+              <TabsTrigger value="general" className="gap-2 flex-shrink-0">
                 <User className="h-4 w-4" /> Personal Details
               </TabsTrigger>
-              <TabsTrigger value="security" className="gap-2">
+              <TabsTrigger value="security" className="gap-2 flex-shrink-0">
                 <ShieldCheck className="h-4 w-4" /> Security & 2FA
               </TabsTrigger>
-              <TabsTrigger value="notifications" className="gap-2">
+              <TabsTrigger value="notifications" className="gap-2 flex-shrink-0">
                 <Bell className="h-4 w-4" /> Preferences
               </TabsTrigger>
-              <TabsTrigger value="activity" className="gap-2">
+              <TabsTrigger value="activity" className="gap-2 flex-shrink-0">
                 <Activity className="h-4 w-4" /> Activity Log
               </TabsTrigger>
             </TabsList>

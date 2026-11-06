@@ -26,6 +26,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { AnimatedNumber } from "@/components/core/animated-number";
+import { AnimatedGroup } from "@/components/core/animated-group";
+import { Magnetic } from "@/components/core/magnetic";
+import { Tilt } from "@/components/core/tilt";
 
 interface Deal {
   id: string;
@@ -235,13 +239,15 @@ export default function DealsPipelinePage() {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-muted/20 px-4 py-2 text-sm">
             <span className="text-muted-foreground font-medium">Pipeline Value:</span>
-            <span className="text-primary font-bold text-[15px] tracking-tight">
-              ${totalPipelineValue.toLocaleString()}
+            <span className="text-primary font-bold text-[15px] tracking-tight flex items-center">
+              $<AnimatedNumber value={totalPipelineValue} />
             </span>
           </div>
-          <Button size="default" className="font-semibold shadow-sm" onClick={() => handleOpenDialog()}>
-            <Plus className="h-4 w-4 mr-2" /> Create Deal
-          </Button>
+          <Magnetic springOptions={{ bounce: 0.1 }}>
+            <Button size="default" className="font-semibold shadow-sm" onClick={() => handleOpenDialog()}>
+              <Plus className="h-4 w-4 mr-2" /> Create Deal
+            </Button>
+          </Magnetic>
         </div>
       </div>
 
@@ -282,71 +288,72 @@ export default function DealsPipelinePage() {
                 </div>
 
                 {/* Column Subtotal */}
-                <div className="text-[11px] font-medium text-muted-foreground mb-3 px-1.5">
-                  Subtotal: <span className="font-bold text-foreground/80">${totalColValue.toLocaleString()}</span>
+                <div className="text-[11px] font-medium text-muted-foreground mb-3 px-1.5 flex items-center gap-1">
+                  Subtotal: <span className="font-bold text-foreground/80 flex items-center">$<AnimatedNumber value={totalColValue} /></span>
                 </div>
 
                 {/* Deal Cards */}
-                <div className="space-y-2.5">
+                <AnimatedGroup preset="scale" className="space-y-2.5">
                   {col.deals.map((deal) => (
-                    <div
-                      key={deal.id}
-                      className="group relative rounded-xl border border-border/60 bg-card p-3.5 shadow-sm hover:shadow-md hover:border-primary/40 transition-all cursor-pointer space-y-3"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-semibold text-[13px] leading-snug group-hover:text-primary transition-colors">
-                          {deal.title}
-                        </h4>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={cn(
-                              "rounded-md px-1.5 py-0.5 text-[9px] font-bold border shrink-0 uppercase tracking-wide",
-                              priorityStyles[deal.priority]
-                            )}
-                          >
-                            {deal.priority}
-                          </span>
-                          
-                          <DropdownMenu>
-                            <DropdownMenuTrigger render={
-                              <Button variant="ghost" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                                <MoreHorizontal className="h-3.5 w-3.5" />
-                              </Button>
-                            } />
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleOpenDialog(deal, col.id)}>
-                                <Edit className="h-4 w-4 mr-2" /> Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/50" onClick={() => handleDeleteDeal(deal.id, col.id)}>
-                                <Trash2 className="h-4 w-4 mr-2" /> Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                    <Tilt key={deal.id} rotationFactor={4} isReverse>
+                      <div
+                        className="group relative rounded-xl border border-border/60 bg-card p-3.5 shadow-xs hover:shadow-md hover:border-primary/40 transition-all cursor-pointer space-y-3"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-semibold text-[13px] leading-snug group-hover:text-primary transition-colors">
+                            {deal.title}
+                          </h4>
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={cn(
+                                "rounded-md px-1.5 py-0.5 text-[9px] font-bold border shrink-0 uppercase tracking-wide",
+                                priorityStyles[deal.priority]
+                              )}
+                            >
+                              {deal.priority}
+                            </span>
+                            
+                            <DropdownMenu>
+                              <DropdownMenuTrigger render={
+                                <Button variant="ghost" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <MoreHorizontal className="h-3.5 w-3.5" />
+                                </Button>
+                              } />
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleOpenDialog(deal, col.id)}>
+                                  <Edit className="h-4 w-4 mr-2" /> Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/50" onClick={() => handleDeleteDeal(deal.id, col.id)}>
+                                  <Trash2 className="h-4 w-4 mr-2" /> Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="flex items-center gap-1.5 text-[15px] font-bold text-emerald-600 dark:text-emerald-400">
-                        <DollarSign className="h-4 w-4 -mr-1" />
-                        {deal.value.toLocaleString()}
-                      </div>
+                        <div className="flex items-center gap-1.5 text-[15px] font-bold text-emerald-600 dark:text-emerald-400">
+                          <DollarSign className="h-4 w-4 -mr-1" />
+                          <AnimatedNumber value={deal.value} />
+                        </div>
 
-                      <div className="space-y-1.5 pt-1.5 border-t border-border/40 text-[11px] text-muted-foreground font-medium">
-                        <div className="flex items-center gap-1.5">
-                          <Building className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
-                          <span className="truncate">{deal.company}</span>
-                        </div>
-                        <div className="flex items-center justify-between pt-0.5">
-                          <span className="flex items-center gap-1.5">
-                            <User className="h-3.5 w-3.5 text-muted-foreground/70" /> {deal.contact}
-                          </span>
-                          <span className="flex items-center gap-1.5 text-[10px] bg-muted/40 px-1.5 py-0.5 rounded-md">
-                            <Calendar className="h-3 w-3 text-muted-foreground/70" /> {deal.dueDate}
-                          </span>
+                        <div className="space-y-1.5 pt-1.5 border-t border-border/40 text-[11px] text-muted-foreground font-medium">
+                          <div className="flex items-center gap-1.5">
+                            <Building className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
+                            <span className="truncate">{deal.company}</span>
+                          </div>
+                          <div className="flex items-center justify-between pt-0.5">
+                            <span className="flex items-center gap-1.5">
+                              <User className="h-3.5 w-3.5 text-muted-foreground/70" /> {deal.contact}
+                            </span>
+                            <span className="flex items-center gap-1.5 text-[10px] bg-muted/40 px-1.5 py-0.5 rounded-md">
+                              <Calendar className="h-3 w-3 text-muted-foreground/70" /> {deal.dueDate}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </Tilt>
                   ))}
-                </div>
+                </AnimatedGroup>
 
                 {/* Add Deal Button */}
                 <Button

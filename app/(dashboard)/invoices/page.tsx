@@ -9,6 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { DataTable, ColumnDef } from "@/components/ui/data-table";
+import { AnimatedGroup } from "@/components/core/animated-group";
+import { AnimatedNumber } from "@/components/core/animated-number";
+import { Magnetic } from "@/components/core/magnetic";
 
 const INITIAL_INVOICES = [
   { id: "INV-2026-001", client: "Acme Corporation", amount: 12500, date: "Sep 12, 2026", status: "Paid" },
@@ -167,9 +170,11 @@ export default function InvoicesPage() {
           
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger render={
-              <Button className="gap-2 shadow-md shadow-primary/20 shrink-0">
-                <Plus className="h-4 w-4" /> Create Invoice
-              </Button>
+              <Magnetic springOptions={{ bounce: 0.1 }}>
+                <Button className="gap-2 shadow-md shadow-primary/20 shrink-0">
+                  <Plus className="h-4 w-4" /> Create Invoice
+                </Button>
+              </Magnetic>
             } />
             <DialogContent>
               <DialogHeader>
@@ -222,41 +227,47 @@ export default function InvoicesPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3 mb-6">
-        <Card className="border-border/50 shadow-sm">
+      <AnimatedGroup preset="scale" className="grid gap-4 md:grid-cols-3 mb-6">
+        <Card className="border-border/50 shadow-xs">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Outstanding</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalOutstanding)}</div>
+            <div className="text-2xl font-bold flex items-center">
+              $<AnimatedNumber value={totalOutstanding} />
+            </div>
             <p className="text-xs text-amber-500 mt-1 flex items-center gap-1 font-medium">
                {invoices.filter(i => i.status === "Pending").length} Invoices Pending
             </p>
           </CardContent>
         </Card>
-        <Card className="border-border/50 shadow-sm">
+        <Card className="border-border/50 shadow-xs">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Overdue</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-500">{formatCurrency(totalOverdue)}</div>
+            <div className="text-2xl font-bold text-red-500 flex items-center">
+              $<AnimatedNumber value={totalOverdue} />
+            </div>
             <p className="text-xs text-red-500/80 mt-1 flex items-center gap-1 font-medium">
                {invoices.filter(i => i.status === "Overdue").length} Invoices Overdue
             </p>
           </CardContent>
         </Card>
-        <Card className="border-border/50 shadow-sm">
+        <Card className="border-border/50 shadow-xs">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Paid (Total)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-500">{formatCurrency(totalPaid)}</div>
+            <div className="text-2xl font-bold text-emerald-500 flex items-center">
+              $<AnimatedNumber value={totalPaid} />
+            </div>
             <p className="text-xs text-emerald-500/80 mt-1 flex items-center gap-1 font-medium">
                {invoices.filter(i => i.status === "Paid").length} Invoices Paid
             </p>
           </CardContent>
         </Card>
-      </div>
+      </AnimatedGroup>
 
       <Card className="border-border/50 shadow-sm">
         <CardHeader className="pb-4">

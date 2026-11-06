@@ -39,6 +39,10 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import { AnimatedGroup } from "@/components/core/animated-group";
+import { AnimatedNumber } from "@/components/core/animated-number";
+import { Magnetic } from "@/components/core/magnetic";
+import { Tilt } from "@/components/core/tilt";
 
 interface Note {
   id: number;
@@ -166,9 +170,11 @@ export default function NotesPage() {
         {/* Add Note Modal */}
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger render={
-            <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20">
-              <Plus className="h-4 w-4" /> Add New Note
-            </Button>
+            <Magnetic springOptions={{ bounce: 0.1 }}>
+              <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20">
+                <Plus className="h-4 w-4" /> Add New Note
+              </Button>
+            </Magnetic>
           } />
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
@@ -281,60 +287,63 @@ export default function NotesPage() {
           </div>
 
           {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
             {filteredNotes.length === 0 ? (
-              <div className="col-span-full p-12 text-center text-muted-foreground bg-card rounded-xl border border-dashed">
+              <div className="p-12 text-center text-muted-foreground bg-card rounded-xl border border-dashed">
                 <StickyNote className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p className="font-semibold text-sm">No notes found</p>
                 <p className="text-xs">Create a new note or adjust your search term.</p>
               </div>
             ) : (
-              filteredNotes.map((note) => (
-                <Card 
-                  key={note.id} 
-                  className={`shadow-xs border transition-all hover:shadow-md ${note.color} ${note.isPinned ? "ring-2 ring-primary/40" : ""}`}
-                >
-                  <CardHeader className="pb-2 flex flex-row items-start justify-between space-y-0">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="text-[10px] font-semibold">{note.category}</Badge>
-                        {note.isPinned && (
-                          <Badge className="bg-amber-500 text-white text-[10px] gap-1 px-1.5 py-0 border-none">
-                            <Pin className="h-3 w-3 fill-current" /> Pinned
-                          </Badge>
-                        )}
-                      </div>
-                      <CardTitle className="text-base font-bold pt-1">{note.title}</CardTitle>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Button 
-                        variant="ghost" 
-                        size="icon-sm" 
-                        onClick={() => togglePin(note.id)}
-                        className={note.isPinned ? "text-amber-600" : "text-muted-foreground"}
-                      >
-                        <Pin className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon-sm" 
-                        onClick={() => deleteNote(note.id)}
-                        className="text-muted-foreground hover:text-rose-600"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-xs text-foreground/80 leading-relaxed whitespace-pre-line">{note.content}</p>
-                    <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-border/40">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" /> {note.date}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+              <AnimatedGroup preset="scale" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredNotes.map((note) => (
+                  <Tilt key={note.id} rotationFactor={3} isReverse>
+                    <Card 
+                      className={`shadow-xs border transition-all hover:shadow-md ${note.color} ${note.isPinned ? "ring-2 ring-primary/40" : ""}`}
+                    >
+                      <CardHeader className="pb-2 flex flex-row items-start justify-between space-y-0">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="text-[10px] font-semibold">{note.category}</Badge>
+                            {note.isPinned && (
+                              <Badge className="bg-amber-500 text-white text-[10px] gap-1 px-1.5 py-0 border-none">
+                                <Pin className="h-3 w-3 fill-current" /> Pinned
+                              </Badge>
+                            )}
+                          </div>
+                          <CardTitle className="text-base font-bold pt-1">{note.title}</CardTitle>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon-sm" 
+                            onClick={() => togglePin(note.id)}
+                            className={note.isPinned ? "text-amber-600" : "text-muted-foreground"}
+                          >
+                            <Pin className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon-sm" 
+                            onClick={() => deleteNote(note.id)}
+                            className="text-muted-foreground hover:text-rose-600"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <p className="text-xs text-foreground/80 leading-relaxed whitespace-pre-line">{note.content}</p>
+                        <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-border/40">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" /> {note.date}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Tilt>
+                ))}
+              </AnimatedGroup>
             )}
           </div>
         </div>

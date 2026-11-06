@@ -1,11 +1,26 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import { AppSidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isComponentRoute = pathname?.startsWith("/components");
+
+  if (isComponentRoute) {
+    return (
+      <div className="flex flex-col min-h-screen bg-background">
+        <Topbar isComponentRoute={true} />
+        <div className="flex-1 w-full">
+          {children}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />

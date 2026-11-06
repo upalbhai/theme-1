@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription as DialogDesc } from "@/components/ui/dialog";
+import { AnimatedGroup } from "@/components/core/animated-group";
+import { BorderTrail } from "@/components/core/border-trail";
+import { Magnetic } from "@/components/core/magnetic";
+import { Tilt } from "@/components/core/tilt";
 
 const DUMMY_FOLDERS = [
   { id: 1, name: "Project Assets", files: 12, size: "45 MB", color: "text-blue-500" },
@@ -92,9 +96,11 @@ export default function DocumentsPage() {
         
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger render={
-            <Button className="gap-2 shadow-md shadow-primary/20 shrink-0">
-              <Upload className="h-4 w-4" /> Upload File
-            </Button>
+            <Magnetic springOptions={{ bounce: 0.1 }}>
+              <Button className="gap-2 shadow-md shadow-primary/20 shrink-0">
+                <Upload className="h-4 w-4" /> Upload File
+              </Button>
+            </Magnetic>
           } />
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -104,8 +110,9 @@ export default function DocumentsPage() {
             <div className="py-6">
               {!isUploading && !uploadComplete ? (
                 <label 
-                  className="border-2 border-dashed border-primary/20 rounded-xl p-10 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 hover:border-primary/50 transition-colors"
+                  className="relative overflow-hidden border-2 border-dashed border-primary/20 rounded-xl p-10 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 hover:border-primary/50 transition-colors"
                 >
+                  <BorderTrail size={80} transition={{ duration: 6, repeat: Infinity, ease: "linear" }} className="bg-gradient-to-r from-primary to-blue-400" />
                   <input type="file" className="hidden" onChange={simulateUpload} />
                   <div className="p-3 bg-primary/10 rounded-full mb-3 text-primary">
                     <Upload className="h-6 w-6" />
@@ -143,23 +150,25 @@ export default function DocumentsPage() {
       {/* Folders Section */}
       <div>
         <h3 className="text-lg font-semibold mb-4 text-foreground">Folders</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <AnimatedGroup preset="scale" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {DUMMY_FOLDERS.map((folder) => (
-            <Card key={folder.id} className="border-border/50 shadow-sm hover:shadow-md transition-shadow cursor-pointer group bg-card">
-              <CardContent className="p-5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2.5 rounded-lg bg-muted group-hover:bg-background transition-colors ${folder.color}`}>
-                    <Folder className="h-6 w-6" fill="currentColor" fillOpacity={0.2} />
+            <Tilt key={folder.id} rotationFactor={4} isReverse>
+              <Card className="border-border/50 shadow-xs hover:shadow-md transition-shadow cursor-pointer group bg-card">
+                <CardContent className="p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-lg bg-muted group-hover:bg-background transition-colors ${folder.color}`}>
+                      <Folder className="h-6 w-6" fill="currentColor" fillOpacity={0.2} />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm line-clamp-1">{folder.name}</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">{folder.files} files • {folder.size}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-sm line-clamp-1">{folder.name}</h4>
-                    <p className="text-xs text-muted-foreground mt-0.5">{folder.files} files • {folder.size}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Tilt>
           ))}
-        </div>
+        </AnimatedGroup>
       </div>
 
       {/* Files Section */}

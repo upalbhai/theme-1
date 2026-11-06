@@ -47,6 +47,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable, ColumnDef } from "@/components/ui/data-table";
+import { AnimatedGroup } from "@/components/core/animated-group";
+import { AnimatedNumber } from "@/components/core/animated-number";
+import { BorderTrail } from "@/components/core/border-trail";
+import { Magnetic } from "@/components/core/magnetic";
+import { Tilt } from "@/components/core/tilt";
 
 interface StorageFile {
   id: string;
@@ -206,9 +211,11 @@ export default function StoragePage() {
         {/* Upload File Dialog */}
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger render={
-            <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20">
-              <Upload className="h-4 w-4" /> Upload File
-            </Button>
+            <Magnetic springOptions={{ bounce: 0.1 }}>
+              <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20">
+                <Upload className="h-4 w-4" /> Upload File
+              </Button>
+            </Magnetic>
           } />
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
@@ -264,7 +271,8 @@ export default function StoragePage() {
       </div>
 
       {/* Storage Capacity Bar Card */}
-      <Card className="shadow-sm border border-border/60 bg-gradient-to-r from-slate-900 to-slate-800 text-white">
+      <Card className="relative overflow-hidden shadow-sm border border-border/60 bg-gradient-to-r from-slate-900 to-slate-800 text-white">
+        <BorderTrail size={120} transition={{ duration: 8, repeat: Infinity, ease: "linear" }} className="bg-gradient-to-r from-blue-500 via-purple-500 to-emerald-400" />
         <CardContent className="p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="space-y-1">
@@ -304,21 +312,23 @@ export default function StoragePage() {
             <FolderPlus className="h-3.5 w-3.5" /> Create Folder
           </Button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <AnimatedGroup preset="scale" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {folders.map((f, idx) => (
-            <Card key={idx} className="shadow-sm border border-border/60 hover:shadow-md transition-shadow">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className={`p-3 rounded-xl ${f.color}`}>
-                  <Folder className="h-6 w-6" />
-                </div>
-                <div className="space-y-0.5">
-                  <h4 className="font-bold text-sm leading-tight">{f.name}</h4>
-                  <p className="text-xs text-muted-foreground">{f.count} • {f.size}</p>
-                </div>
-              </CardContent>
-            </Card>
+            <Tilt key={idx} rotationFactor={4} isReverse>
+              <Card className="shadow-xs border border-border/60 hover:shadow-md transition-shadow">
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className={`p-3 rounded-xl ${f.color}`}>
+                    <Folder className="h-6 w-6" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <h4 className="font-bold text-sm leading-tight">{f.name}</h4>
+                    <p className="text-xs text-muted-foreground">{f.count} • {f.size}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Tilt>
           ))}
-        </div>
+        </AnimatedGroup>
       </div>
 
       {/* Files Directory Table */}

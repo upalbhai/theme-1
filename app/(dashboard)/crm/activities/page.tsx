@@ -23,6 +23,10 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AnimatedGroup } from "@/components/core/animated-group";
+import { BorderTrail } from "@/components/core/border-trail";
+import { Magnetic } from "@/components/core/magnetic";
+import { TextLoop } from "@/components/core/text-loop";
 
 interface Activity {
   id: string;
@@ -99,9 +103,15 @@ export default function ActivityTimelinePage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Customer Interactions & Feed</h1>
-          <p className="text-sm text-muted-foreground">
-            Chronological audit log of calls, emails, meetings, and team notes.
-          </p>
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <span>Chronological audit log tracking</span>
+            <TextLoop className="text-primary font-semibold">
+              <span>phone calls</span>
+              <span>direct emails</span>
+              <span>stakeholder meetings</span>
+              <span>internal notes</span>
+            </TextLoop>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -110,7 +120,8 @@ export default function ActivityTimelinePage() {
       </div>
 
       {/* Quick Activity Logger Box */}
-      <Card>
+      <Card className="relative overflow-hidden">
+        <BorderTrail size={80} transition={{ duration: 8, repeat: Infinity, ease: "linear" }} className="bg-gradient-to-r from-primary/60 to-purple-500/60" />
         <CardHeader className="pb-3">
           <CardTitle className="text-xs uppercase tracking-wider text-muted-foreground">
             Quick Log New Interaction
@@ -137,9 +148,11 @@ export default function ActivityTimelinePage() {
               <Calendar className="h-3.5 w-3.5 text-emerald-500" /> Meeting
             </Button>
           </div>
-          <Button size="sm" className="gap-1.5 h-8 mt-2">
-            <Send className="h-3.5 w-3.5" /> Post Activity
-          </Button>
+          <Magnetic springOptions={{ bounce: 0.1 }}>
+            <Button size="sm" className="gap-1.5 h-8 mt-2 shadow-xs">
+              <Send className="h-3.5 w-3.5" /> Post Activity
+            </Button>
+          </Magnetic>
         </CardFooter>
       </Card>
 
@@ -156,54 +169,56 @@ export default function ActivityTimelinePage() {
       </div>
 
       {/* Activity Timeline List */}
-      <div className="relative pl-6 space-y-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
-        {filteredActivities.map((act) => {
-          const Config = activityTypeConfig[act.type];
-          const Icon = Config.icon;
-          return (
-            <div key={act.id} className="relative group">
-              {/* Timeline Icon Badge */}
-              <div
-                className={cn(
-                  "absolute -left-6 top-1.5 flex h-6 w-6 -translate-x-1/2 items-center justify-center rounded-full border shadow-xs transition-transform group-hover:scale-110 bg-background",
-                  Config.color
-                )}
-              >
-                <Icon className="h-3 w-3" />
-              </div>
+      <div className="relative pl-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
+        <AnimatedGroup preset="blur-slide" className="space-y-6">
+          {filteredActivities.map((act) => {
+            const Config = activityTypeConfig[act.type];
+            const Icon = Config.icon;
+            return (
+              <div key={act.id} className="relative group">
+                {/* Timeline Icon Badge */}
+                <div
+                  className={cn(
+                    "absolute -left-6 top-1.5 flex h-6 w-6 -translate-x-1/2 items-center justify-center rounded-full border shadow-xs transition-transform group-hover:scale-110 bg-background",
+                    Config.color
+                  )}
+                >
+                  <Icon className="h-3 w-3" />
+                </div>
 
-              {/* Activity Card */}
-              <Card className="transition-all hover:shadow-md hover:border-primary/40">
-                <CardHeader className="pb-2">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                    <div className="flex items-center gap-2">
-                      <CardTitle className="text-sm">{act.title}</CardTitle>
-                      <Badge variant="secondary" className="text-[10px] py-0">
-                        {act.company}
-                      </Badge>
+                {/* Activity Card */}
+                <Card className="transition-all hover:shadow-md hover:border-primary/40">
+                  <CardHeader className="pb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-sm">{act.title}</CardTitle>
+                        <Badge variant="secondary" className="text-[10px] py-0">
+                          {act.company}
+                        </Badge>
+                      </div>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" /> {act.timestamp}
+                      </span>
                     </div>
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" /> {act.timestamp}
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-xs leading-relaxed text-foreground">
-                    {act.details}
-                  </CardDescription>
-                </CardContent>
-                <CardFooter className="pt-2 pb-3 border-t">
-                  <div className="flex w-full items-center justify-between text-[11px] text-muted-foreground">
-                    <span className="flex items-center gap-1 font-medium">
-                      <User className="h-3 w-3" /> Contact: <strong className="text-foreground">{act.contact}</strong>
-                    </span>
-                    <span>Logged by {act.user}</span>
-                  </div>
-                </CardFooter>
-              </Card>
-            </div>
-          );
-        })}
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-xs leading-relaxed text-foreground">
+                      {act.details}
+                    </CardDescription>
+                  </CardContent>
+                  <CardFooter className="pt-2 pb-3 border-t">
+                    <div className="flex w-full items-center justify-between text-[11px] text-muted-foreground">
+                      <span className="flex items-center gap-1 font-medium">
+                        <User className="h-3 w-3" /> Contact: <strong className="text-foreground">{act.contact}</strong>
+                      </span>
+                      <span>Logged by {act.user}</span>
+                    </div>
+                  </CardFooter>
+                </Card>
+              </div>
+            );
+          })}
+        </AnimatedGroup>
       </div>
     </div>
   );

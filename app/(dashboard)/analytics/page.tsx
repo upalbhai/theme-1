@@ -26,6 +26,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataTable, ColumnDef } from "@/components/ui/data-table";
+import { AnimatedNumber } from "@/components/core/animated-number";
+import { AnimatedGroup } from "@/components/core/animated-group";
+import { Magnetic } from "@/components/core/magnetic";
+import { Tilt } from "@/components/core/tilt";
 
 import {
   monthlyConversionsData,
@@ -111,14 +115,16 @@ export default function AnalyticsPage() {
           <Button variant="outline" size="sm">
             <Calendar className="mr-2 h-4 w-4" /> Custom Range
           </Button>
-          <Button size="sm">
-            Download PDF Report
-          </Button>
+          <Magnetic springOptions={{ bounce: 0.1 }}>
+            <Button size="sm" className="shadow-xs">
+              Download PDF Report
+            </Button>
+          </Magnetic>
         </div>
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <AnimatedGroup preset="scale" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1 */}
         <Card className="transition-all hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -152,7 +158,9 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="flex items-baseline justify-between mt-1">
-              <span className="text-2xl font-bold tracking-tight">$124,500</span>
+              <span className="text-2xl font-bold tracking-tight flex items-center">
+                $<AnimatedNumber value={124500} />
+              </span>
               <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none gap-0.5 font-semibold text-xs py-0.5">
                 <ArrowUpRight className="h-3 w-3" /> +8.2%
               </Badge>
@@ -173,7 +181,9 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="flex items-baseline justify-between mt-1">
-              <span className="text-2xl font-bold tracking-tight">$142</span>
+              <span className="text-2xl font-bold tracking-tight flex items-center">
+                $<AnimatedNumber value={142} />
+              </span>
               <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none gap-0.5 font-semibold text-xs py-0.5">
                 <ArrowDownRight className="h-3 w-3" /> -4.2%
               </Badge>
@@ -194,7 +204,9 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="flex items-baseline justify-between mt-1">
-              <span className="text-2xl font-bold tracking-tight">$887k</span>
+              <span className="text-2xl font-bold tracking-tight flex items-center">
+                $<AnimatedNumber value={887000} />
+              </span>
               <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none gap-0.5 font-semibold text-xs py-0.5">
                 <ArrowUpRight className="h-3 w-3" /> +12%
               </Badge>
@@ -202,7 +214,7 @@ export default function AnalyticsPage() {
             <p className="mt-2 text-xs text-muted-foreground">Total pipeline value</p>
           </CardContent>
         </Card>
-      </div>
+      </AnimatedGroup>
 
       {/* Charts Layout Row 1 */}
       <div className="grid gap-6 lg:grid-cols-3">

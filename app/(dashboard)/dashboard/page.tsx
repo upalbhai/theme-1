@@ -33,6 +33,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataTable, ColumnDef } from "@/components/ui/data-table";
+import { AnimatedNumber } from "@/components/core/animated-number";
+import { AnimatedGroup } from "@/components/core/animated-group";
 
 interface RecentDeal {
   company: string;
@@ -97,7 +99,7 @@ export default function SalesAnalyticsDashboard() {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <AnimatedGroup preset="scale" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1 */}
         <Card className="transition-all hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -110,7 +112,9 @@ export default function SalesAnalyticsDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex items-baseline justify-between mt-1">
-              <span className="text-2xl font-bold tracking-tight">$89,450</span>
+              <span className="text-2xl font-bold tracking-tight flex items-center">
+                $<AnimatedNumber value={89450} />
+              </span>
               <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none gap-0.5 font-semibold text-xs py-0.5">
                 <ArrowUpRight className="h-3 w-3" /> +18.4%
               </Badge>
@@ -131,7 +135,9 @@ export default function SalesAnalyticsDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex items-baseline justify-between mt-1">
-              <span className="text-2xl font-bold tracking-tight">1,160</span>
+              <span className="text-2xl font-bold tracking-tight">
+                <AnimatedNumber value={1160} />
+              </span>
               <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none gap-0.5 font-semibold text-xs py-0.5">
                 <ArrowUpRight className="h-3 w-3" /> +8.2%
               </Badge>
@@ -173,7 +179,9 @@ export default function SalesAnalyticsDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex items-baseline justify-between mt-1">
-              <span className="text-2xl font-bold tracking-tight">$38,600</span>
+              <span className="text-2xl font-bold tracking-tight flex items-center">
+                $<AnimatedNumber value={38600} />
+              </span>
               <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none gap-0.5 font-semibold text-xs py-0.5">
                 <ArrowUpRight className="h-3 w-3" /> +12.1%
               </Badge>
@@ -181,7 +189,7 @@ export default function SalesAnalyticsDashboard() {
             <p className="mt-2 text-xs text-muted-foreground">Up from $34.4k average</p>
           </CardContent>
         </Card>
-      </div>
+      </AnimatedGroup>
 
       {/* Main Revenue Chart & Lead Source Breakdown */}
       <div className="grid gap-6 lg:grid-cols-3">

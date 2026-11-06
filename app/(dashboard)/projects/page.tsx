@@ -50,6 +50,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable, ColumnDef } from "@/components/ui/data-table";
+import { AnimatedGroup } from "@/components/core/animated-group";
+import { AnimatedNumber } from "@/components/core/animated-number";
+import { Magnetic } from "@/components/core/magnetic";
+import { Tilt } from "@/components/core/tilt";
 
 interface ProjectItem {
   id: string;
@@ -227,9 +231,11 @@ export default function ProjectsPage() {
         {/* Create Project Modal */}
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger render={
-            <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20">
-              <Plus className="h-4 w-4" /> Create Project
-            </Button>
+            <Magnetic springOptions={{ bounce: 0.1 }}>
+              <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20">
+                <Plus className="h-4 w-4" /> Create Project
+              </Button>
+            </Magnetic>
           } />
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
@@ -302,12 +308,14 @@ export default function ProjectsPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="shadow-sm border border-border/60">
+      <AnimatedGroup preset="scale" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="shadow-xs border border-border/60">
           <CardContent className="p-5 flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-muted-foreground uppercase">Total Projects</p>
-              <h3 className="text-2xl font-bold tracking-tight mt-1">{projects.length}</h3>
+              <h3 className="text-2xl font-bold tracking-tight mt-1">
+                <AnimatedNumber value={projects.length} />
+              </h3>
               <p className="text-xs text-muted-foreground mt-1">Across all workspace clients</p>
             </div>
             <div className="p-3 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl">
@@ -316,12 +324,12 @@ export default function ProjectsPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm border border-border/60">
+        <Card className="shadow-xs border border-border/60">
           <CardContent className="p-5 flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-muted-foreground uppercase">Active In Progress</p>
               <h3 className="text-2xl font-bold tracking-tight text-blue-600 dark:text-blue-400 mt-1">
-                {projects.filter(p => p.status === "In Progress").length}
+                <AnimatedNumber value={projects.filter(p => p.status === "In Progress").length} />
               </h3>
               <p className="text-xs text-muted-foreground mt-1">Active sprint milestones</p>
             </div>
@@ -331,12 +339,12 @@ export default function ProjectsPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm border border-border/60">
+        <Card className="shadow-xs border border-border/60">
           <CardContent className="p-5 flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-muted-foreground uppercase">Completed</p>
               <h3 className="text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400 mt-1">
-                {projects.filter(p => p.status === "Completed").length}
+                <AnimatedNumber value={projects.filter(p => p.status === "Completed").length} />
               </h3>
               <p className="text-xs text-muted-foreground mt-1">Delivered successfully</p>
             </div>
@@ -346,12 +354,12 @@ export default function ProjectsPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm border border-border/60">
+        <Card className="shadow-xs border border-border/60">
           <CardContent className="p-5 flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-muted-foreground uppercase">Delayed / Blocked</p>
               <h3 className="text-2xl font-bold tracking-tight text-rose-600 dark:text-rose-400 mt-1">
-                {projects.filter(p => p.status === "Delayed").length}
+                <AnimatedNumber value={projects.filter(p => p.status === "Delayed").length} />
               </h3>
               <p className="text-xs text-muted-foreground mt-1">Needs team escalation</p>
             </div>
@@ -360,7 +368,7 @@ export default function ProjectsPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </AnimatedGroup>
 
       {/* Controls Bar: Search, Status Tabs, View Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-4 rounded-xl border border-border/60 shadow-xs">
