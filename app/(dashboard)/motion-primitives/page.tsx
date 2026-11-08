@@ -384,11 +384,11 @@ export default function MotionPrimitivesPage() {
                 <CardDescription>Radial curved badge with infinite rotating text.</CardDescription>
               </CardHeader>
               <CardContent className="h-48 flex items-center justify-center bg-muted/30 rounded-xl m-6 border border-dashed border-border/80">
-                <div className="relative flex items-center justify-center">
+                <div className="relative flex items-center justify-center size-32">
                   <SpinningText radius={4.5} fontSize={0.75} duration={12} className="font-semibold uppercase tracking-widest text-primary">
                     ★ APEX CRM • MOTION PRIMITIVES •
                   </SpinningText>
-                  <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary pointer-events-none">
                     <Sparkles className="size-4" />
                   </div>
                 </div>

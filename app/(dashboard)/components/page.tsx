@@ -306,12 +306,12 @@ import { TextShimmerWave } from "@/components/core/text-shimmer-wave";
                 onCopy={copyCode}
                 id="c-spinning-text"
               >
-                <div className="min-h-[110px] flex items-center justify-center p-4 bg-muted/30 rounded-lg">
-                  <div className="relative flex items-center justify-center">
+                <div className="min-h-[140px] flex items-center justify-center p-4 bg-muted/30 rounded-lg">
+                  <div className="relative flex items-center justify-center size-28">
                     <SpinningText radius={4} fontSize={0.7} duration={10} className="font-semibold uppercase tracking-widest text-primary">
                       ★ APEX THEME • MOTION PRIMITIVES •
                     </SpinningText>
-                    <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary pointer-events-none">
                       <Sparkles className="size-3.5" />
                     </div>
                   </div>

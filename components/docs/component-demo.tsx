@@ -60,6 +60,9 @@ import { MorphingDialog, MorphingDialogTrigger, MorphingDialogContent, MorphingD
 import { MorphingPopover, MorphingPopoverTrigger, MorphingPopoverContent } from "@/components/core/morphing-popover";
 import { ToolbarDynamic } from "@/components/core/toolbar-dynamic";
 import { ToolbarExpandable } from "@/components/core/toolbar-expandable";
+import { InView } from "@/components/core/in-view";
+import { ProgressiveBlur } from "@/components/core/progressive-blur";
+import { Carousel, CarouselContent, CarouselItem, CarouselNavigation, CarouselIndicator } from "@/components/core/carousel";
 
 export function ComponentDemo({ slug }: { slug: string }) {
   // Demo states
@@ -256,7 +259,7 @@ export function ComponentDemo({ slug }: { slug: string }) {
       return (
         <div className="space-y-6">
           <div className="min-h-[220px] flex items-center justify-center p-8 bg-muted/20 border rounded-xl border-dashed relative">
-            <div className="relative flex items-center justify-center">
+            <div className="relative flex items-center justify-center size-36">
               <SpinningText
                 radius={4.5}
                 fontSize={0.8}
@@ -265,8 +268,8 @@ export function ComponentDemo({ slug }: { slug: string }) {
               >
                 • NEXT.JS 16 • MOTION PRIMITIVES • REACT 19 •
               </SpinningText>
-              <div className="size-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold">
-                <Sparkles className="size-6" />
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold pointer-events-none">
+                <Sparkles className="size-5" />
               </div>
             </div>
           </div>
@@ -961,6 +964,87 @@ export function ComponentDemo({ slug }: { slug: string }) {
               </div>
               <Progress value={78} className="h-2 w-full" />
             </div>
+          </div>
+        </div>
+      );
+
+    case "in-view":
+      return (
+        <div className="space-y-6">
+          <div className="min-h-[160px] flex items-center justify-center p-8 bg-muted/20 border rounded-xl border-dashed">
+            <InView
+              key={key}
+              variants={{
+                hidden: { opacity: 0, y: 20, scale: 0.95 },
+                visible: { opacity: 1, y: 0, scale: 1 },
+              }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+              <div className="p-6 bg-card rounded-2xl border shadow-md text-center space-y-2 max-w-sm">
+                <div className="size-10 rounded-xl bg-primary/10 text-primary mx-auto flex items-center justify-center">
+                  <Sparkles className="size-5" />
+                </div>
+                <h4 className="font-bold text-base">Viewport Entrance Triggered</h4>
+                <p className="text-xs text-muted-foreground">Animates smoothly when entering into viewport bounds.</p>
+              </div>
+            </InView>
+          </div>
+          <div className="flex justify-center">
+            <Button size="sm" variant="outline" onClick={restart} className="gap-2 text-xs">
+              <RefreshCw className="size-3.5" /> Replay Entrance
+            </Button>
+          </div>
+        </div>
+      );
+
+    case "progressive-blur":
+      return (
+        <div className="space-y-6">
+          <div className="min-h-[220px] flex items-center justify-center p-8 bg-muted/20 border rounded-xl border-dashed">
+            <div className="relative h-56 w-80 rounded-2xl overflow-hidden border shadow-lg group">
+              <img
+                src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80"
+                alt="Artwork"
+                className="size-full object-cover"
+              />
+              <ProgressiveBlur
+                direction="bottom"
+                blurLayers={6}
+                blurIntensity={0.3}
+                className="absolute inset-x-0 bottom-0 h-28"
+              />
+              <div className="absolute inset-x-0 bottom-0 p-4 z-10 text-white">
+                <p className="text-xs font-semibold uppercase tracking-wider opacity-80">Design Artifact</p>
+                <p className="text-sm font-bold">Progressive Frosted Depth</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+
+    case "carousel":
+      return (
+        <div className="space-y-6">
+          <div className="min-h-[200px] p-6 bg-muted/20 border rounded-xl border-dashed max-w-md mx-auto">
+            <Carousel className="w-full">
+              <CarouselContent className="gap-4">
+                {["Enterprise Deal Flow", "Predictive Analytics", "Unified Customer 360", "Automated Workflows"].map((title, i) => (
+                  <CarouselItem key={i} className="basis-full">
+                    <div className="p-6 rounded-xl bg-card border shadow-xs text-center space-y-2">
+                      <div className="size-10 rounded-full bg-primary/10 text-primary mx-auto flex items-center justify-center font-bold">
+                        {i + 1}
+                      </div>
+                      <h4 className="font-bold text-base">{title}</h4>
+                      <p className="text-xs text-muted-foreground">Fluid drag gestures and kinetic spring release.</p>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="flex items-center justify-between mt-4">
+                <CarouselNavigation />
+                <CarouselIndicator />
+              </div>
+            </Carousel>
           </div>
         </div>
       );

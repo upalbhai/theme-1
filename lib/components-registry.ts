@@ -715,6 +715,64 @@ export const COMPONENTS_REGISTRY: ComponentItem[] = [
       { name: "springOptions", type: "SpringOptions", description: "Spring dynamics config." },
     ],
   },
+  {
+    slug: "progressive-blur",
+    title: "Progressive Blur",
+    category: "Surfaces & Layouts",
+    categorySlug: "surfaces",
+    badge: "motion/core",
+    description: "Multi-stop gradient frosted glass blur transition for overlays and hero imagery.",
+    howItWorks: "Renders stacked linear-gradient layers with calculated alpha stops and backdrop blur filters to produce an ultra-smooth, continuous frosted glass depth gradient.",
+    importStatement: `import { ProgressiveBlur } from "@/components/core/progressive-blur";`,
+    codeUsage: `<div className="relative h-64 w-full rounded-2xl overflow-hidden">
+  <img src="/photo.jpg" alt="Scene" className="size-full object-cover" />
+  <ProgressiveBlur
+    direction="bottom"
+    blurLayers={8}
+    blurIntensity={0.25}
+    className="absolute inset-x-0 bottom-0 h-32"
+  />
+</div>`,
+    features: [
+      "Natural frosted depth without harsh line edges",
+      "Configurable blur intensity and gradient direction (top, bottom, left, right)",
+      "Zero JavaScript animation overhead, pure CSS filter layers",
+    ],
+    props: [
+      { name: "direction", type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'", description: "Direction of blur progression." },
+      { name: "blurLayers", type: "number", default: "8", description: "Number of layered gradient stops." },
+      { name: "blurIntensity", type: "number", default: "0.25", description: "Blur strength coefficient." },
+    ],
+  },
+  {
+    slug: "carousel",
+    title: "Carousel (Motion)",
+    category: "Surfaces & Layouts",
+    categorySlug: "surfaces",
+    badge: "motion/core",
+    description: "Fluid gesture-driven carousel with spring inertia release and pagination.",
+    howItWorks: "Combines touch and pointer drag gestures with Framer Motion spring physics. Calculates current index from drag release delta and animates to the snapped item.",
+    importStatement: `import { Carousel, CarouselContent, CarouselItem, CarouselNavigation, CarouselIndicator } from "@/components/core/carousel";`,
+    codeUsage: `<Carousel className="w-full max-w-lg mx-auto">
+  <CarouselContent>
+    <CarouselItem>Slide 1</CarouselItem>
+    <CarouselItem>Slide 2</CarouselItem>
+    <CarouselItem>Slide 3</CarouselItem>
+  </CarouselContent>
+  <CarouselNavigation />
+  <CarouselIndicator />
+</Carousel>`,
+    features: [
+      "Smooth drag gestures with velocity-aware inertia",
+      "Built-in indicator dots and chevron navigation",
+      "Responsive min-width column sizing",
+    ],
+    props: [
+      { name: "children", type: "ReactNode", description: "Carousel layout components." },
+      { name: "initialIndex", type: "number", default: "0", description: "Starting slide index." },
+      { name: "disableDrag", type: "boolean", default: "false", description: "Disable drag gestures." },
+    ],
+  },
 
   // 5. OVERLAYS & DISCLOSURES
   {

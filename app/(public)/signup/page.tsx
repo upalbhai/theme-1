@@ -5,12 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
-import { Sparkles, ArrowRight, CheckCircle2 } from "lucide-react";
-import { TextEffect } from "@/components/core/text-effect";
-import { Magnetic } from "@/components/core/magnetic";
-import { Tilt } from "@/components/core/tilt";
-import { BorderTrail } from "@/components/core/border-trail";
-import { AnimatedGroup } from "@/components/core/animated-group";
+import { ArrowRight, CheckCircle2, ShieldCheck, Building2, Users } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -21,142 +16,183 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-background text-foreground">
       {/* Left Form Section */}
-      <div className="flex flex-col justify-center items-center p-8 bg-background relative overflow-hidden">
-        {/* Subtle Background Elements */}
-        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="flex flex-col justify-between p-6 sm:p-10 lg:p-12">
+        <div>
+          <Link href="/" className="inline-flex items-center gap-2.5 font-semibold text-sm">
+            <div className="size-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs shadow-xs">
+              A
+            </div>
+            <span className="tracking-tight font-bold text-foreground">Apex CRM</span>
+          </Link>
+        </div>
 
-        <div className="w-full max-w-md relative z-10">
-          <div className="relative rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md p-8 shadow-xs overflow-hidden">
-            <BorderTrail size={100} transition={{ duration: 7, repeat: Infinity, ease: "linear" }} className="bg-gradient-to-r from-primary via-emerald-400 to-primary" />
-
-            <div className="text-center sm:text-left mb-6">
-              <Link href="/" className="inline-flex items-center gap-2 mb-6 hover:opacity-80 transition-opacity">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-tr from-primary to-primary/80 text-primary-foreground shadow-md">
-                  <Sparkles className="size-4" />
-                </div>
-                <span className="font-bold text-xl tracking-tight">Apex CRM</span>
-              </Link>
-              
-              <h1 className="text-3xl font-bold tracking-tight mb-2">
-                <TextEffect per="char" preset="fade" as="span">
-                  Create an account
-                </TextEffect>
+        <div className="w-full max-w-sm mx-auto my-auto py-8">
+          <div className="space-y-6">
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-medium tracking-tight text-foreground">
+                Create your workspace
               </h1>
-              <p className="text-sm text-muted-foreground">
-                Start your 14-day free trial. No credit card required.
+              <p className="text-xs text-muted-foreground">
+                14-day evaluation period for your team. Instant setup.
               </p>
             </div>
 
-            <div className="grid gap-5">
-              <Button variant="outline" className="w-full h-10 gap-2 border-border bg-background hover:bg-accent font-medium text-xs">
-                Sign up with GitHub
-              </Button>
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border" />
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="first-name" className="text-xs text-foreground">First name</Label>
+                  <Input
+                    id="first-name"
+                    placeholder="Alex"
+                    defaultValue="Alex"
+                    className="h-9 text-xs rounded-lg bg-background border-border/80"
+                    required
+                  />
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground text-[10px]">
-                    Or register with email
-                  </span>
+                <div className="space-y-1.5">
+                  <Label htmlFor="last-name" className="text-xs text-foreground">Last name</Label>
+                  <Input
+                    id="last-name"
+                    placeholder="Rivera"
+                    defaultValue="Rivera"
+                    className="h-9 text-xs rounded-lg bg-background border-border/80"
+                    required
+                  />
                 </div>
               </div>
 
-              <form onSubmit={handleSignup} className="grid gap-3.5">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="first-name" className="text-xs">First name</Label>
-                    <Input id="first-name" placeholder="John" defaultValue="John" className="h-10 text-sm" required />
-                  </div>
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="last-name" className="text-xs">Last name</Label>
-                    <Input id="last-name" placeholder="Doe" defaultValue="Doe" className="h-10 text-sm" required />
-                  </div>
-                </div>
-                
-                <div className="grid gap-1.5">
-                  <Label htmlFor="email" className="text-xs">Work Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    defaultValue="john.doe@company.com"
-                    className="h-10 text-sm"
-                    required
-                  />
-                </div>
-                <div className="grid gap-1.5">
-                  <Label htmlFor="password" className="text-xs">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Create a strong password"
-                    defaultValue="password123"
-                    className="h-10 text-sm"
-                    required
-                  />
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Must be at least 8 characters and contain a number or symbol.</p>
-                </div>
-                <Magnetic springOptions={{ bounce: 0.1 }}>
-                  <Button type="submit" className="w-full h-10 gap-2 mt-1 shadow-sm">
-                    Create Account
-                    <ArrowRight className="size-4" />
-                  </Button>
-                </Magnetic>
-              </form>
-            </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="company" className="text-xs text-foreground">Company name</Label>
+                <Input
+                  id="company"
+                  placeholder="Acme Corp"
+                  defaultValue="Starlight Technologies"
+                  className="h-9 text-xs rounded-lg bg-background border-border/80"
+                  required
+                />
+              </div>
 
-            <p className="text-center text-xs text-muted-foreground mt-6 border-t border-border/50 pt-5">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs text-foreground">Work Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="alex@company.com"
+                  defaultValue="alex@starlight.io"
+                  className="h-9 text-xs rounded-lg bg-background border-border/80"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="password" className="text-xs text-foreground">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  defaultValue="password123"
+                  className="h-9 text-xs rounded-lg bg-background border-border/80"
+                  required
+                />
+                <p className="text-[11px] text-muted-foreground font-mono">
+                  Minimum 8 characters with letters and numbers
+                </p>
+              </div>
+
+              <Button type="submit" className="w-full h-9 text-xs font-medium rounded-lg gap-2 mt-2 shadow-xs">
+                <span>Create Workspace</span>
+                <ArrowRight className="size-3.5" />
+              </Button>
+            </form>
+
+            <div className="pt-2 text-center text-xs text-muted-foreground">
               Already have an account?{" "}
-              <Link href="/login" className="text-primary hover:underline font-medium">
-                Log in
+              <Link href="/login" className="text-foreground hover:underline font-medium">
+                Sign in
               </Link>
-            </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/60 pt-4">
+          <span className="font-mono text-[11px]">Apex CRM v2.0</span>
+          <div className="flex items-center gap-4">
+            <Link href="/" className="hover:text-foreground transition-colors">Documentation</Link>
+            <Link href="/" className="hover:text-foreground transition-colors">Terms of Service</Link>
           </div>
         </div>
       </div>
 
-      {/* Right Feature/Banner Section */}
-      <div className="hidden lg:flex flex-col items-center justify-center bg-primary/5 dark:bg-primary/10 border-l border-border/50 relative overflow-hidden p-12">
-        <div className="relative z-10 max-w-lg w-full">
-          <h2 className="text-3xl font-bold tracking-tight mb-8">
-            Everything you need to scale your SaaS
-          </h2>
-          
-          <AnimatedGroup preset="blur-slide" className="space-y-5">
-            {[
-              "Enterprise-grade Data Tables with Sorting & Filtering",
-              "Advanced Redux & TanStack Query State Management",
-              "Pre-built CRM Dashboard & Analytics Views",
-              "33 Fluid Motion Primitives integrated natively",
-              "Beautifully customized shadcn/ui components"
-            ].map((feature, idx) => (
-              <div key={idx} className="flex items-start gap-3.5">
-                <div className="mt-0.5 h-5 w-5 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="size-3.5" />
-                </div>
-                <p className="text-base text-muted-foreground font-medium">{feature}</p>
-              </div>
-            ))}
-          </AnimatedGroup>
+      {/* Right Product Context Section */}
+      <div className="hidden lg:flex flex-col justify-between bg-muted/20 border-l border-border/60 p-12">
+        <div className="flex justify-end">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-background border border-border/80 text-[11px] font-mono text-muted-foreground">
+            <span className="size-1.5 rounded-full bg-emerald-500" />
+            <span>Pre-configured Environment</span>
+          </div>
+        </div>
 
-          <Tilt rotationFactor={6} isReverse className="mt-12">
-            <div className="p-6 rounded-2xl bg-background border border-border shadow-xs">
-              <p className="italic text-muted-foreground text-sm mb-4 leading-relaxed">
-                "This template saved us 3 months of frontend development time. The motion physics, state setup, and UI are absolutely stunning right out of the box."
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500" />
-                <div>
-                  <p className="font-semibold text-xs">Sarah Jenkins</p>
-                  <p className="text-[11px] text-muted-foreground">CTO at Nexus AI</p>
-                </div>
+        <div className="max-w-md mx-auto space-y-6 w-full">
+          <div className="space-y-2">
+            <h2 className="text-xl font-medium tracking-tight text-foreground">
+              Standardized architecture out of the box
+            </h2>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Every workspace is provisioned with pre-wired Redux stores, TanStack Query hooks, and typed schemas for instant customization.
+            </p>
+          </div>
+
+          {/* Provisioning Configuration Card */}
+          <div className="rounded-xl border border-border/80 bg-card p-5 space-y-4 shadow-2xs">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <span className="text-xs font-medium text-foreground">Default Workspace Stack</span>
+              <span className="text-[11px] font-mono text-muted-foreground">Production Ready</span>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="flex items-center justify-between py-1 border-b border-border/40">
+                <span className="text-muted-foreground">Application Framework</span>
+                <span className="font-mono font-medium text-foreground">Next.js 16 (App Router)</span>
+              </div>
+              <div className="flex items-center justify-between py-1 border-b border-border/40">
+                <span className="text-muted-foreground">Rendering Engine</span>
+                <span className="font-mono font-medium text-foreground">React 19 Server Components</span>
+              </div>
+              <div className="flex items-center justify-between py-1 border-b border-border/40">
+                <span className="text-muted-foreground">State Management</span>
+                <span className="font-mono font-medium text-foreground">Redux Toolkit + TanStack Query</span>
+              </div>
+              <div className="flex items-center justify-between py-1 border-b border-border/40">
+                <span className="text-muted-foreground">Design System</span>
+                <span className="font-mono font-medium text-foreground">Tailwind CSS v4 + 33 Primitives</span>
+              </div>
+              <div className="flex items-center justify-between py-1">
+                <span className="text-muted-foreground">Data Layer</span>
+                <span className="font-mono font-medium text-foreground">Mock REST + Webhook Event Bus</span>
               </div>
             </div>
-          </Tilt>
+          </div>
+
+          <div className="space-y-2 text-xs text-muted-foreground pt-2">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="size-3.5 text-primary shrink-0" />
+              <span>Full TypeScript typecheck with zero compiler warnings</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="size-3.5 text-primary shrink-0" />
+              <span>Static prerendering support across all internal routes</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="size-3.5 text-primary shrink-0" />
+              <span>WCAG AA compliant contrast ratios and keyboard traps</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-xs text-muted-foreground">
+          © {new Date().getFullYear()} Apex CRM. All rights reserved.
         </div>
       </div>
     </div>
