@@ -46,6 +46,8 @@ export function Topbar({ isComponentRoute }: { isComponentRoute?: boolean }) {
   const router = useRouter();
 
   React.useEffect(() => {
+    if (isComponentRoute) return; // Component routes use ComponentCommandMenu for Cmd+K
+
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -54,7 +56,7 @@ export function Topbar({ isComponentRoute }: { isComponentRoute?: boolean }) {
     };
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, []);
+  }, [isComponentRoute]);
 
   const runCommand = React.useCallback((command: () => void) => {
     setOpen(false);
@@ -62,51 +64,77 @@ export function Topbar({ isComponentRoute }: { isComponentRoute?: boolean }) {
   }, []);
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b bg-background/80 px-4 md:px-6 backdrop-blur-md transition-colors">
-      {/* Search Input & Mobile Toggle / Brand Logo */}
-      <div className="flex items-center gap-3 md:flex-1 md:max-w-xl">
-        {isComponentRoute ? (
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 group text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors mr-1"
-            >
-              <div className="size-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-xs">
-                A
-              </div>
-              <span className="hidden sm:inline font-bold text-foreground text-sm">Apex CRM</span>
-              <span className="hidden md:inline px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-mono">
-                Docs
-              </span>
-            </Link>
-            <Link
-              href="/dashboard"
-              className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground px-2.5 py-1.5 rounded-lg bg-muted/50 hover:bg-muted border border-border/60 transition-colors"
-            >
-              <ArrowLeft className="size-3.5" />
-              <span>Back to CRM</span>
-            </Link>
-          </div>
-        ) : (
-          <SidebarTrigger className="md:hidden" />
-        )}
+    <header className="sticky top-0 z-20 flex h-16 w-full items-center justify-between gap-4 border-b bg-background/80 px-4 md:px-6 backdrop-blur-md transition-colors">
+      {/* Left side: Navigation / Search */}
+      {isComponentRoute ? (
+        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+          {/* Brand Logo & Name */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2.5 group shrink-0 text-foreground transition-opacity hover:opacity-90"
+          >
+            <div className="size-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+              A
+            </div>
+            <span className="font-bold text-foreground text-sm tracking-tight whitespace-nowrap">
+              Apex CRM
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-mono font-medium shrink-0">
+              Docs
+            </span>
+          </Link>
 
-        <button
-          onClick={() => setOpen(true)}
-          className="relative flex items-center justify-center md:justify-start w-10 h-10 md:w-full md:h-10 rounded-lg md:border md:border-input md:bg-muted/30 text-muted-foreground hover:bg-muted/50 md:hover:bg-muted/30 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 md:focus:ring-0 md:pl-9 md:pr-12 text-[15px]"
-        >
-          <Search className="h-5 w-5 md:h-4 md:w-4 md:absolute md:left-3 md:top-1/2 md:-translate-y-1/2" />
-          <span className="hidden md:inline truncate">
-            {isComponentRoute ? "Search components, primitives, hooks..." : "Search deals, contacts, leads..."}
-          </span>
-          <kbd className="hidden md:inline absolute right-3 top-1/2 -translate-y-1/2 rounded border bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
-            K
-          </kbd>
-        </button>
-      </div>
+          {/* Divider */}
+          <div className="hidden sm:block h-4 w-px bg-border/80 shrink-0" aria-hidden="true" />
+
+          {/* Back to CRM */}
+          <Link
+            href="/dashboard"
+            className="shrink-0 flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-2.5 py-1.5 rounded-lg bg-muted/40 hover:bg-muted border border-border/60 transition-colors whitespace-nowrap"
+          >
+            <ArrowLeft className="size-3.5 shrink-0" />
+            <span className="hidden sm:inline">Back to CRM</span>
+            <span className="sm:hidden">CRM</span>
+          </Link>
+
+          {/* Search Trigger for Components */}
+          <div className="flex-1 max-w-xs md:max-w-sm lg:max-w-md min-w-0 ml-1 sm:ml-2">
+            <button
+              type="button"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent("open-component-palette"));
+                document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
+              }}
+              className="relative flex items-center justify-start w-full h-9 rounded-lg border border-input/60 bg-muted/30 hover:bg-muted/60 text-muted-foreground px-3 pl-8 pr-10 text-xs transition-colors cursor-pointer min-w-0"
+            >
+              <Search className="size-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/70 shrink-0" />
+              <span className="hidden md:inline truncate">Search components, primitives, hooks...</span>
+              <span className="md:hidden truncate">Search components...</span>
+              <kbd className="hidden sm:inline-flex items-center gap-0.5 absolute right-2.5 top-1/2 -translate-y-1/2 rounded border bg-muted/80 px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground shrink-0">
+                ⌘K
+              </kbd>
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center gap-3 flex-1 max-w-md min-w-0">
+          <SidebarTrigger className="md:hidden shrink-0" />
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="relative flex items-center justify-center md:justify-start w-10 h-10 md:w-full md:h-9 rounded-lg md:border md:border-input md:bg-muted/30 text-muted-foreground hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 md:focus:ring-0 md:pl-9 md:pr-12 text-xs md:text-sm transition-colors min-w-0"
+          >
+            <Search className="h-4 w-4 md:absolute md:left-3 md:top-1/2 md:-translate-y-1/2 shrink-0" />
+            <span className="hidden md:inline truncate">Search deals, contacts, leads...</span>
+            <kbd className="hidden md:inline-flex items-center gap-0.5 absolute right-3 top-1/2 -translate-y-1/2 rounded border bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground shrink-0">
+              ⌘K
+            </kbd>
+          </button>
+        </div>
+      )}
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
         {/* Light / Dark Mode Toggle */}
         <Button
           variant="ghost"
@@ -172,7 +200,6 @@ export function Topbar({ isComponentRoute }: { isComponentRoute?: boolean }) {
               <span>Components Directory & Usage</span>
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => router.push("/motion-primitives"))}>
-              <Sparkles className="mr-2 h-4 w-4" />
               <span>Motion Primitives Showcase</span>
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => router.push("/crm/deals"))}>

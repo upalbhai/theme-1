@@ -210,7 +210,7 @@ export function NotificationPopover() {
                                   ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20"
                                   : notification.type === "error"
                                   ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20"
-                                  : "bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20"
+                                  : "bg-primary/10 text-primary hover:bg-primary/20"
                               }`}
                             >
                               {notification.type}

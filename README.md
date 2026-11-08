@@ -35,5 +35,13 @@ cp .env.example .env.local
 npm run dev
 ```
 
+## Credits & Acknowledgements
+
+Special thanks and attribution to the authors of open-source projects used in this theme:
+
+- **[Motion Primitives](https://github.com/ibelick/motion-primitives)** by [Julien Thibeaut (@ibelick)](https://github.com/ibelick) — Beautiful, production-grade animated UI primitives powered by Motion and Tailwind CSS.
+- **[Base UI](https://base-ui.com/)** and **[shadcn/ui](https://ui.shadcn.com/)** — Accessible foundational UI primitives and design system tokens.
+- **[Lucide Icons](https://lucide.dev/)** — Clean, modern icon set.
+
 ## License
 *Commercial License applies. Do not distribute or resell this template's source code.*

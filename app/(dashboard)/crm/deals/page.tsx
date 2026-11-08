@@ -1,9 +1,25 @@
 "use client";
 
 import * as React from "react";
-import { Plus, MoreHorizontal, DollarSign, User, Building, Calendar, Tag, Edit, Trash2 } from "lucide-react";
+import {
+  Plus,
+  MoreHorizontal,
+  DollarSign,
+  User,
+  Building,
+  Calendar,
+  Edit,
+  Trash2,
+  Search,
+  MoveRight,
+  Sparkles,
+  Layers,
+  ArrowRight,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -14,24 +30,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AnimatedNumber } from "@/components/core/animated-number";
-import { AnimatedGroup } from "@/components/core/animated-group";
-import { Magnetic } from "@/components/core/magnetic";
-import { Tilt } from "@/components/core/tilt";
+import { KanbanBoard, KanbanColumn, ItemMoveEvent } from "@/components/ui/kanban";
+import { toast } from "sonner";
 
-interface Deal {
+export interface Deal {
   id: string;
   title: string;
   company: string;
@@ -41,19 +53,12 @@ interface Deal {
   dueDate: string;
 }
 
-interface Column {
-  id: string;
-  title: string;
-  deals: Deal[];
-  color: string;
-}
-
-const initialPipeline: Column[] = [
+const INITIAL_COLUMNS: KanbanColumn<Deal>[] = [
   {
-    id: "new",
+    id: "lead",
     title: "New Lead",
-    color: "bg-slate-500",
-    deals: [
+    color: "bg-muted-foreground",
+    items: [
       {
         id: "d1",
         title: "Enterprise SaaS Tier Migration",
@@ -61,7 +66,7 @@ const initialPipeline: Column[] = [
         value: 35000,
         contact: "Elena Rostova",
         priority: "High",
-        dueDate: "Aug 15",
+        dueDate: "Oct 28",
       },
       {
         id: "d2",
@@ -70,15 +75,15 @@ const initialPipeline: Column[] = [
         value: 12000,
         contact: "Mark Vance",
         priority: "Low",
-        dueDate: "Aug 20",
+        dueDate: "Nov 04",
       },
     ],
   },
   {
     id: "contacted",
-    title: "Contacted / Qualified",
-    color: "bg-blue-500",
-    deals: [
+    title: "Qualified & In Review",
+    color: "bg-primary",
+    items: [
       {
         id: "d3",
         title: "Cloud Infrastructure Audit",
@@ -86,15 +91,15 @@ const initialPipeline: Column[] = [
         value: 24500,
         contact: "James Thorne",
         priority: "Medium",
-        dueDate: "Aug 12",
+        dueDate: "Oct 25",
       },
     ],
   },
   {
     id: "proposal",
     title: "Proposal Sent",
-    color: "bg-purple-500",
-    deals: [
+    color: "bg-amber-600 dark:bg-amber-500",
+    items: [
       {
         id: "d4",
         title: "Custom CRM Deployment",
@@ -102,15 +107,15 @@ const initialPipeline: Column[] = [
         value: 58000,
         contact: "David Miller",
         priority: "High",
-        dueDate: "Aug 18",
+        dueDate: "Nov 02",
       },
     ],
   },
   {
     id: "negotiation",
     title: "Negotiation",
-    color: "bg-amber-500",
-    deals: [
+    color: "bg-rose-600 dark:bg-rose-500",
+    items: [
       {
         id: "d5",
         title: "Multi-year Support Contract",
@@ -118,40 +123,66 @@ const initialPipeline: Column[] = [
         value: 92000,
         contact: "Sarah Jenkins",
         priority: "High",
-        dueDate: "Aug 11",
+        dueDate: "Oct 22",
       },
     ],
   },
   {
     id: "won",
     title: "Closed Won",
-    color: "bg-emerald-500",
-    deals: [
+    color: "bg-emerald-600 dark:bg-emerald-500",
+    items: [
       {
         id: "d6",
-        title: "Mobile App Development",
+        title: "Mobile App Development Retainer",
         company: "Fintech Express",
         value: 46000,
         contact: "Robert Paul",
         priority: "Medium",
-        dueDate: "Aug 05",
+        dueDate: "Oct 15",
       },
     ],
   },
 ];
 
-const priorityStyles = {
+const PRIORITY_STYLES: Record<Deal["priority"], string> = {
   High: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
-  Medium: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
-  Low: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20",
+  Medium: "bg-primary/10 text-primary border-primary/20",
+  Low: "bg-muted text-muted-foreground border-border",
 };
 
 export default function DealsPipelinePage() {
-  const [pipeline, setPipeline] = React.useState(initialPipeline);
+  const [columns, setColumns] = React.useState<KanbanColumn<Deal>[]>(INITIAL_COLUMNS);
+  const [searchQuery, setSearchQuery] = React.useState("");
+
+  // Dialog State
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [editingDeal, setEditingDeal] = React.useState<Deal | null>(null);
   const [formData, setFormData] = React.useState<Partial<Deal> & { columnId?: string }>({});
 
+  // Compute Total Pipeline Value
+  const totalPipelineValue = React.useMemo(() => {
+    return columns.reduce(
+      (sum, col) => sum + col.items.reduce((colSum, d) => colSum + d.value, 0),
+      0
+    );
+  }, [columns]);
+
+  const totalDealsCount = React.useMemo(() => {
+    return columns.reduce((sum, col) => sum + col.items.length, 0);
+  }, [columns]);
+
+  // Handle Drag & Drop item movement
+  const handleItemMove = (event: ItemMoveEvent<Deal>) => {
+    const targetColumn = columns.find((c) => c.id === event.targetColumnId);
+    if (event.sourceColumnId !== event.targetColumnId) {
+      toast.success(
+        `Moved "${event.item.title}" to ${targetColumn?.title || "stage"}`
+      );
+    }
+  };
+
+  // Open Dialog for Create or Edit
   const handleOpenDialog = (deal?: Deal, columnId?: string) => {
     if (deal) {
       setEditingDeal(deal);
@@ -164,326 +195,414 @@ export default function DealsPipelinePage() {
         value: 0,
         contact: "",
         priority: "Medium",
-        dueDate: "",
-        columnId: columnId || pipeline[0].id,
+        dueDate: "Oct 30",
+        columnId: columnId || columns[0].id,
       });
     }
     setIsDialogOpen(true);
   };
 
-  const handleSaveDeal = () => {
+  // Save or Create Deal
+  const handleSaveDeal = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!formData.title || !formData.company || !formData.columnId) return;
 
-    setPipeline((prev) => {
-      const pipelineWithoutDeal = prev.map((col) => ({
+    const targetColumnId = formData.columnId;
+
+    setColumns((prev) => {
+      // If editing, first remove it from all columns
+      const cleaned = prev.map((col) => ({
         ...col,
-        deals: editingDeal ? col.deals.filter((d) => d.id !== editingDeal.id) : col.deals,
+        items: editingDeal ? col.items.filter((d) => d.id !== editingDeal.id) : col.items,
       }));
 
-      return pipelineWithoutDeal.map((col) => {
-        if (col.id === formData.columnId) {
-          const dealToAdd: Deal = editingDeal
-            ? {
-                id: editingDeal.id,
-                title: formData.title || "",
-                company: formData.company || "",
-                value: Number(formData.value) || 0,
-                contact: formData.contact || "",
-                priority: (formData.priority as "High" | "Medium" | "Low") || "Medium",
-                dueDate: formData.dueDate || "",
-              }
-            : {
-                id: `d-${Date.now()}`,
-                title: formData.title || "",
-                company: formData.company || "",
-                value: Number(formData.value) || 0,
-                contact: formData.contact || "",
-                priority: (formData.priority as "High" | "Medium" | "Low") || "Medium",
-                dueDate: formData.dueDate || "",
-              };
-          return { ...col, deals: [...col.deals, dealToAdd] };
+      const dealToInsert: Deal = {
+        id: editingDeal ? editingDeal.id : `deal-${Date.now()}`,
+        title: formData.title || "",
+        company: formData.company || "",
+        value: Number(formData.value) || 0,
+        contact: formData.contact || "",
+        priority: (formData.priority as Deal["priority"]) || "Medium",
+        dueDate: formData.dueDate || "Today",
+      };
+
+      return cleaned.map((col) => {
+        if (col.id === targetColumnId) {
+          return {
+            ...col,
+            items: [dealToInsert, ...col.items],
+          };
         }
         return col;
       });
     });
 
     setIsDialogOpen(false);
+    toast.success(editingDeal ? "Deal updated successfully" : "New deal added to pipeline");
   };
 
-  const handleDeleteDeal = (dealId: string, columnId: string) => {
-    setPipeline((prev) =>
+  // Move deal to specific stage (accessibility / mobile fallback)
+  const handleMoveToStage = (deal: Deal, sourceColId: string, targetColId: string) => {
+    if (sourceColId === targetColId) return;
+
+    setColumns((prev) => {
+      return prev.map((col) => {
+        if (col.id === sourceColId) {
+          return { ...col, items: col.items.filter((d) => d.id !== deal.id) };
+        }
+        if (col.id === targetColId) {
+          return { ...col, items: [...col.items, deal] };
+        }
+        return col;
+      });
+    });
+
+    const targetTitle = columns.find((c) => c.id === targetColId)?.title;
+    toast.success(`Moved to ${targetTitle}`);
+  };
+
+  // Delete Deal
+  const handleDeleteDeal = (dealId: string, colId: string, title: string) => {
+    setColumns((prev) =>
       prev.map((col) => {
-        if (col.id === columnId) {
-          return { ...col, deals: col.deals.filter((d) => d.id !== dealId) };
+        if (col.id === colId) {
+          return { ...col, items: col.items.filter((d) => d.id !== dealId) };
         }
         return col;
       })
     );
+    toast.success(`Deleted: "${title}"`);
   };
 
-  const totalPipelineValue = pipeline.reduce(
-    (sum, col) => sum + col.deals.reduce((colSum, d) => colSum + d.value, 0),
-    0
-  );
+  // Filter items by search query if present
+  const displayColumns = React.useMemo(() => {
+    if (!searchQuery.trim()) return columns;
+    const query = searchQuery.toLowerCase();
+    return columns.map((col) => ({
+      ...col,
+      items: col.items.filter(
+        (deal) =>
+          deal.title.toLowerCase().includes(query) ||
+          deal.company.toLowerCase().includes(query) ||
+          deal.contact.toLowerCase().includes(query)
+      ),
+    }));
+  }, [columns, searchQuery]);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-2 border-b border-border/40">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Sales Deals Pipeline</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage, track, and progress leads across active pipeline stages.
+          <h1 className="text-2xl font-bold tracking-tight">Deals Pipeline</h1>
+          <p className="text-xs md:text-sm text-muted-foreground mt-1">
+            Drag and drop deals across pipeline stages to track deal velocity and forecasted revenue.
           </p>
         </div>
+
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-muted/20 px-4 py-2 text-sm">
-            <span className="text-muted-foreground font-medium">Pipeline Value:</span>
-            <span className="text-primary font-bold text-[15px] tracking-tight flex items-center">
+          {/* Total Pipeline Pill */}
+          <div className="flex items-center gap-2 rounded-lg border border-border/80 bg-muted/30 px-3.5 py-1.5 text-xs">
+            <span className="text-muted-foreground">Pipeline Value:</span>
+            <span className="text-primary font-bold text-sm tracking-tight font-mono">
               $<AnimatedNumber value={totalPipelineValue} />
             </span>
           </div>
-          <Magnetic springOptions={{ bounce: 0.1 }}>
-            <Button size="default" className="font-semibold shadow-sm" onClick={() => handleOpenDialog()}>
-              <Plus className="h-4 w-4 mr-2" /> Create Deal
-            </Button>
-          </Magnetic>
+
+          <Button
+            size="sm"
+            onClick={() => handleOpenDialog()}
+            className="gap-2 cursor-pointer shadow-xs"
+          >
+            <Plus className="size-4" />
+            <span>Create Deal</span>
+          </Button>
         </div>
       </div>
 
-      {/* Kanban Pipeline Columns */}
-      <div className="flex overflow-x-auto pb-4 -mx-2 px-2 snap-x hide-scrollbar">
-        <div className="flex gap-4 min-w-max items-start">
-          {pipeline.map((col) => {
-            const totalColValue = col.deals.reduce((acc, d) => acc + d.value, 0);
-            return (
-              <div
-                key={col.id}
-                className="w-[300px] sm:w-[320px] shrink-0 snap-start rounded-xl border border-border/40 bg-muted/20 p-2.5 shadow-sm"
-              >
-                {/* Column Header */}
-                <div className="flex items-center justify-between pb-2 mb-2 px-1">
-                  <div className="flex items-center gap-2.5">
-                    <span className={cn("h-2.5 w-2.5 rounded-full shadow-sm", col.color)} />
-                    <h3 className="font-semibold text-[13px] uppercase tracking-wider text-foreground/90">
-                      {col.title}
-                    </h3>
-                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-background border border-border/50 text-[10px] font-bold text-muted-foreground shadow-sm">
-                      {col.deals.length}
-                    </span>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger render={
-                      <Button variant="ghost" size="icon-sm" className="h-7 w-7 text-muted-foreground hover:text-foreground">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    } />
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleOpenDialog(undefined, col.id)}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add deal here
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+      {/* Filter / Search Bar */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="relative max-w-xs md:max-w-sm w-full">
+          <Search className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search deals, companies, contacts..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8 h-9 text-xs"
+          />
+        </div>
+
+        <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground font-mono">
+          <span>{totalDealsCount} Total Deals</span>
+        </div>
+      </div>
+
+      {/* Interactive Drag & Drop Kanban Board */}
+      <KanbanBoard<Deal>
+        columns={displayColumns}
+        onColumnsChange={(newCols) => setColumns(newCols)}
+        onItemMove={handleItemMove}
+        renderColumnHeader={(column, count) => {
+          const colTotal = column.items.reduce((sum, d) => sum + d.value, 0);
+          return (
+            <div className="pb-3 border-b border-border/60 mb-3 space-y-1">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className={cn("size-2 rounded-full", column.color)} aria-hidden="true" />
+                  <h3 className="font-semibold text-xs text-foreground tracking-tight">
+                    {column.title}
+                  </h3>
+                  <span className="text-[10px] font-mono font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                    {count}
+                  </span>
                 </div>
 
-                {/* Column Subtotal */}
-                <div className="text-[11px] font-medium text-muted-foreground mb-3 px-1.5 flex items-center gap-1">
-                  Subtotal: <span className="font-bold text-foreground/80 flex items-center">$<AnimatedNumber value={totalColValue} /></span>
-                </div>
-
-                {/* Deal Cards */}
-                <AnimatedGroup preset="scale" className="space-y-2.5">
-                  {col.deals.map((deal) => (
-                    <Tilt key={deal.id} rotationFactor={4} isReverse>
-                      <div
-                        className="group relative rounded-xl border border-border/60 bg-card p-3.5 shadow-xs hover:shadow-md hover:border-primary/40 transition-all cursor-pointer space-y-3"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <h4 className="font-semibold text-[13px] leading-snug group-hover:text-primary transition-colors">
-                            {deal.title}
-                          </h4>
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={cn(
-                                "rounded-md px-1.5 py-0.5 text-[9px] font-bold border shrink-0 uppercase tracking-wide",
-                                priorityStyles[deal.priority]
-                              )}
-                            >
-                              {deal.priority}
-                            </span>
-                            
-                            <DropdownMenu>
-                              <DropdownMenuTrigger render={
-                                <Button variant="ghost" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <MoreHorizontal className="h-3.5 w-3.5" />
-                                </Button>
-                              } />
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleOpenDialog(deal, col.id)}>
-                                  <Edit className="h-4 w-4 mr-2" /> Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/50" onClick={() => handleDeleteDeal(deal.id, col.id)}>
-                                  <Trash2 className="h-4 w-4 mr-2" /> Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 text-[15px] font-bold text-emerald-600 dark:text-emerald-400">
-                          <DollarSign className="h-4 w-4 -mr-1" />
-                          <AnimatedNumber value={deal.value} />
-                        </div>
-
-                        <div className="space-y-1.5 pt-1.5 border-t border-border/40 text-[11px] text-muted-foreground font-medium">
-                          <div className="flex items-center gap-1.5">
-                            <Building className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
-                            <span className="truncate">{deal.company}</span>
-                          </div>
-                          <div className="flex items-center justify-between pt-0.5">
-                            <span className="flex items-center gap-1.5">
-                              <User className="h-3.5 w-3.5 text-muted-foreground/70" /> {deal.contact}
-                            </span>
-                            <span className="flex items-center gap-1.5 text-[10px] bg-muted/40 px-1.5 py-0.5 rounded-md">
-                              <Calendar className="h-3 w-3 text-muted-foreground/70" /> {deal.dueDate}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </Tilt>
-                  ))}
-                </AnimatedGroup>
-
-                {/* Add Deal Button */}
-                <Button
-                  variant="outline"
-                  className="mt-2.5 w-full border-dashed border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/30 hover:shadow-sm transition-all text-xs font-semibold h-9"
-                  onClick={() => handleOpenDialog(undefined, col.id)}
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1" /> Add Deal
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger render={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-6 text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
+                      <MoreHorizontal className="size-3.5" />
+                    </Button>
+                  } />
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleOpenDialog(undefined, column.id)}>
+                      <Plus className="size-3.5 mr-2" /> Add deal here
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-            );
-          })}
-        </div>
-      </div>
 
+              {/* Subtotal */}
+              <div className="text-[11px] text-muted-foreground font-mono flex items-center gap-1">
+                <span>Subtotal:</span>
+                <span className="font-semibold text-foreground">
+                  $<AnimatedNumber value={colTotal} />
+                </span>
+              </div>
+            </div>
+          );
+        }}
+        renderItem={(deal, column) => (
+          <Card className="p-3.5 border-border/80 shadow-2xs hover:border-primary/50 transition-colors bg-card space-y-2.5">
+            {/* Title & Priority Badge */}
+            <div className="flex items-start justify-between gap-2">
+              <h4 className="font-semibold text-xs leading-snug text-foreground hover:text-primary transition-colors">
+                {deal.title}
+              </h4>
+
+              <div className="flex items-center gap-1 shrink-0">
+                <Badge
+                  variant="outline"
+                  className={cn("text-[9px] py-0 px-1.5 h-4 font-mono font-medium", PRIORITY_STYLES[deal.priority])}
+                >
+                  {deal.priority}
+                </Badge>
+
+                {/* Card Action Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger render={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-5 text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
+                      <MoreHorizontal className="size-3" />
+                    </Button>
+                  } />
+                  <DropdownMenuContent align="end" className="w-44">
+                    <DropdownMenuItem onClick={() => handleOpenDialog(deal, column.id)}>
+                      <Edit className="size-3.5 mr-2" /> Edit Deal
+                    </DropdownMenuItem>
+
+                    {/* Stage Mover for Mobile / Accessibility */}
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        <MoveRight className="size-3.5 mr-2" /> Move to Stage
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent>
+                        {columns.map((c) => (
+                          <DropdownMenuItem
+                            key={c.id}
+                            disabled={c.id === column.id}
+                            onClick={() => handleMoveToStage(deal, column.id, c.id)}
+                          >
+                            <span className={cn("size-2 rounded-full mr-2", c.color)} />
+                            <span>{c.title}</span>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => handleDeleteDeal(deal.id, column.id, deal.title)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="size-3.5 mr-2" /> Delete Deal
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            {/* Value */}
+            <div className="text-sm font-bold text-foreground font-mono">
+              ${deal.value.toLocaleString()}
+            </div>
+
+            {/* Company & Contact */}
+            <div className="space-y-1 pt-1.5 border-t border-border/50 text-[11px] text-muted-foreground">
+              <div className="flex items-center gap-1.5 truncate">
+                <Building className="size-3 text-muted-foreground/70 shrink-0" />
+                <span className="truncate">{deal.company}</span>
+              </div>
+              <div className="flex items-center justify-between pt-0.5">
+                <span className="flex items-center gap-1.5 truncate">
+                  <User className="size-3 text-muted-foreground/70 shrink-0" />
+                  <span className="truncate">{deal.contact}</span>
+                </span>
+                <span className="flex items-center gap-1 text-[10px] font-mono bg-muted/60 px-1.5 py-0.5 rounded shrink-0">
+                  <Calendar className="size-2.5 text-muted-foreground/70" />
+                  <span>{deal.dueDate}</span>
+                </span>
+              </div>
+            </div>
+          </Card>
+        )}
+        renderColumnFooter={(column) => (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleOpenDialog(undefined, column.id)}
+            className="w-full border-dashed border-border/80 text-muted-foreground hover:text-foreground hover:border-primary/50 text-xs h-8 cursor-pointer"
+          >
+            <Plus className="size-3.5 mr-1" /> Add Deal
+          </Button>
+        )}
+      />
+
+      {/* Create / Edit Deal Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{editingDeal ? "Edit Deal" : "Create Deal"}</DialogTitle>
+            <DialogTitle>{editingDeal ? "Edit Deal" : "Create New Deal"}</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right">
-                Title
+
+          <form onSubmit={handleSaveDeal} className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="deal-title" className="text-xs font-semibold">
+                Deal Title
               </Label>
               <Input
-                id="title"
+                id="deal-title"
+                placeholder="e.g. Enterprise Cloud Migration"
                 value={formData.title || ""}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="col-span-3"
-                placeholder="Deal Title"
+                required
+                autoFocus
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="company" className="text-right">
-                Company
-              </Label>
-              <Input
-                id="company"
-                value={formData.company || ""}
-                onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                className="col-span-3"
-                placeholder="Company Name"
-              />
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="deal-company" className="text-xs font-semibold">
+                  Company Name
+                </Label>
+                <Input
+                  id="deal-company"
+                  placeholder="e.g. Acme Corp"
+                  value={formData.company || ""}
+                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="deal-value" className="text-xs font-semibold">
+                  Value ($)
+                </Label>
+                <Input
+                  id="deal-value"
+                  type="number"
+                  placeholder="e.g. 50000"
+                  value={formData.value || ""}
+                  onChange={(e) => setFormData({ ...formData, value: Number(e.target.value) })}
+                  required
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="value" className="text-right">
-                Value ($)
-              </Label>
-              <Input
-                id="value"
-                type="number"
-                value={formData.value || ""}
-                onChange={(e) => setFormData({ ...formData, value: Number(e.target.value) })}
-                className="col-span-3"
-              />
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="deal-contact" className="text-xs font-semibold">
+                  Primary Contact
+                </Label>
+                <Input
+                  id="deal-contact"
+                  placeholder="e.g. Sarah Jenkins"
+                  value={formData.contact || ""}
+                  onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="deal-date" className="text-xs font-semibold">
+                  Target Close Date
+                </Label>
+                <Input
+                  id="deal-date"
+                  placeholder="e.g. Nov 15"
+                  value={formData.dueDate || ""}
+                  onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="contact" className="text-right">
-                Contact
-              </Label>
-              <Input
-                id="contact"
-                value={formData.contact || ""}
-                onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
-                className="col-span-3"
-                placeholder="Contact Name"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="dueDate" className="text-right">
-                Due Date
-              </Label>
-              <Input
-                id="dueDate"
-                value={formData.dueDate || ""}
-                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                className="col-span-3"
-                placeholder="e.g. Aug 15"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="priority" className="text-right">
-                Priority
-              </Label>
-              <div className="col-span-3">
-                <Select
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Priority</Label>
+                <select
                   value={formData.priority || "Medium"}
-                  onValueChange={(value) => setFormData({ ...formData, priority: value as "High" | "Medium" | "Low" })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, priority: e.target.value as Deal["priority"] })
+                  }
+                  className="w-full h-9 px-3 rounded-lg border border-input bg-card text-xs focus:outline-none focus:ring-2 focus:ring-ring"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select priority" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="High">High</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="Low">Low</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Stage</Label>
+                <select
+                  value={formData.columnId || columns[0].id}
+                  onChange={(e) => setFormData({ ...formData, columnId: e.target.value })}
+                  className="w-full h-9 px-3 rounded-lg border border-input bg-card text-xs focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  {columns.map((col) => (
+                    <option key={col.id} value={col.id}>
+                      {col.title}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="stage" className="text-right">
-                Stage
-              </Label>
-              <div className="col-span-3">
-                <Select
-                  value={formData.columnId || pipeline[0].id}
-                  onValueChange={(value) => setFormData({ ...formData, columnId: value || undefined })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select stage" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {pipeline.map((col) => (
-                      <SelectItem key={col.id} value={col.id}>
-                        {col.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveDeal}>Save changes</Button>
-          </DialogFooter>
+
+            <DialogFooter className="pt-2">
+              <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!formData.title || !formData.company}>
+                {editingDeal ? "Save Changes" : "Create Deal"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

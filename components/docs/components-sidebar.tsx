@@ -24,6 +24,7 @@ import {
   Menu,
   X,
   Compass,
+  ExternalLink,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -77,13 +78,12 @@ export function ComponentsSidebar({ className }: { className?: string }) {
           className={cn(
             "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors",
             pathname === "/motion-primitives"
-              ? "bg-purple-600 text-white shadow-xs"
+              ? "bg-primary text-primary-foreground shadow-xs"
               : "text-muted-foreground hover:bg-muted hover:text-foreground"
           )}
         >
-          <Sparkles className="size-4 text-purple-400" />
           <span>Motion Showcase</span>
-          <Badge variant="secondary" className="ml-auto text-[10px] h-4.5 px-1.5 bg-purple-500/10 text-purple-600 border border-purple-500/20">
+          <Badge variant="secondary" className="ml-auto text-[10px] h-4.5 px-1.5 bg-primary/10 text-primary border border-primary/20">
             Live
           </Badge>
         </Link>
@@ -131,6 +131,19 @@ export function ComponentsSidebar({ className }: { className?: string }) {
             </div>
           );
         })}
+      </div>
+
+      {/* Credit Footer */}
+      <div className="pt-2 border-t border-border/60 shrink-0">
+        <a
+          href="https://github.com/ibelick/motion-primitives"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-between text-[11px] text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 rounded-lg hover:bg-muted/60"
+        >
+          <span className="truncate">Credit: ibelick/motion-primitives</span>
+          <ExternalLink className="size-3 shrink-0 ml-1.5" />
+        </a>
       </div>
     </div>
   );

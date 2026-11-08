@@ -1,10 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
+import * as React from "react";
 import {
-  User, Mail, Phone, MapPin, Briefcase, Calendar, Shield, Key, Bell, Camera,
-  CheckCircle2, Lock, Smartphone, Laptop, Globe, Sparkles, Award, TrendingUp,
-  Save, Check, Building, Clock, ShieldCheck, Activity, DollarSign, Share2
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Briefcase,
+  Calendar,
+  Shield,
+  Key,
+  Bell,
+  Camera,
+  CheckCircle2,
+  Lock,
+  Smartphone,
+  Laptop,
+  Globe,
+  TrendingUp,
+  Save,
+  Check,
+  Building,
+  Clock,
+  ShieldCheck,
+  Activity,
+  DollarSign,
+  Share2,
+  ExternalLink,
+  ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,320 +41,329 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { AnimatedNumber } from "@/components/core/animated-number";
+import { toast } from "sonner";
 
-// Dummy Data Object for Profile Rendering
-const DUMMY_USER = {
-  profile: {
-    firstName: "Alex",
-    lastName: "Morgan",
-    email: "alex.m@apex-crm.com",
-    phone: "+1 (555) 234-5678",
-    title: "Senior Director of Sales & Revenue",
-    department: "Executive Sales",
-    location: "San Francisco, CA",
-    timezone: "Pacific Time (US & Canada) (GMT-7)",
-    bio: "Passionate sales director leading high-velocity enterprise teams. Specializing in deal structuring, pipeline optimization, and SaaS customer acquisition.",
-    joinedDate: "Jan 2024",
-    avatarInitials: "AM",
-    completionScore: 85,
-  },
-  stats: {
-    totalRevenue: "$1,482,000",
-    revenueTrend: "+24.5% from last quarter",
-    winRate: "78.4%",
-    winRateTrend: "Top 5% in organization",
-    activeAccounts: "42 Key Clients",
-    retentionRate: "98% retention rate",
-    clientRating: "4.9 / 5.0",
-    reviewsCount: "Based on 124 reviews",
-  },
-  skills: ["Enterprise SaaS", "Pipeline Mgmt", "Key Accounts", "CRM Automation", "Negotiation"],
-  sessions: [
-    {
-      id: 1,
-      device: 'MacBook Pro 16" (Chrome)',
-      location: 'San Francisco, USA',
-      ip: '192.168.1.65',
-      time: 'Current Session',
-      isActive: true,
-      icon: Laptop
-    },
-    {
-      id: 2,
-      device: 'iPhone 15 Pro (Apex CRM Mobile)',
-      location: 'San Francisco, USA',
-      ip: '192.168.1.65',
-      time: '2 hours ago',
-      isActive: false,
-      icon: Smartphone
-    }
-  ],
-  activities: [
-    {
-      id: 1,
-      title: 'Closed Deal: Apex Enterprise Expansion',
-      description: '+$240,000 ARR Added',
-      time: 'Today at 2:45 PM',
-      color: 'bg-primary',
-      textColor: 'text-emerald-600 dark:text-emerald-400 font-medium'
-    },
-    {
-      id: 2,
-      title: 'Updated Lead Qualification Matrix',
-      description: 'Adjusted scoring algorithm for Enterprise leads',
-      time: 'Yesterday at 11:30 AM',
-      color: 'bg-primary',
-      textColor: 'text-muted-foreground'
-    },
-    {
-      id: 3,
-      title: 'Exported Sales Analytics Report',
-      description: 'Q3 Performance Breakdown CSV',
-      time: 'Aug 9, 2026 at 4:15 PM',
-      color: 'bg-emerald-500',
-      textColor: 'text-muted-foreground'
-    }
-  ]
+interface ProfileData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  title: string;
+  department: string;
+  location: string;
+  timezone: string;
+  bio: string;
+  joinedDate: string;
+  avatarInitials: string;
+  completionScore: number;
+}
+
+const INITIAL_PROFILE: ProfileData = {
+  firstName: "Alex",
+  lastName: "Morgan",
+  email: "alex.m@apex-crm.com",
+  phone: "+1 (555) 234-5678",
+  title: "Senior Director of Sales & Revenue",
+  department: "Executive Revenue",
+  location: "San Francisco, CA",
+  timezone: "Pacific Time (US & Canada) (GMT-7)",
+  bio: "Leading enterprise account expansion, contract negotiation, and sales pipeline optimization across North American accounts.",
+  joinedDate: "January 2024",
+  avatarInitials: "AM",
+  completionScore: 88,
 };
 
-export default function ProfilePage() {
-  const [isSaved, setIsSaved] = useState(false);
-  const [copied, setCopied] = useState(false);
+const STATS = [
+  {
+    label: "Closed Pipeline",
+    value: "$1,482,000",
+    detail: "+24.5% vs previous quarter",
+    isPositive: true,
+  },
+  {
+    label: "Deal Win Rate",
+    value: "78.4%",
+    detail: "Top tier in revenue cohort",
+    isPositive: true,
+  },
+  {
+    label: "Active Accounts",
+    value: "42",
+    detail: "98% annual retention rate",
+    isPositive: true,
+  },
+  {
+    label: "Client CSAT",
+    value: "4.9 / 5.0",
+    detail: "Across 124 verified reviews",
+    isPositive: true,
+  },
+];
 
-  // Form states based on DUMMY_USER
-  const [formData, setFormData] = useState({ ...DUMMY_USER.profile });
+const SKILLS = [
+  "Enterprise SaaS",
+  "Pipeline Velocity",
+  "Contract Negotiation",
+  "Account Expansion",
+  "Executive Sponsor",
+];
+
+const SESSIONS = [
+  {
+    id: "sess-1",
+    device: "MacBook Pro 16″ (Chrome / macOS)",
+    location: "San Francisco, United States",
+    ip: "192.168.1.65",
+    time: "Current session",
+    isActive: true,
+    icon: Laptop,
+  },
+  {
+    id: "sess-2",
+    device: "iPhone 15 Pro (Apex CRM Mobile)",
+    location: "San Francisco, United States",
+    ip: "192.168.1.84",
+    time: "2 hours ago",
+    isActive: false,
+    icon: Smartphone,
+  },
+];
+
+const ACTIVITIES = [
+  {
+    id: "act-1",
+    title: "Closed Deal: Horizon Tech Enterprise Expansion",
+    description: "+$240,000 ARR added to Q4 target",
+    time: "Today at 2:45 PM",
+  },
+  {
+    id: "act-2",
+    title: "Updated Enterprise Lead Scoring Matrix",
+    description: "Adjusted automated qualification criteria for Tier-1 prospects",
+    time: "Yesterday at 11:30 AM",
+  },
+  {
+    id: "act-3",
+    title: "Exported Pipeline Performance Report",
+    description: "Generated Q3 executive revenue breakdown",
+    time: "Oct 18, 2026 at 4:15 PM",
+  },
+];
+
+export default function ProfilePage() {
+  const [formData, setFormData] = React.useState<ProfileData>(INITIAL_PROFILE);
+  const [isSaving, setIsSaving] = React.useState(false);
 
   // Security Toggles
-  const [twoFactor, setTwoFactor] = useState(true);
-  const [emailAlerts, setEmailAlerts] = useState(true);
-  const [weeklyDigest, setWeeklyDigest] = useState(true);
-  const [dealUpdates, setDealUpdates] = useState(true);
+  const [twoFactor, setTwoFactor] = React.useState(true);
+  const [emailAlerts, setEmailAlerts] = React.useState(true);
+  const [weeklyDigest, setWeeklyDigest] = React.useState(true);
+  const [dealUpdates, setDealUpdates] = React.useState(true);
 
-  const handleSave = (e: React.FormEvent) => {
+  // Active Sessions State
+  const [sessions, setSessions] = React.useState(SESSIONS);
+
+  const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 2500);
+    setIsSaving(true);
+    setTimeout(() => {
+      setIsSaving(false);
+      toast.success("Profile changes saved successfully");
+    }, 400);
   };
 
-  const handleCopyLink = () => {
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopyProfileLink = () => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success("Profile URL copied to clipboard");
+    }
+  };
+
+  const handleRevokeSession = (id: string, device: string) => {
+    setSessions((prev) => prev.filter((s) => s.id !== id));
+    toast.success(`Revoked session for ${device}`);
   };
 
   return (
-    <div className="space-y-6 w-full min-w-0">
-      {/* Top Banner & Header */}
-      <div className="relative rounded-2xl border bg-card text-card-foreground shadow-sm">
-        {/* Cover Photo Gradient */}
-        <div className="h-40 md:h-52 w-full rounded-t-2xl bg-gradient-to-r from-primary via-blue-600 to-sky-500 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/10 via-transparent to-black/20" />
+    <div className="space-y-6">
+      {/* Profile Header Card */}
+      <Card className="border-border/80 shadow-2xs overflow-hidden">
+        {/* Subtle Warm Cover Banner */}
+        <div className="h-32 md:h-40 w-full bg-muted/60 border-b border-border/60 relative p-4 flex items-start justify-end">
           <Button
-            variant="secondary"
+            variant="outline"
             size="sm"
-            className="absolute top-4 right-4 gap-2 bg-background/80 backdrop-blur-md hover:bg-background shadow-sm"
-            onClick={handleCopyLink}
+            onClick={handleCopyProfileLink}
+            className="gap-2 bg-card/90 backdrop-blur-xs text-xs font-medium cursor-pointer shadow-2xs"
           >
-            {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Share2 className="h-4 w-4" />}
-            <span>{copied ? "Link Copied" : "Share Profile"}</span>
+            <Share2 className="size-3.5" />
+            <span>Copy Link</span>
           </Button>
         </div>
 
-        {/* Profile Info Overlay - Removed negative margins from this container to keep text below banner */}
-        <div className="px-6 pb-6 pt-4 relative flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-5 text-center sm:text-left">
-            {/* Avatar with Camera Icon - Pulled up individually */}
-            <div className="relative group -mt-20 md:-mt-24 sm:mb-2">
-              <Avatar className="h-28 w-28 md:h-36 md:w-36 border-4 border-background shadow-xl ring-2 ring-primary/20 bg-background">
-                <AvatarFallback className="bg-gradient-to-tr from-primary to-sky-500 text-white font-bold text-3xl md:text-4xl">
-                  {DUMMY_USER.profile.avatarInitials}
-                </AvatarFallback>
-              </Avatar>
-              <button 
-                title="Change Profile Photo"
-                className="absolute bottom-1 right-1 p-2 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-ring"
+        {/* Profile Info Row */}
+        <div className="px-6 pb-6 pt-0 relative">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 -mt-14 md:-mt-16">
+            {/* Avatar & Identifiers */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
+              <div className="relative group">
+                <Avatar className="size-24 md:size-28 border-4 border-card shadow-sm bg-primary text-primary-foreground">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-2xl md:text-3xl font-bold font-mono">
+                    {formData.avatarInitials}
+                  </AvatarFallback>
+                </Avatar>
+                <button
+                  type="button"
+                  onClick={() => toast.info("Profile photo upload dialog")}
+                  className="absolute bottom-0 right-0 size-7 rounded-full bg-foreground text-background flex items-center justify-center shadow-xs hover:opacity-90 transition-opacity cursor-pointer"
+                  title="Upload avatar"
+                >
+                  <Camera className="size-3.5" />
+                </button>
+              </div>
+
+              <div className="space-y-1 pb-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
+                    {formData.firstName} {formData.lastName}
+                  </h1>
+                  <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4.5 bg-muted/40 font-mono">
+                    Director
+                  </Badge>
+                </div>
+                <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                  {formData.title} • {formData.department}
+                </p>
+                <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground/80 pt-0.5">
+                  <span className="flex items-center gap-1">
+                    <MapPin className="size-3" />
+                    <span>{formData.location}</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="size-3" />
+                    <span>Member since {formData.joinedDate}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Status / Actions */}
+            <div className="flex items-center gap-2.5 pb-1">
+              <Badge
+                variant="outline"
+                className="text-xs gap-1.5 py-1 px-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
               >
-                <Camera className="h-4 w-4" />
-              </button>
+                <CheckCircle2 className="size-3.5" />
+                <span>Active Account</span>
+              </Badge>
             </div>
-
-            {/* Name and Badges */}
-            <div className="space-y-1.5 pb-1">
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                  {formData.firstName} {formData.lastName}
-                </h1>
-                <Badge variant="default" className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 gap-1 font-semibold">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Verified Admin
-                </Badge>
-                <Badge variant="outline" className="gap-1 border-primary/40 text-primary">
-                  <Sparkles className="h-3 w-3" /> Pro Director
-                </Badge>
-              </div>
-              <p className="text-sm font-medium text-muted-foreground flex items-center justify-center sm:justify-start gap-2">
-                <Briefcase className="h-4 w-4 text-primary" /> {formData.title}
-              </p>
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-muted-foreground pt-1">
-                <span className="flex items-center gap-1">
-                  <Building className="h-3.5 w-3.5" /> {formData.department}
-                </span>
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5" /> {formData.location}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" /> Joined {formData.joinedDate}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Header Actions */}
-          <div className="flex flex-wrap items-center justify-center gap-3 md:pb-2">
-            <Button variant="outline" size="sm" className="gap-2">
-              <Globe className="h-4 w-4" /> Public View
-            </Button>
-            <Button size="sm" className="gap-2 shadow-md shadow-primary/20">
-              <Award className="h-4 w-4" /> View Achievements
-            </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
-      {/* Metric Cards Summary Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-gradient-to-br from-card to-primary/5">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue Closed</CardTitle>
-            <div className="p-2 rounded-lg bg-primary/10 text-primary">
-              <DollarSign className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{DUMMY_USER.stats.totalRevenue}</div>
-            <p className="text-xs text-emerald-500 flex items-center gap-1 mt-1 font-medium">
-              <TrendingUp className="h-3.5 w-3.5" /> {DUMMY_USER.stats.revenueTrend}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-card to-indigo-500/5">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Deal Win Rate</CardTitle>
-            <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500">
-              <Award className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{DUMMY_USER.stats.winRate}</div>
-            <p className="text-xs text-emerald-500 flex items-center gap-1 mt-1 font-medium">
-              <TrendingUp className="h-3.5 w-3.5" /> {DUMMY_USER.stats.winRateTrend}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-card to-amber-500/5">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Accounts</CardTitle>
-            <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
-              <User className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{DUMMY_USER.stats.activeAccounts}</div>
-            <p className="text-xs text-muted-foreground mt-1">{DUMMY_USER.stats.retentionRate}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-card to-purple-500/5">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Client Rating</CardTitle>
-            <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
-              <Sparkles className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{DUMMY_USER.stats.clientRating}</div>
-            <p className="text-xs text-muted-foreground mt-1">{DUMMY_USER.stats.reviewsCount}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content Layout (Sidebar Card + Tabs Content) */}
-      <div className="grid gap-6 lg:grid-cols-12">
-        {/* Left Side Profile Overview */}
-        <div className="lg:col-span-4 space-y-6 min-w-0">
-          {/* Profile Completion Card */}
-          <Card className="min-w-0">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-semibold">Profile Strength</CardTitle>
-                <span className="text-sm font-bold text-primary">{DUMMY_USER.profile.completionScore}%</span>
+      {/* Metrics Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {STATS.map((stat) => (
+          <Card key={stat.label} className="border-border/80 shadow-2xs">
+            <CardContent className="p-4 space-y-1">
+              <span className="text-xs font-medium text-muted-foreground">{stat.label}</span>
+              <div className="text-2xl font-bold tracking-tight tabular-nums text-foreground">
+                {stat.value}
               </div>
-              <CardDescription>Complete profile to unlock full team features</CardDescription>
+              <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                  {stat.detail}
+                </span>
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Main 2-Column Content Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Profile Strength, Contact, Skills */}
+        <div className="lg:col-span-4 space-y-6">
+          {/* Profile Strength */}
+          <Card className="border-border/80 shadow-2xs">
+            <CardHeader className="pb-3 border-b border-border/60">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Profile Completeness
+                </CardTitle>
+                <span className="text-xs font-bold font-mono text-primary">
+                  {formData.completionScore}%
+                </span>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <Progress value={DUMMY_USER.profile.completionScore} className="h-2" />
+            <CardContent className="p-4 space-y-3.5">
+              <Progress value={formData.completionScore} className="h-2 bg-muted" />
+
               <div className="space-y-2 text-xs">
                 <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Work Email Verified
+                  <span className="flex items-center gap-2">
+                    <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>Primary corporate email verified</span>
                   </span>
-                  <span className="font-semibold text-foreground">Done</span>
+                  <span className="font-mono text-[11px] text-foreground">Done</span>
                 </div>
                 <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> 2FA Authentication
+                  <span className="flex items-center gap-2">
+                    <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>Two-factor authentication (2FA)</span>
                   </span>
-                  <span className="font-semibold text-foreground">Active</span>
+                  <span className="font-mono text-[11px] text-foreground">Active</span>
                 </div>
                 <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-muted" /> Add Social Profiles
+                  <span className="flex items-center gap-2">
+                    <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>Role & team permissions</span>
                   </span>
-                  <span className="font-semibold text-amber-500">Pending</span>
+                  <span className="font-mono text-[11px] text-foreground">Done</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Quick Contact & Bio Card */}
-          <Card className="min-w-0">
-            <CardHeader>
-              <CardTitle className="text-base font-semibold">About & Contact</CardTitle>
+          {/* Contact Details Card */}
+          <Card className="border-border/80 shadow-2xs">
+            <CardHeader className="pb-3 border-b border-border/60">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Direct Contact
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 text-sm min-w-0">
-              <p className="text-muted-foreground text-xs leading-relaxed break-words">
-                {formData.bio}
-              </p>
-              
-              <Separator />
-
-              <div className="space-y-3 text-xs min-w-0">
-                <div className="flex items-center gap-3 min-w-0">
-                  <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="truncate font-medium flex-1">{formData.email}</span>
-                </div>
-                <div className="flex items-center gap-3 min-w-0">
-                  <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="truncate font-medium flex-1">{formData.phone}</span>
-                </div>
-                <div className="flex items-center gap-3 min-w-0">
-                  <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="truncate font-medium flex-1">{formData.location}</span>
-                </div>
-                <div className="flex items-center gap-3 min-w-0">
-                  <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="truncate font-medium flex-1" title={formData.timezone}>{formData.timezone}</span>
-                </div>
+            <CardContent className="p-4 space-y-3 text-xs">
+              <div className="flex items-center gap-3">
+                <Mail className="size-3.5 text-muted-foreground shrink-0" />
+                <span className="truncate font-medium flex-1">{formData.email}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Phone className="size-3.5 text-muted-foreground shrink-0" />
+                <span className="truncate font-medium flex-1">{formData.phone}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <MapPin className="size-3.5 text-muted-foreground shrink-0" />
+                <span className="truncate font-medium flex-1">{formData.location}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Clock className="size-3.5 text-muted-foreground shrink-0" />
+                <span className="truncate font-medium flex-1" title={formData.timezone}>
+                  {formData.timezone}
+                </span>
               </div>
 
-              <Separator />
+              <Separator className="my-2" />
 
-              {/* Skills Tags */}
-              <div className="space-y-2">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Expertise</span>
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {DUMMY_USER.skills.map((skill, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs font-normal">{skill}</Badge>
+              <div className="space-y-2 pt-1">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Core Expertise
+                </span>
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                  {SKILLS.map((skill) => (
+                    <Badge key={skill} variant="outline" className="text-[10px] py-0 px-2 h-5 bg-muted/40 font-normal">
+                      {skill}
+                    </Badge>
                   ))}
                 </div>
               </div>
@@ -338,66 +371,85 @@ export default function ProfilePage() {
           </Card>
         </div>
 
-        {/* Right Side Main Tabbed Settings */}
-        <div className="lg:col-span-8 min-w-0">
-          <Tabs defaultValue="general" className="space-y-6">
-            <TabsList className="w-full justify-start overflow-x-auto flex whitespace-nowrap bg-muted/60 p-1 scrollbar-none">
-              <TabsTrigger value="general" className="gap-2 flex-shrink-0">
-                <User className="h-4 w-4" /> Personal Details
+        {/* Right Column: Settings Tabs */}
+        <div className="lg:col-span-8 space-y-6">
+          <Tabs defaultValue="general" className="w-full space-y-6">
+            <TabsList className="inline-flex w-auto p-1 gap-1 bg-muted/60 border border-border/80 rounded-xl">
+              <TabsTrigger value="general" className="gap-2 px-3.5 py-1.5 text-xs font-medium cursor-pointer">
+                <User className="size-3.5 text-primary" />
+                <span>Personal Information</span>
               </TabsTrigger>
-              <TabsTrigger value="security" className="gap-2 flex-shrink-0">
-                <ShieldCheck className="h-4 w-4" /> Security & 2FA
+              <TabsTrigger value="security" className="gap-2 px-3.5 py-1.5 text-xs font-medium cursor-pointer">
+                <ShieldCheck className="size-3.5 text-primary" />
+                <span>Security & Sessions</span>
               </TabsTrigger>
-              <TabsTrigger value="notifications" className="gap-2 flex-shrink-0">
-                <Bell className="h-4 w-4" /> Preferences
+              <TabsTrigger value="preferences" className="gap-2 px-3.5 py-1.5 text-xs font-medium cursor-pointer">
+                <Bell className="size-3.5 text-primary" />
+                <span>Notifications</span>
               </TabsTrigger>
-              <TabsTrigger value="activity" className="gap-2 flex-shrink-0">
-                <Activity className="h-4 w-4" /> Activity Log
+              <TabsTrigger value="activity" className="gap-2 px-3.5 py-1.5 text-xs font-medium cursor-pointer">
+                <Activity className="size-3.5 text-primary" />
+                <span>Activity Log</span>
               </TabsTrigger>
             </TabsList>
 
-            {/* TAB 1: General Details Form */}
-            <TabsContent value="general" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg font-bold">Personal Information</CardTitle>
-                  <CardDescription>
-                    Update your public profile details and company information.
+            {/* TAB 1: General Information */}
+            <TabsContent value="general">
+              <Card className="border-border/80 shadow-2xs">
+                <CardHeader className="pb-3 border-b border-border/60">
+                  <CardTitle className="text-sm font-semibold">Profile Details</CardTitle>
+                  <CardDescription className="text-xs">
+                    Update your account details and organizational contact information.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <form onSubmit={handleSave} className="space-y-4">
+                <CardContent className="p-5">
+                  <form onSubmit={handleSaveProfile} className="space-y-4">
                     <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="firstName">First Name</Label>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="firstName" className="text-xs font-semibold">
+                          First Name
+                        </Label>
                         <Input
                           id="firstName"
                           value={formData.firstName}
-                          onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, firstName: e.target.value })
+                          }
+                          required
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="lastName">Last Name</Label>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="lastName" className="text-xs font-semibold">
+                          Last Name
+                        </Label>
                         <Input
                           id="lastName"
                           value={formData.lastName}
-                          onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, lastName: e.target.value })
+                          }
+                          required
                         />
                       </div>
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email Address</Label>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="email" className="text-xs font-semibold">
+                          Corporate Email
+                        </Label>
                         <Input
                           id="email"
                           type="email"
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          required
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number</Label>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="phone" className="text-xs font-semibold">
+                          Phone Number
+                        </Label>
                         <Input
                           id="phone"
                           value={formData.phone}
@@ -407,35 +459,45 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="title">Job Title</Label>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="title" className="text-xs font-semibold">
+                          Title
+                        </Label>
                         <Input
                           id="title"
                           value={formData.title}
                           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="department">Department</Label>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="department" className="text-xs font-semibold">
+                          Department
+                        </Label>
                         <Input
                           id="department"
                           value={formData.department}
-                          onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, department: e.target.value })
+                          }
                         />
                       </div>
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="location">Location</Label>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="location" className="text-xs font-semibold">
+                          Location
+                        </Label>
                         <Input
                           id="location"
                           value={formData.location}
                           onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="timezone">Timezone</Label>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="timezone" className="text-xs font-semibold">
+                          Timezone
+                        </Label>
                         <Input
                           id="timezone"
                           value={formData.timezone}
@@ -444,22 +506,34 @@ export default function ProfilePage() {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="bio">Professional Bio</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="bio" className="text-xs font-semibold">
+                        Professional Summary
+                      </Label>
                       <Textarea
                         id="bio"
-                        rows={4}
+                        rows={3}
                         value={formData.bio}
                         onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                        className="resize-none"
+                        className="resize-none text-xs leading-relaxed"
                       />
                     </div>
 
-                    <div className="flex items-center justify-end gap-3 pt-2">
-                      <Button type="button" variant="outline">Discard</Button>
-                      <Button type="submit" className="gap-2 shadow-md shadow-primary/20">
-                        {isSaved ? <Check className="h-4 w-4 text-emerald-400" /> : <Save className="h-4 w-4" />}
-                        {isSaved ? "Saved Successfully!" : "Save Changes"}
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/60">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => {
+                          setFormData(INITIAL_PROFILE);
+                          toast.info("Changes reverted");
+                        }}
+                        className="text-xs cursor-pointer"
+                      >
+                        Reset
+                      </Button>
+                      <Button type="submit" disabled={isSaving} className="gap-2 text-xs cursor-pointer">
+                        <Save className="size-3.5" />
+                        <span>{isSaving ? "Saving..." : "Save Changes"}</span>
                       </Button>
                     </div>
                   </form>
@@ -467,86 +541,141 @@ export default function ProfilePage() {
               </Card>
             </TabsContent>
 
-            {/* TAB 2: Security & Password */}
+            {/* TAB 2: Security & Authentication */}
             <TabsContent value="security" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg font-bold">Two-Factor Authentication (2FA)</CardTitle>
-                  <CardDescription>
-                    Add an extra layer of security to your admin account.
+              {/* 2FA */}
+              <Card className="border-border/80 shadow-2xs">
+                <CardHeader className="pb-3 border-b border-border/60">
+                  <CardTitle className="text-sm font-semibold">
+                    Two-Factor Authentication (2FA)
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Protect workspace access using time-based one-time authentication codes.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between rounded-lg border p-4 bg-muted/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between p-3.5 rounded-lg border border-border/80 bg-muted/20">
                     <div className="space-y-0.5">
-                      <div className="font-semibold text-sm flex items-center gap-2">
-                        <Shield className="h-4 w-4 text-primary" /> Authenticator App (TOTP)
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Use Google Authenticator or 1Password to generate verification codes.
+                      <p className="font-semibold text-xs text-foreground flex items-center gap-2">
+                        <Shield className="size-3.5 text-primary" />
+                        <span>Authenticator App (TOTP)</span>
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Use Google Authenticator, 1Password, or YubiKey to approve sign-in prompts.
                       </p>
                     </div>
                     <Switch
                       checked={twoFactor}
-                      onCheckedChange={setTwoFactor}
+                      onCheckedChange={(val) => {
+                        setTwoFactor(val);
+                        toast.success(val ? "2FA enabled" : "2FA disabled");
+                      }}
                     />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg font-bold">Change Password</CardTitle>
-                  <CardDescription>Ensure your password is at least 12 characters long with symbols.</CardDescription>
+              {/* Password update */}
+              <Card className="border-border/80 shadow-2xs">
+                <CardHeader className="pb-3 border-b border-border/60">
+                  <CardTitle className="text-sm font-semibold">Change Password</CardTitle>
+                  <CardDescription className="text-xs">
+                    Passwords must contain at least 12 characters including uppercase, numbers, and symbols.
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current Password</Label>
-                    <Input id="currentPassword" type="password" placeholder="••••••••••••" />
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="newPassword">New Password</Label>
-                      <Input id="newPassword" type="password" placeholder="••••••••••••" />
+                <CardContent className="p-4 space-y-4">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      toast.success("Password updated successfully");
+                    }}
+                    className="space-y-3"
+                  >
+                    <div className="space-y-1.5">
+                      <Label htmlFor="curr-pass" className="text-xs font-semibold">
+                        Current Password
+                      </Label>
+                      <Input id="curr-pass" type="password" placeholder="••••••••••••" required />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                      <Input id="confirmPassword" type="password" placeholder="••••••••••••" />
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="new-pass" className="text-xs font-semibold">
+                          New Password
+                        </Label>
+                        <Input id="new-pass" type="password" placeholder="••••••••••••" required />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="confirm-pass" className="text-xs font-semibold">
+                          Confirm Password
+                        </Label>
+                        <Input id="confirm-pass" type="password" placeholder="••••••••••••" required />
+                      </div>
                     </div>
-                  </div>
-                  <div className="pt-2 flex justify-end">
-                    <Button className="gap-2">
-                      <Lock className="h-4 w-4" /> Update Password
-                    </Button>
-                  </div>
+
+                    <div className="flex justify-end pt-1">
+                      <Button type="submit" size="sm" className="gap-2 text-xs cursor-pointer">
+                        <Lock className="size-3.5" />
+                        <span>Update Password</span>
+                      </Button>
+                    </div>
+                  </form>
                 </CardContent>
               </Card>
 
               {/* Active Sessions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg font-bold">Active Login Sessions</CardTitle>
-                  <CardDescription>Manage devices currently logged into your Apex CRM account.</CardDescription>
+              <Card className="border-border/80 shadow-2xs">
+                <CardHeader className="pb-3 border-b border-border/60">
+                  <CardTitle className="text-sm font-semibold">Active Login Sessions</CardTitle>
+                  <CardDescription className="text-xs">
+                    Authorized hardware devices currently signed into your Apex CRM credentials.
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  {DUMMY_USER.sessions.map((session) => (
-                    <div key={session.id} className="flex items-center justify-between p-3 rounded-lg border bg-card">
+                <CardContent className="p-4 space-y-2.5">
+                  {sessions.map((session) => (
+                    <div
+                      key={session.id}
+                      className="flex items-center justify-between p-3 rounded-lg border border-border/80 bg-card"
+                    >
                       <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-lg ${session.isActive ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
-                          <session.icon className="h-5 w-5" />
+                        <div
+                          className={`p-2 rounded-lg ${
+                            session.isActive
+                              ? "bg-primary/10 text-primary"
+                              : "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          <session.icon className="size-4" />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold flex items-center gap-2">
-                            {session.device}
-                            {session.isActive && <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 text-[10px] py-0">Current Session</Badge>}
+                          <p className="text-xs font-semibold flex items-center gap-2 text-foreground">
+                            <span>{session.device}</span>
+                            {session.isActive && (
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] py-0 px-1.5 h-4 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                              >
+                                Active Now
+                              </Badge>
+                            )}
                           </p>
-                          <p className="text-xs text-muted-foreground">{session.location} • {session.isActive ? session.ip : session.time}</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {session.location} • {session.ip} • {session.time}
+                          </p>
                         </div>
                       </div>
+
                       {session.isActive ? (
-                        <Button variant="ghost" size="sm" className="text-xs">Active Now</Button>
+                        <span className="text-[11px] font-mono text-muted-foreground">Current</span>
                       ) : (
-                        <Button variant="outline" size="sm" className="text-xs text-destructive hover:text-destructive">Revoke</Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRevokeSession(session.id, session.device)}
+                          className="text-xs text-destructive hover:bg-destructive/10 cursor-pointer h-7"
+                        >
+                          Revoke
+                        </Button>
                       )}
                     </div>
                   ))}
@@ -554,60 +683,96 @@ export default function ProfilePage() {
               </Card>
             </TabsContent>
 
-            {/* TAB 3: Preferences */}
-            <TabsContent value="notifications" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg font-bold">Notification Settings</CardTitle>
-                  <CardDescription>Choose how you want to be notified about deals, leads, and team updates.</CardDescription>
+            {/* TAB 3: Preferences & Notifications */}
+            <TabsContent value="preferences" className="space-y-6">
+              <Card className="border-border/80 shadow-2xs">
+                <CardHeader className="pb-3 border-b border-border/60">
+                  <CardTitle className="text-sm font-semibold">Email & In-App Alerts</CardTitle>
+                  <CardDescription className="text-xs">
+                    Choose which notifications you receive across your workspace accounts.
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="p-4 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <p className="font-semibold text-sm">Deal Status Updates</p>
-                      <p className="text-xs text-muted-foreground">Receive instant alerts when deals move stages or close.</p>
+                      <p className="font-semibold text-xs text-foreground">
+                        Deals Pipeline Stage Transitions
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Receive instant updates whenever high-value deals advance or close.
+                      </p>
                     </div>
-                    <Switch checked={dealUpdates} onCheckedChange={setDealUpdates} />
+                    <Switch
+                      checked={dealUpdates}
+                      onCheckedChange={(val) => {
+                        setDealUpdates(val);
+                        toast.success("Deal notifications updated");
+                      }}
+                    />
                   </div>
 
                   <Separator />
 
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <p className="font-semibold text-sm">Email Security Notifications</p>
-                      <p className="text-xs text-muted-foreground">Get notified when a new device logs into your account.</p>
+                      <p className="font-semibold text-xs text-foreground">
+                        Security & Device Login Alerts
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Receive email alerts whenever an unrecognized browser or IP signs in.
+                      </p>
                     </div>
-                    <Switch checked={emailAlerts} onCheckedChange={setEmailAlerts} />
+                    <Switch
+                      checked={emailAlerts}
+                      onCheckedChange={(val) => {
+                        setEmailAlerts(val);
+                        toast.success("Security alerts updated");
+                      }}
+                    />
                   </div>
 
                   <Separator />
 
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <p className="font-semibold text-sm">Weekly Executive Digest</p>
-                      <p className="text-xs text-muted-foreground">Receive a weekly summary report of pipeline revenue and team metrics.</p>
+                      <p className="font-semibold text-xs text-foreground">
+                        Weekly Executive Revenue Summary
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Monday morning email digest summarizing pipeline velocity and quotas.
+                      </p>
                     </div>
-                    <Switch checked={weeklyDigest} onCheckedChange={setWeeklyDigest} />
+                    <Switch
+                      checked={weeklyDigest}
+                      onCheckedChange={(val) => {
+                        setWeeklyDigest(val);
+                        toast.success("Digest preference updated");
+                      }}
+                    />
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
             {/* TAB 4: Activity Log */}
-            <TabsContent value="activity" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg font-bold">Recent System Activity</CardTitle>
-                  <CardDescription>Audit log of actions taken by your account in Apex CRM.</CardDescription>
+            <TabsContent value="activity">
+              <Card className="border-border/80 shadow-2xs">
+                <CardHeader className="pb-3 border-b border-border/60">
+                  <CardTitle className="text-sm font-semibold">Audit Trail & Action Log</CardTitle>
+                  <CardDescription className="text-xs">
+                    System record of recent actions performed under this administrative user profile.
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="relative pl-6 border-l-2 border-primary/20 space-y-6">
-                    {DUMMY_USER.activities.map((activity) => (
-                      <div key={activity.id} className="relative group">
-                        <div className={`absolute -left-[31px] top-0.5 h-4 w-4 rounded-full ${activity.color} ring-4 ring-background`} />
-                        <p className="text-sm font-semibold">{activity.title}</p>
-                        <p className={`text-xs ${activity.textColor}`}>{activity.description}</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">{activity.time}</p>
+                <CardContent className="p-5">
+                  <div className="relative pl-5 border-l-2 border-border/80 space-y-5">
+                    {ACTIVITIES.map((act) => (
+                      <div key={act.id} className="relative space-y-0.5">
+                        <div className="absolute -left-[27px] top-1 size-3 rounded-full bg-primary ring-4 ring-card" />
+                        <p className="text-xs font-semibold text-foreground">{act.title}</p>
+                        <p className="text-[11px] text-muted-foreground">{act.description}</p>
+                        <p className="text-[10px] text-muted-foreground/70 font-mono pt-0.5">
+                          {act.time}
+                        </p>
                       </div>
                     ))}
                   </div>

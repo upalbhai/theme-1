@@ -8,7 +8,7 @@ import {
   Variant,
   Variants,
 } from 'motion/react';
-import { createContext, useContext, useState, useId, useEffect } from 'react';
+import { createContext, useContext, useState, useId } from 'react';
 import { cn } from '@/lib/utils';
 
 export type DisclosureContextType = {
@@ -21,37 +21,48 @@ const DisclosureContext = createContext<DisclosureContextType | undefined>(
   undefined
 );
 
+export function useDisclosure() {
+  const context = useContext(DisclosureContext);
+  if (!context) {
+    throw new Error('useDisclosure must be used within a DisclosureProvider');
+  }
+  return context;
+}
+
 export type DisclosureProviderProps = {
   children: React.ReactNode;
-  open: boolean;
+  open?: boolean;
+  defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   variants?: { expanded: Variant; collapsed: Variant };
 };
 
-function DisclosureProvider({
+export function DisclosureProvider({
   children,
   open: openProp,
+  defaultOpen = false,
   onOpenChange,
   variants,
 }: DisclosureProviderProps) {
-  const [internalOpenValue, setInternalOpenValue] = useState<boolean>(openProp);
+  const isControlled = openProp !== undefined;
+  const [internalOpenValue, setInternalOpenValue] = useState<boolean>(
+    isControlled ? openProp : defaultOpen
+  );
 
-  useEffect(() => {
-    setInternalOpenValue(openProp);
-  }, [openProp]);
+  const currentOpen = isControlled ? openProp : internalOpenValue;
 
   const toggle = () => {
-    const newOpen = !internalOpenValue;
-    setInternalOpenValue(newOpen);
-    if (onOpenChange) {
-      onOpenChange(newOpen);
+    const newOpen = !currentOpen;
+    if (!isControlled) {
+      setInternalOpenValue(newOpen);
     }
+    onOpenChange?.(newOpen);
   };
 
   return (
     <DisclosureContext.Provider
       value={{
-        open: internalOpenValue,
+        open: currentOpen,
         toggle,
         variants,
       }}
@@ -61,16 +72,9 @@ function DisclosureProvider({
   );
 }
 
-function useDisclosure() {
-  const context = useContext(DisclosureContext);
-  if (!context) {
-    throw new Error('useDisclosure must be used within a DisclosureProvider');
-  }
-  return context;
-}
-
 export type DisclosureProps = {
   open?: boolean;
+  defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   children: React.ReactNode;
   className?: string;
@@ -79,7 +83,8 @@ export type DisclosureProps = {
 };
 
 export function Disclosure({
-  open: openProp = false,
+  open: openProp,
+  defaultOpen = false,
   onOpenChange,
   children,
   className,
@@ -91,6 +96,7 @@ export function Disclosure({
       <div className={className}>
         <DisclosureProvider
           open={openProp}
+          defaultOpen={defaultOpen}
           onOpenChange={onOpenChange}
           variants={variants}
         >
@@ -102,49 +108,55 @@ export function Disclosure({
   );
 }
 
+export type DisclosureTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  children: React.ReactNode;
+  className?: string;
+};
+
 export function DisclosureTrigger({
   children,
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+  onClick,
+  ...props
+}: DisclosureTriggerProps) {
   const { toggle, open } = useDisclosure();
 
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    onClick?.(e);
+    if (!e.defaultPrevented) {
+      toggle();
+    }
+  };
+
   return (
-    <>
-      {React.Children.map(children, (child) => {
-        return React.isValidElement(child)
-          ? React.cloneElement(child, {
-              onClick: toggle,
-              role: 'button',
-              'aria-expanded': open,
-              tabIndex: 0,
-              onKeyDown: (e: { key: string; preventDefault: () => void }) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  toggle();
-                }
-              },
-              className: cn(
-                className,
-                (child as React.ReactElement<any>).props?.className
-              ),
-              ...((child as React.ReactElement<any>).props || {}),
-            })
-          : child;
-      })}
-    </>
+    <button
+      type='button'
+      onClick={handleClick}
+      aria-expanded={open}
+      data-state={open ? 'open' : 'closed'}
+      data-expanded={open ? '' : undefined}
+      data-closed={!open ? '' : undefined}
+      className={cn(
+        'group flex w-full items-center justify-between text-left cursor-pointer transition-colors',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </button>
   );
 }
+
+export type DisclosureContentProps = React.HTMLAttributes<HTMLDivElement> & {
+  children: React.ReactNode;
+  className?: string;
+};
 
 export function DisclosureContent({
   children,
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+  ...props
+}: DisclosureContentProps) {
   const { open, variants } = useDisclosure();
   const uniqueId = useId();
 
@@ -152,10 +164,18 @@ export function DisclosureContent({
     expanded: {
       height: 'auto',
       opacity: 1,
+      transition: {
+        height: { duration: 0.28, ease: [0.04, 0.62, 0.23, 0.98] },
+        opacity: { duration: 0.2, ease: 'easeOut' },
+      },
     },
     collapsed: {
       height: 0,
       opacity: 0,
+      transition: {
+        height: { duration: 0.24, ease: [0.04, 0.62, 0.23, 0.98] },
+        opacity: { duration: 0.15, ease: 'easeIn' },
+      },
     },
   };
 
@@ -165,7 +185,7 @@ export function DisclosureContent({
   };
 
   return (
-    <div className={cn('overflow-hidden', className)}>
+    <div className='overflow-hidden'>
       <AnimatePresence initial={false}>
         {open && (
           <motion.div
@@ -174,8 +194,12 @@ export function DisclosureContent({
             animate='expanded'
             exit='collapsed'
             variants={combinedVariants}
+            className='overflow-hidden'
+            data-state='open'
           >
-            {children}
+            <div {...props} className={className}>
+              {children}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -188,4 +212,5 @@ export default {
   DisclosureProvider,
   DisclosureTrigger,
   DisclosureContent,
+  useDisclosure,
 };

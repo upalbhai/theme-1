@@ -773,6 +773,47 @@ export const COMPONENTS_REGISTRY: ComponentItem[] = [
       { name: "disableDrag", type: "boolean", default: "false", description: "Disable drag gestures." },
     ],
   },
+  {
+    slug: "kanban",
+    title: "Kanban Board",
+    category: "Surfaces & Layouts",
+    categorySlug: "surfaces",
+    badge: "motion/core",
+    description: "Interactive drag-and-drop Kanban board supporting cross-column transfers, card reordering, and customizable render slots.",
+    howItWorks: "Utilizes native HTML5 drag and drop events combined with React state transitions. Tracks active drag items and target insertion slots, recalculating column items immutably upon drop with smooth visual feedback.",
+    importStatement: `import { KanbanBoard, type KanbanColumn, type ItemMoveEvent } from "@/components/ui/kanban";`,
+    codeUsage: `<KanbanBoard
+  columns={columns}
+  onColumnsChange={setColumns}
+  onItemMove={({ item, targetColumnId }) => {
+    console.log("Moved", item.title, "to", targetColumnId);
+  }}
+  renderColumnHeader={(col, count) => (
+    <div className="font-semibold text-xs">{col.title} ({count})</div>
+  )}
+  renderItem={(deal) => (
+    <Card className="p-3 bg-card shadow-xs">
+      <p className="font-medium text-xs">{deal.title}</p>
+      <p className="text-sm font-bold">\${deal.value.toLocaleString()}</p>
+    </Card>
+  )}
+/>`,
+    features: [
+      "Zero-dependency HTML5 drag-and-drop compatible with React 19",
+      "Full cross-column transfer and within-column card reordering",
+      "Customizable renderItem, renderColumnHeader, and renderColumnFooter render props",
+      "Visual drop insertion indicator line and ghost drag styling",
+      "Accessible keyboard and mobile stage mover fallback support",
+    ],
+    props: [
+      { name: "columns", type: "KanbanColumn<T>[]", description: "Array of column objects containing title and items array." },
+      { name: "onColumnsChange", type: "(columns: KanbanColumn<T>[]) => void", description: "Callback triggered when columns state changes after a drop." },
+      { name: "onItemMove", type: "(event: ItemMoveEvent<T>) => void", description: "Callback triggered with moved item, source, and target column info." },
+      { name: "renderItem", type: "(item: T, column: KanbanColumn<T>, index: number) => ReactNode", description: "Custom card item renderer." },
+      { name: "renderColumnHeader", type: "(column: KanbanColumn<T>, count: number) => ReactNode", description: "Optional custom column header renderer." },
+      { name: "renderColumnFooter", type: "(column: KanbanColumn<T>) => ReactNode", description: "Optional custom column footer renderer." },
+    ],
+  },
 
   // 5. OVERLAYS & DISCLOSURES
   {
@@ -783,7 +824,7 @@ export const COMPONENTS_REGISTRY: ComponentItem[] = [
     badge: "motion/core",
     description: "Spring-animated collapsible accordion items with smooth height transitions.",
     howItWorks: "Maintains active value in context. AccordionContent dynamically calculates height: auto using AnimatePresence with spring damping to prevent text clipping.",
-    importStatement: `import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";`,
+    importStatement: `import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/core/accordion";`,
     codeUsage: `<Accordion defaultValue="item-1">
   <AccordionItem value="item-1">
     <AccordionTrigger>What makes this theme high-converting?</AccordionTrigger>
@@ -815,6 +856,8 @@ export const COMPONENTS_REGISTRY: ComponentItem[] = [
     codeUsage: `<Disclosure className="rounded-xl border p-4 bg-card">
   <DisclosureTrigger className="flex justify-between w-full font-semibold">
     <span>View Advanced Configuration</span>
+    <ChevronDown className="size-4 group-data-[state=open]:hidden" />
+    <ChevronUp className="size-4 hidden group-data-[state=open]:block" />
   </DisclosureTrigger>
   <DisclosureContent>
     <div className="pt-3 text-sm text-muted-foreground">
@@ -835,22 +878,24 @@ export const COMPONENTS_REGISTRY: ComponentItem[] = [
   },
   {
     slug: "dialog",
-    title: "Dialog (Motion)",
+    title: "Dialog",
     category: "Overlays & Disclosures",
     categorySlug: "overlays",
-    badge: "motion/core",
-    description: "Fluid modal dialog with spring scale entrance and backdrop blur fading.",
-    howItWorks: "Combines accessible portal rendering with AnimatePresence. The backdrop fades from 0 to 1 opacity while modal dialog scales from 0.95 to 1.0 with soft spring bounce.",
-    importStatement: `import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/core/dialog";`,
+    badge: "shadcn/ui",
+    description: "Accessible modal dialog built with @base-ui/react, featuring focus trapping, backdrop blur, and accessible portals.",
+    howItWorks: "Combines accessible portal rendering with backdrop transitions. Fully accessible with automatic focus management and keyboard dismissal.",
+    importStatement: `import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";`,
     codeUsage: `<Dialog>
-  <DialogTrigger>
-    <Button>Open Dialog</Button>
-  </DialogTrigger>
+  <DialogTrigger render={<Button>Open Dialog</Button>} />
   <DialogContent className="max-w-md">
     <DialogHeader>
       <DialogTitle>Confirm Action</DialogTitle>
+      <DialogDescription>Are you sure you want to continue?</DialogDescription>
     </DialogHeader>
-    <p className="text-sm text-muted-foreground">Are you sure you want to continue?</p>
+    <div className="flex justify-end gap-2 mt-4">
+      <DialogClose render={<Button variant="outline">Cancel</Button>} />
+      <Button>Confirm</Button>
+    </div>
   </DialogContent>
 </Dialog>`,
     features: [

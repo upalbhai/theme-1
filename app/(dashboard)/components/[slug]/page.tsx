@@ -22,6 +22,7 @@ import {
   ChevronRight,
   Info,
   BookOpen,
+  ExternalLink,
 } from "lucide-react";
 
 export function generateStaticParams() {
@@ -76,7 +77,18 @@ export default async function ComponentPage({ params }: ComponentPageProps) {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {item.badge === "motion/core" && (
+              <a
+                href="https://github.com/ibelick/motion-primitives"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button size="sm" variant="outline" className="text-xs gap-1.5">
+                  <ExternalLink className="size-3.5" /> ibelick/motion-primitives
+                </Button>
+              </a>
+            )}
             <Link href="/components">
               <Button size="sm" variant="outline" className="text-xs gap-1.5">
                 <ArrowLeft className="size-3.5" /> All Components
@@ -90,7 +102,6 @@ export default async function ComponentPage({ params }: ComponentPageProps) {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="size-4 text-primary" />
             <h2 className="text-lg font-bold tracking-tight">Interactive Live Demo</h2>
           </div>
           <span className="text-xs text-muted-foreground font-mono">

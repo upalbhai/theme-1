@@ -65,7 +65,7 @@ export function ComponentCommandMenu({
     }
   };
 
-  // Listen for Cmd+K / Ctrl+K
+  // Listen for Cmd+K / Ctrl+K & custom trigger
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if ((e.key === "k" || e.key === "K") && (e.metaKey || e.ctrlKey)) {
@@ -74,8 +74,14 @@ export function ComponentCommandMenu({
       }
     };
 
+    const handleCustomOpen = () => setOpen(true);
+
     document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
+    window.addEventListener("open-component-palette", handleCustomOpen);
+    return () => {
+      document.removeEventListener("keydown", down);
+      window.removeEventListener("open-component-palette", handleCustomOpen);
+    };
   }, [open]);
 
   const navigateTo = (path: string) => {
@@ -117,7 +123,7 @@ export function ComponentCommandMenu({
             onSelect={() => navigateTo("/motion-primitives")}
             className="flex items-center gap-2 cursor-pointer"
           >
-            <Layers className="size-4 text-purple-500" />
+            <Layers className="size-4 text-primary" />
             <span>Motion Primitives Showcase</span>
             <CommandShortcut>/motion-primitives</CommandShortcut>
           </CommandItem>

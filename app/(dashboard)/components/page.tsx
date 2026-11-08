@@ -26,6 +26,7 @@ import {
   Send,
   Eye,
   SlidersHorizontal,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,7 +58,7 @@ import { AnimatedGroup } from "@/components/core/animated-group";
 import { AnimatedBackground } from "@/components/core/animated-background";
 import { InfiniteSlider } from "@/components/core/infinite-slider";
 import { ImageComparison } from "@/components/core/image-comparison";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/core/accordion";
 import { Dock, DockIcon, DockItem } from "@/components/core/dock";
 import { TransitionPanel } from "@/components/core/transition-panel";
 
@@ -95,9 +96,19 @@ export default function ComponentsDirectoryPage() {
         <BorderTrail size={120} transition={{ duration: 8, repeat: Infinity, ease: "linear" }} className="bg-gradient-to-r from-primary via-blue-400 to-indigo-500" />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-              <Sparkles className="size-3.5" />
-              <span>Full Component Design System</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                <span>Full Component Design System</span>
+              </div>
+              <a
+                href="https://github.com/ibelick/motion-primitives"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/60 px-3 py-1 text-xs font-medium transition-colors"
+              >
+                <span>Motion Primitives by @ibelick</span>
+                <ExternalLink className="size-3" />
+              </a>
             </div>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
               Component Library & Usage
@@ -128,16 +139,14 @@ export default function ComponentsDirectoryPage() {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
-                selectedCategory === cat.id
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${selectedCategory === cat.id
+                ? "bg-primary text-primary-foreground shadow-xs"
+                : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
             >
               <span>{cat.label}</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                selectedCategory === cat.id ? "bg-primary-foreground/20 text-primary-foreground" : "bg-background text-muted-foreground"
-              }`}>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${selectedCategory === cat.id ? "bg-primary-foreground/20 text-primary-foreground" : "bg-background text-muted-foreground"
+                }`}>
                 {cat.count}
               </span>
             </button>
@@ -311,9 +320,7 @@ import { TextShimmerWave } from "@/components/core/text-shimmer-wave";
                     <SpinningText radius={4} fontSize={0.7} duration={10} className="font-semibold uppercase tracking-widest text-primary">
                       ★ APEX THEME • MOTION PRIMITIVES •
                     </SpinningText>
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary pointer-events-none">
-                      <Sparkles className="size-3.5" />
-                    </div>
+
                   </div>
                 </div>
               </ComponentCard>
@@ -435,7 +442,7 @@ import { TextShimmerWave } from "@/components/core/text-shimmer-wave";
                 codeSnippet={`import { GlowEffect } from "@/components/core/glow-effect";
 
 <div className="relative">
-  <GlowEffect colors={['#0066CC', '#34C759']} mode="rotate" blur="soft" />
+  <GlowEffect colors={['#d9541e', '#e8590c']} mode="rotate" blur="soft" />
   <div className="relative bg-card p-4 rounded-lg">Content</div>
 </div>`}
                 copiedId={copiedId}
@@ -445,7 +452,7 @@ import { TextShimmerWave } from "@/components/core/text-shimmer-wave";
                 <div className="min-h-[120px] flex items-center justify-center p-4 bg-muted/30 rounded-lg">
                   <div className="relative">
                     <GlowEffect
-                      colors={['#0066CC', '#34C759', '#AF52DE', '#FF9500']}
+                      colors={['#d9541e', '#e8590c', '#f59f00', '#d9541e']}
                       mode="rotate"
                       blur="soft"
                       duration={4}
@@ -649,14 +656,14 @@ import { TextShimmerWave } from "@/components/core/text-shimmer-wave";
               {/* Animated Accordion */}
               <ComponentCard
                 title="Accordion"
-                badge="components/ui/accordion"
+                badge="motion/core"
                 description="Fluid spring collapse/expand with smooth height interpolation."
                 codeSnippet={`import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from "@/components/ui/accordion";
+} from "@/components/core/accordion";
 
 <Accordion type="single" collapsible>
   <AccordionItem value="item-1">
@@ -711,9 +718,8 @@ import { TextShimmerWave } from "@/components/core/text-shimmer-wave";
                       <button
                         key={tab}
                         onClick={() => setActivePanelTab(idx)}
-                        className={`text-xs px-2.5 py-1 rounded-md transition-colors ${
-                          activePanelTab === idx ? "bg-primary text-primary-foreground font-semibold" : "bg-card border text-muted-foreground"
-                        }`}
+                        className={`text-xs px-2.5 py-1 rounded-md transition-colors ${activePanelTab === idx ? "bg-primary text-primary-foreground font-semibold" : "bg-card border text-muted-foreground"
+                          }`}
                       >
                         {tab}
                       </button>

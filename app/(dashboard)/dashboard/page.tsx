@@ -152,7 +152,7 @@ export default function SalesAnalyticsDashboard() {
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Win Rate
             </CardTitle>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Target className="h-5 w-5" />
             </div>
           </CardHeader>

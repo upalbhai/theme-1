@@ -25,6 +25,7 @@ import {
   Sliders,
   Check,
   ChevronDown,
+  ChevronUp,
   Layers,
   Search,
 } from "lucide-react";
@@ -53,9 +54,9 @@ import { AnimatedGroup } from "@/components/core/animated-group";
 import { AnimatedBackground } from "@/components/core/animated-background";
 import { TransitionPanel } from "@/components/core/transition-panel";
 import { ScrollProgress } from "@/components/core/scroll-progress";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/core/accordion";
 import { Disclosure, DisclosureTrigger, DisclosureContent } from "@/components/core/disclosure";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/core/dialog";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { MorphingDialog, MorphingDialogTrigger, MorphingDialogContent, MorphingDialogContainer, MorphingDialogClose } from "@/components/core/morphing-dialog";
 import { MorphingPopover, MorphingPopoverTrigger, MorphingPopoverContent } from "@/components/core/morphing-popover";
 import { ToolbarDynamic } from "@/components/core/toolbar-dynamic";
@@ -63,6 +64,77 @@ import { ToolbarExpandable } from "@/components/core/toolbar-expandable";
 import { InView } from "@/components/core/in-view";
 import { ProgressiveBlur } from "@/components/core/progressive-blur";
 import { Carousel, CarouselContent, CarouselItem, CarouselNavigation, CarouselIndicator } from "@/components/core/carousel";
+import { KanbanBoard, type KanbanColumn } from "@/components/ui/kanban";
+
+function KanbanDemoWrapper() {
+  const [columns, setColumns] = React.useState<
+    KanbanColumn<{ id: string; title: string; priority: string; tag: string }>[]
+  >([
+    {
+      id: "backlog",
+      title: "Backlog",
+      color: "bg-muted-foreground",
+      items: [
+        { id: "k-1", title: "API latency optimization", priority: "High", tag: "Backend" },
+        { id: "k-2", title: "Audit billing webhooks", priority: "Low", tag: "Finance" },
+      ],
+    },
+    {
+      id: "in_progress",
+      title: "In Progress",
+      color: "bg-primary",
+      items: [
+        { id: "k-3", title: "Drag-and-drop Kanban", priority: "High", tag: "Design" },
+        { id: "k-4", title: "SAML 2.0 SSO configuration", priority: "Medium", tag: "Security" },
+      ],
+    },
+    {
+      id: "completed",
+      title: "Completed",
+      color: "bg-emerald-600 dark:bg-emerald-500",
+      items: [
+        { id: "k-5", title: "Multi-tenant auth provider", priority: "High", tag: "Auth" },
+      ],
+    },
+  ]);
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        Drag cards across columns or within a column to reorder them in real-time.
+      </p>
+      <div className="overflow-x-auto pb-2">
+        <KanbanBoard
+          columns={columns}
+          onColumnsChange={setColumns}
+          columnClassName="w-64 min-h-[300px]"
+          renderItem={(item) => (
+            <div className="p-3 bg-card rounded-lg border border-border/80 shadow-2xs space-y-2">
+              <p className="text-xs font-semibold text-foreground">{item.title}</p>
+              <div className="flex items-center justify-between text-[10px]">
+                <span className="font-mono text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">
+                  {item.tag}
+                </span>
+                <span
+                  className={cn(
+                    "px-1.5 py-0.5 rounded font-mono font-semibold",
+                    item.priority === "High"
+                      ? "text-rose-600 dark:text-rose-400 bg-rose-500/10"
+                      : item.priority === "Medium"
+                        ? "text-primary bg-primary/10"
+                        : "text-muted-foreground bg-muted"
+                  )}
+                >
+                  {item.priority}
+                </span>
+              </div>
+            </div>
+          )}
+        />
+      </div>
+    </div>
+  );
+}
 
 export function ComponentDemo({ slug }: { slug: string }) {
   // Demo states
@@ -154,7 +226,6 @@ export function ComponentDemo({ slug }: { slug: string }) {
         <div className="space-y-6">
           <div className="min-h-[140px] flex items-center justify-center p-8 bg-muted/20 border rounded-xl border-dashed">
             <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-border/80 bg-background/90 shadow-sm">
-              <Sparkles className="size-4 text-amber-500 animate-pulse" />
               <TextShimmer
                 duration={2}
                 spread={2}
@@ -351,7 +422,6 @@ export function ComponentDemo({ slug }: { slug: string }) {
           <div className="min-h-[180px] flex items-center justify-center p-8 bg-muted/20 border rounded-xl border-dashed gap-6">
             <Magnetic intensity={0.3} range={90}>
               <Button size="lg" className="rounded-xl shadow-lg gap-2 cursor-pointer">
-                <Sparkles className="size-4" />
                 Magnetic Button
               </Button>
             </Magnetic>
@@ -741,7 +811,8 @@ export function ComponentDemo({ slug }: { slug: string }) {
             <Disclosure className="rounded-xl border p-4 bg-card shadow-xs">
               <DisclosureTrigger className="flex items-center justify-between w-full font-bold text-sm cursor-pointer">
                 <span>View Webhook Configuration</span>
-                <ChevronDown className="size-4 text-muted-foreground transition-transform" />
+                <ChevronDown className="size-4 text-muted-foreground transition-all duration-200 group-data-[state=open]:hidden" />
+                <ChevronUp className="size-4 text-primary transition-all duration-200 hidden group-data-[state=open]:block" />
               </DisclosureTrigger>
               <DisclosureContent>
                 <div className="pt-3 text-xs text-muted-foreground space-y-2 border-t mt-3">
@@ -759,10 +830,8 @@ export function ComponentDemo({ slug }: { slug: string }) {
         <div className="space-y-6">
           <div className="min-h-[140px] flex items-center justify-center p-8 bg-muted/20 border rounded-xl border-dashed">
             <Dialog>
-              <DialogTrigger>
-                <Button className="gap-2">
-                  <Sparkles className="size-4" /> Open Spring Dialog
-                </Button>
+              <DialogTrigger render={<Button className="gap-2" />}>
+                <Sparkles className="size-4" /> Open Dialog
               </DialogTrigger>
               <DialogContent className="max-w-md p-6 bg-card rounded-2xl border shadow-2xl">
                 <DialogHeader>
@@ -772,7 +841,7 @@ export function ComponentDemo({ slug }: { slug: string }) {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="mt-4 flex justify-end gap-2">
-                  <Button variant="outline" size="sm">Cancel</Button>
+                  <DialogClose render={<Button variant="outline" size="sm" />}>Cancel</DialogClose>
                   <Button size="sm">Confirm Export</Button>
                 </div>
               </DialogContent>
@@ -1048,6 +1117,9 @@ export function ComponentDemo({ slug }: { slug: string }) {
           </div>
         </div>
       );
+
+    case "kanban":
+      return <KanbanDemoWrapper />;
 
     default:
       return (

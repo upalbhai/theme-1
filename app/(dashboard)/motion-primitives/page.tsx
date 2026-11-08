@@ -72,7 +72,6 @@ export default function MotionPrimitivesPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-              <Sparkles className="size-3.5" />
               <span>Motion Primitives by ibelick</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
@@ -108,7 +107,6 @@ export default function MotionPrimitivesPage() {
       <Tabs defaultValue="text" className="w-full">
         <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full md:w-auto h-auto p-1 gap-1">
           <TabsTrigger value="text" className="gap-2 py-2.5">
-            <Sparkles className="size-4" />
             <span>Text & Typography</span>
           </TabsTrigger>
           <TabsTrigger value="interactions" className="gap-2 py-2.5">
