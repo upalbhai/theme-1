@@ -1,27 +1,27 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { 
   Filter, 
-  LayoutGrid, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  MoreHorizontal, 
-  MoreVertical,
+  Download, 
   ArrowUpRight, 
   ArrowDownRight,
-  User,
+  Building2,
+  Mail, 
+  Phone, 
+  MoreHorizontal, 
+  Search,
+  Calendar,
+  Clock,
+  ExternalLink,
   CheckCircle2,
-  Eye,
-  Pencil,
-  Trash2,
-  Image as ImageIcon
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -36,523 +36,603 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { DataTable, ColumnDef } from "@/components/ui/data-table";
 import { 
+  AreaChart, 
+  Area, 
   BarChart, 
   Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  Legend, 
   ResponsiveContainer 
 } from "recharts";
+import { toast } from "sonner";
 
-const kpiData = [
-  { title: "Total Inquiry", value: "32K", trend: "+20.36%", isPositive: true },
-  { title: "Performance", value: "45.68%", trend: "-10.46%", isPositive: false },
-  { title: "Escalations", value: "985", trend: "+25.48%", isPositive: true },
-  { title: "SLA Compliant", value: "895", trend: "+15.39%", isPositive: true },
-  { title: "Avg. Time (H)", value: "03.45", trend: "-12.86%", isPositive: false },
-  { title: "Avg. Fulfillment", value: "65.95%", trend: "+20.35%", isPositive: true },
+interface LeadKPI {
+  title: string;
+  value: string;
+  trend: string;
+  isPositive: boolean;
+  benchmark: string;
+}
+
+const KPI_DATA: LeadKPI[] = [
+  { 
+    title: "Total Inbound Leads", 
+    value: "3,842", 
+    trend: "+18.4%", 
+    isPositive: true,
+    benchmark: "vs. 3,245 last month" 
+  },
+  { 
+    title: "Lead-to-Opportunity Rate", 
+    value: "28.6%", 
+    trend: "+4.2%", 
+    isPositive: true,
+    benchmark: "vs. 24.4% Q2 avg" 
+  },
+  { 
+    title: "Avg. First Response Time", 
+    value: "18m", 
+    trend: "-24.0%", 
+    isPositive: true,
+    benchmark: "vs. 24m target SLA" 
+  },
+  { 
+    title: "Pipeline Value Generated", 
+    value: "$1.48M", 
+    trend: "+22.5%", 
+    isPositive: true,
+    benchmark: "vs. $1.21M target" 
+  },
 ];
 
-const trackingData = [
-  { name: 'JAN/23', value: 25000 },
-  { name: 'FEB/23', value: 15000 },
-  { name: 'MAR/23', value: 45000 },
-  { name: 'APR/23', value: 30000 },
-  { name: 'MAY/23', value: 20000 },
-  { name: 'JUN/23', value: 42000 },
-  { name: 'JUL/23', value: 18000 },
-  { name: 'AUG/23', value: 35000 },
-  { name: 'SEP/23', value: 48000 },
-  { name: 'OCT/23', value: 22000 },
-  { name: 'NOV/23', value: 15000 },
-  { name: 'DEC/23', value: 38000 },
+const MONTHLY_LEAD_TREND = [
+  { month: "Jan", inbound: 240, qualified: 82 },
+  { month: "Feb", inbound: 290, qualified: 98 },
+  { month: "Mar", inbound: 340, qualified: 115 },
+  { month: "Apr", inbound: 310, qualified: 104 },
+  { month: "May", inbound: 380, qualified: 132 },
+  { month: "Jun", inbound: 420, qualified: 148 },
+  { month: "Jul", inbound: 390, qualified: 136 },
+  { month: "Aug", inbound: 460, qualified: 165 },
+  { month: "Sep", inbound: 510, qualified: 188 },
 ];
 
-const channelData = [
-  { name: 'JAN/22', leads: 4000, active: 8000, pending: 2000, resolved: 6000, cancelled: 1000 },
-  { name: 'FEB/22', leads: 5000, active: 6000, pending: 3000, resolved: 7000, cancelled: 1500 },
-  { name: 'MAR/22', leads: 6000, active: 9000, pending: 2500, resolved: 8000, cancelled: 1200 },
-  { name: 'APR/22', leads: 4500, active: 7500, pending: 4000, resolved: 5500, cancelled: 1800 },
-  { name: 'MAY/22', leads: 5500, active: 8500, pending: 3500, resolved: 6500, cancelled: 1400 },
-  { name: 'JUN/22', leads: 7000, active: 10000, pending: 2000, resolved: 9000, cancelled: 1000 },
-  { name: 'JUL/22', leads: 4000, active: 6500, pending: 4500, resolved: 5000, cancelled: 2000 },
-  { name: 'AUG/22', leads: 5000, active: 7000, pending: 3000, resolved: 6500, cancelled: 1500 },
-  { name: 'SEP/22', leads: 6500, active: 9500, pending: 2500, resolved: 8500, cancelled: 1100 },
-  { name: 'OCT/22', leads: 4500, active: 6000, pending: 5000, resolved: 4500, cancelled: 2200 },
-  { name: 'NOV/22', leads: 5500, active: 7500, pending: 3500, resolved: 6000, cancelled: 1600 },
-  { name: 'DEC/22', leads: 7500, active: 10500, pending: 1500, resolved: 9500, cancelled: 800 },
+const CHANNEL_ATTRIBUTION = [
+  { channel: "Enterprise Inbound", leads: 1420, share: 37, cpl: "$84" },
+  { channel: "Partner Referrals", leads: 980, share: 26, cpl: "$52" },
+  { channel: "Executive Events", leads: 690, share: 18, cpl: "$145" },
+  { channel: "Outbound SDR", leads: 480, share: 12, cpl: "$110" },
+  { channel: "Organic Content", leads: 272, share: 7, cpl: "$28" },
 ];
 
-const leadsStatusData = [
-  { name: "Archie Tones", initials: "AT", date: "15 June, 2023", status: "Deal Won", statusColor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400", value: "$15.56K" },
-  { name: "Holmes Cherry", initials: "HC", date: "18 June, 2023", status: "Intro Call", statusColor: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400", value: "$10.24K" },
-  { name: "Kenneth Hune", initials: "KH", date: "20 June, 2023", status: "Stuck", statusColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400", value: "$12.47K" },
-  { name: "Malanie Hanvey", initials: "MH", date: "22 June, 2023", status: "Cancelled", statusColor: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400", value: "$10.88K" },
-  { name: "Valentine Maton", initials: "VM", date: "25 June, 2023", status: "Progress", statusColor: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400", value: "$13.85K" },
-];
+interface EnterpriseLead {
+  id: string;
+  company: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  source: string;
+  stage: "Discovery" | "Qualified" | "Proposal" | "Negotiation" | "Won";
+  salesRep: { name: string; initials: string };
+  estValue: string;
+  lastContact: string;
+}
 
-const upcomingEvents = [
-  { date: "20 DEC", time: "11:30am - 12:30pm", title: "Meeting for campaign with sales team" },
-  { date: "21 DEC", time: "10:00am - 12:00pm", title: "Meeting for campaign with sales team" },
-  { date: "22 DEC", time: "8:00am - 9:00am", title: "Meeting for campaign with sales team" },
-];
-
-const projectLeads = [
+const ENTERPRISE_LEADS: EnterpriseLead[] = [
   {
-    id: "#874965",
-    title: "React admin dashboard design",
-    statusBadge: "5+ Follow Up",
-    statusIcon: User,
-    badgeColor: "bg-blue-100 text-blue-700",
-    phone: "+1 (375) 9874 663",
-    email: "support@wrapcoders.com",
-    address: "4295 Pheasant Ridge Road, Philadelphia, PA",
-    revenue: "5,685 USD",
-    status: "Inprogress",
-    statusDot: "bg-blue-500",
-    progressValue: 90,
-    progressText: "$900USD",
-    progressColor: "text-blue-500",
-    strokeColor: "#3b82f6"
+    id: "LD-8742",
+    company: "Northwind Logistics",
+    contactName: "Marcus Vance",
+    contactEmail: "m.vance@northwind.io",
+    contactPhone: "+1 (415) 890-4421",
+    source: "Enterprise Inbound",
+    stage: "Qualified",
+    salesRep: { name: "Alex Morgan", initials: "AM" },
+    estValue: "$48,500",
+    lastContact: "Today, 10:30 AM"
   },
   {
-    id: "#963245",
-    title: "React admin dashboard design",
-    statusBadge: "15+ Completed",
-    statusIcon: CheckCircle2,
-    badgeColor: "bg-emerald-100 text-emerald-700",
-    phone: "+1 (951) 6547 862",
-    email: "support@wrapcoders.com",
-    address: "1362 Emerson Road, Doyline, LA 71023",
-    revenue: "6,500 USD",
-    status: "Completed",
-    statusDot: "bg-emerald-500",
-    progressValue: 70,
-    progressText: "$700USD",
-    progressColor: "text-emerald-500",
-    strokeColor: "#10b981"
+    id: "LD-8743",
+    company: "Apex Cybernetics",
+    contactName: "Dr. Elena Rostova",
+    contactEmail: "elena@apex-cyber.com",
+    contactPhone: "+1 (650) 334-9021",
+    source: "Partner Referral",
+    stage: "Proposal",
+    salesRep: { name: "Sarah Jenkins", initials: "SJ" },
+    estValue: "$62,000",
+    lastContact: "Yesterday"
   },
   {
-    id: "#953684",
-    title: "React admin dashboard design",
-    statusBadge: "2+ Upcomming",
-    statusIcon: Eye,
-    badgeColor: "bg-orange-100 text-orange-700",
-    phone: "+1 (951) 6547 862",
-    email: "support@wrapcoders.com",
-    address: "139 Ethels Lane, Okeechobee, FL 33472",
-    revenue: "3,500 USD",
-    status: "Upcoming",
-    statusDot: "bg-orange-500",
-    progressValue: 60,
-    progressText: "$600USD",
-    progressColor: "text-orange-500",
-    strokeColor: "#f97316"
+    id: "LD-8744",
+    company: "Starlight Healthcare",
+    contactName: "Julian Thorne",
+    contactEmail: "j.thorne@starlight-health.org",
+    contactPhone: "+1 (212) 554-1890",
+    source: "Executive Event",
+    stage: "Negotiation",
+    salesRep: { name: "David Chen", initials: "DC" },
+    estValue: "$34,000",
+    lastContact: "Sep 12, 2026"
+  },
+  {
+    id: "LD-8745",
+    company: "Vanguard Financial",
+    contactName: "Caroline Scott",
+    contactEmail: "cscott@vanguard-corp.net",
+    contactPhone: "+1 (312) 887-2195",
+    source: "Enterprise Inbound",
+    stage: "Won",
+    salesRep: { name: "Alex Morgan", initials: "AM" },
+    estValue: "$85,000",
+    lastContact: "Sep 10, 2026"
+  },
+  {
+    id: "LD-8746",
+    company: "Horizon Media Group",
+    contactName: "Kofi Mensah",
+    contactEmail: "kmensah@horizon-media.com",
+    contactPhone: "+1 (206) 441-7823",
+    source: "Organic Content",
+    stage: "Discovery",
+    salesRep: { name: "Sarah Jenkins", initials: "SJ" },
+    estValue: "$29,500",
+    lastContact: "Sep 09, 2026"
   }
 ];
 
-interface LeadStatus {
-  name: string;
-  initials: string;
-  date: string;
-  status: string;
-  statusColor: string;
-  value: string;
-}
-
-const leadStatusColumns: ColumnDef<LeadStatus>[] = [
+const UPCOMING_DISCOVERY_CALLS = [
   {
-    header: "NAME",
-    className: "w-[200px] pl-6",
-    render: (lead) => (
-      <div className="flex items-center gap-3">
-        <Avatar className="h-8 w-8">
-          <AvatarFallback className="bg-primary/10 text-primary text-xs">{lead.initials}</AvatarFallback>
-        </Avatar>
-        {lead.name}
-      </div>
-    ),
+    date: "Sep 15",
+    time: "11:00 AM – 11:45 AM",
+    company: "Acrobat Robotics",
+    contact: "Liam Hayes (VP Infrastructure)",
+    leadSource: "Enterprise Inbound"
   },
   {
-    header: "SALE REP.",
-    render: () => (
-      <div className="flex -space-x-2">
-        <Avatar className="border-2 border-background w-7 h-7"><AvatarFallback className="text-[10px] bg-blue-100">A</AvatarFallback></Avatar>
-        <Avatar className="border-2 border-background w-7 h-7"><AvatarFallback className="text-[10px] bg-orange-100">B</AvatarFallback></Avatar>
-      </div>
-    ),
+    date: "Sep 16",
+    time: "02:30 PM – 03:15 PM",
+    company: "Meridian BioLabs",
+    contact: "Dr. Anika Patel (CTO)",
+    leadSource: "Partner Referral"
   },
   {
-    header: "CONTACTED",
-    accessorKey: "date",
-    className: "text-muted-foreground",
-  },
-  {
-    header: "STATUS",
-    render: (lead) => (
-      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${lead.statusColor}`}>
-        {lead.status}
-      </span>
-    ),
-  },
-  {
-    header: "VALUE",
-    accessorKey: "value",
-    className: "text-right font-semibold pr-6",
-  },
+    date: "Sep 17",
+    time: "09:30 AM – 10:15 AM",
+    company: "Titan Cloud Network",
+    contact: "Devon Miller (Director of SecOps)",
+    leadSource: "Executive Event"
+  }
 ];
 
-const projectLeadColumns: ColumnDef<any>[] = [
-  {
-    header: "Project ID & Title",
-    className: "w-[300px] pl-6",
-    render: (project) => {
-      const StatusIcon = project.statusIcon;
-      return (
-        <div className="flex items-start gap-3">
-          <div className={`p-2 rounded-lg flex flex-col items-center justify-center shrink-0 w-[90px] h-[90px] ${project.badgeColor} border border-current/10`}>
-            <StatusIcon className="h-6 w-6 mb-1" />
-            <span className="text-[10px] font-bold text-center leading-tight">{project.statusBadge}</span>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium mb-1">{project.id}</p>
-            <h4 className="font-semibold text-sm line-clamp-2">{project.title}</h4>
-          </div>
-        </div>
-      );
-    },
+const STAGE_CONFIG = {
+  Discovery: {
+    label: "Discovery",
+    badgeClass: "bg-muted text-foreground border-border/80"
   },
-  {
-    header: "Contact Details",
-    className: "min-w-[200px]",
-    render: (project) => (
-      <div className="space-y-1.5">
-        <div className="flex items-center text-xs text-muted-foreground">
-          <Phone className="h-3.5 w-3.5 mr-2 shrink-0" />
-          <span>{project.phone}</span>
-        </div>
-        <div className="flex items-center text-xs text-muted-foreground">
-          <Mail className="h-3.5 w-3.5 mr-2 shrink-0" />
-          <span className="truncate">{project.email}</span>
-        </div>
-        <div className="flex items-center text-xs text-muted-foreground">
-          <MapPin className="h-3.5 w-3.5 mr-2 shrink-0" />
-          <span className="truncate">{project.address}</span>
-        </div>
-      </div>
-    ),
+  Qualified: {
+    label: "Qualified",
+    badgeClass: "bg-blue-500/10 text-blue-800 dark:text-blue-300 border-blue-500/25"
   },
-  {
-    header: "",
-    render: () => (
-      <Button variant="link" className="text-blue-600 p-0 h-auto text-sm font-semibold">Show More</Button>
-    ),
+  Proposal: {
+    label: "Proposal Sent",
+    badgeClass: "bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-500/25"
   },
-  {
-    header: "Est. Revenue",
-    render: (project) => (
-      <span className="font-bold text-sm">{project.revenue}</span>
-    ),
+  Negotiation: {
+    label: "Negotiation",
+    badgeClass: "bg-primary/10 text-primary border-primary/25"
   },
-  {
-    header: "Sales Rep",
-    render: () => (
-      <div className="flex items-center gap-1">
-        <div className="flex -space-x-2">
-          <Avatar className="border-2 border-background w-7 h-7"><AvatarFallback className="text-[10px] bg-slate-200">A</AvatarFallback></Avatar>
-          <Avatar className="border-2 border-background w-7 h-7"><AvatarFallback className="text-[10px] bg-slate-200">B</AvatarFallback></Avatar>
-        </div>
-        <span className="text-xs text-muted-foreground font-medium bg-muted px-1.5 py-0.5 rounded-md">35+</span>
-      </div>
-    ),
-  },
-  {
-    header: "Status",
-    render: (project) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger render={
-          <Button variant="outline" size="sm" className="h-8 rounded-full gap-2 text-xs font-semibold px-3">
-            <span className={`w-2 h-2 rounded-full ${project.statusDot}`} />
-            {project.status}
-          </Button>
-        } />
-        <DropdownMenuContent>
-          <DropdownMenuItem>Inprogress</DropdownMenuItem>
-          <DropdownMenuItem>Completed</DropdownMenuItem>
-          <DropdownMenuItem>Upcoming</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-  },
-  {
-    header: "Progress",
-    render: (project) => (
-      <div className="flex items-center justify-center">
-        <div className="relative w-16 h-16 flex items-center justify-center">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-            <path
-              className="text-muted/30"
-              strokeWidth="3"
-              stroke="currentColor"
-              fill="none"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-            <path
-              stroke={project.strokeColor}
-              strokeWidth="3"
-              strokeDasharray={`${project.progressValue}, 100`}
-              strokeLinecap="round"
-              fill="none"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-          </svg>
-          <div className={`absolute inset-0 flex items-center justify-center flex-col`}>
-            <span className={`text-[10px] font-bold ${project.progressColor}`}>{project.progressText}</span>
-          </div>
-        </div>
-      </div>
-    ),
-  },
-  {
-    header: "",
-    className: "text-right pr-6",
-    render: (project) => (
-      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary rounded-full"><ImageIcon className="h-4 w-4" /></Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary rounded-full"><Pencil className="h-4 w-4" /></Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-full"><Trash2 className="h-4 w-4" /></Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary rounded-full"><LayoutGrid className="h-4 w-4" /></Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary rounded-full"><MoreVertical className="h-4 w-4" /></Button>
-      </div>
-    ),
-  },
-];
+  Won: {
+    label: "Deal Won",
+    badgeClass: "bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-500/25"
+  }
+};
 
 export default function LeadsReportPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStage, setSelectedStage] = useState<string>("all");
+
+  const filteredLeads = ENTERPRISE_LEADS.filter(lead => {
+    const matchesSearch = 
+      lead.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lead.contactName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lead.source.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStage = selectedStage === "all" || lead.stage === selectedStage;
+    return matchesSearch && matchesStage;
+  });
+
+  const handleExport = () => {
+    toast.success("Lead intelligence report exported to CSV");
+  };
+
+  const leadColumns: ColumnDef<EnterpriseLead>[] = [
+    {
+      header: "Company & Lead",
+      className: "w-[260px] pl-4",
+      render: (lead) => (
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-xs text-foreground">{lead.company}</span>
+            <span className="text-[10px] font-mono text-muted-foreground">{lead.id}</span>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {lead.contactName}
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Source",
+      className: "w-[170px]",
+      render: (lead) => (
+        <span className="text-xs text-muted-foreground font-medium">
+          {lead.source}
+        </span>
+      ),
+    },
+    {
+      header: "Contact",
+      className: "w-[200px]",
+      render: (lead) => (
+        <div className="space-y-0.5 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5 truncate">
+            <Mail className="size-3 text-muted-foreground shrink-0" />
+            <span className="truncate">{lead.contactEmail}</span>
+          </div>
+          <div className="flex items-center gap-1.5 font-mono text-[11px]">
+            <Phone className="size-3 text-muted-foreground shrink-0" />
+            <span>{lead.contactPhone}</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Stage",
+      className: "w-[130px]",
+      render: (lead) => {
+        const config = STAGE_CONFIG[lead.stage];
+        return (
+          <Badge variant="outline" className={`text-[10px] font-medium ${config.badgeClass}`}>
+            {config.label}
+          </Badge>
+        );
+      },
+    },
+    {
+      header: "Rep",
+      className: "w-[110px]",
+      render: (lead) => (
+        <div className="flex items-center gap-2">
+          <Avatar className="size-6 border border-background">
+            <AvatarFallback className="text-[9px] font-mono bg-muted text-foreground">
+              {lead.salesRep.initials}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-xs text-foreground font-medium">{lead.salesRep.name.split(" ")[0]}</span>
+        </div>
+      ),
+    },
+    {
+      header: "Est. ARR",
+      className: "w-[110px] text-right font-mono",
+      render: (lead) => (
+        <span className="text-xs font-semibold text-foreground font-mono tabular-nums">
+          {lead.estValue}
+        </span>
+      ),
+    },
+    {
+      header: "Last Touch",
+      className: "w-[130px] text-right font-mono text-muted-foreground text-xs",
+      accessorKey: "lastContact",
+    },
+    {
+      header: "",
+      className: "w-[50px] text-right pr-4",
+      render: (lead) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger render={
+            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground hover:text-foreground">
+              <MoreHorizontal className="size-3.5" />
+            </Button>
+          } />
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => toast.success(`Opened dossier for ${lead.company}`)}>
+              View Full Dossier
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => toast.success(`Re-assigned rep for ${lead.company}`)}>
+              Re-assign Lead Owner
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => toast.success(`Stage progression updated`)}>
+              Update Qualification Stage
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
+
   return (
-    <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 max-w-[1600px] mx-auto w-full bg-slate-50/50 dark:bg-slate-950/20">
-      
-      {/* Header section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+      {/* Editorial Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-5">
         <div>
           <Breadcrumb>
-            <BreadcrumbList>
+            <BreadcrumbList className="text-xs">
               <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard">Reports</BreadcrumbLink>
+                <BreadcrumbLink href="/dashboard" className="text-muted-foreground hover:text-foreground">
+                  Reports
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Leads Report</BreadcrumbPage>
+                <BreadcrumbPage className="font-medium text-foreground">
+                  Leads & Acquisition
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <h2 className="text-2xl font-bold tracking-tight mt-2">Leads Report</h2>
+          <div className="flex items-center gap-2 mt-2">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Leads Report</h1>
+            <Badge variant="outline" className="text-xs font-mono font-medium text-muted-foreground border-border/70">
+              Q3 2026
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            Lead attribution, qualification velocity, and inbound pipeline health.
+          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2">
-            <Filter className="h-4 w-4" /> Filter
-          </Button>
-          <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
-            <LayoutGrid className="h-4 w-4" /> Add Widgets
+
+        {/* Action Toolbar */}
+        <div className="flex items-center gap-2.5">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleExport}
+            className="h-8.5 gap-1.5 px-3 text-xs font-medium border-border/70 hover:bg-muted/60"
+          >
+            <Download className="size-3.5 text-muted-foreground" />
+            <span>Export CSV</span>
           </Button>
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {kpiData.map((kpi, idx) => (
-          <Card key={idx} className="shadow-sm">
-            <CardContent className="p-5 flex flex-col items-center text-center justify-center space-y-2">
-              <p className="text-sm font-medium text-muted-foreground uppercase">{kpi.title}</p>
-              <div className="flex items-end gap-2">
-                <h3 className="text-2xl font-bold">{kpi.value}</h3>
+      {/* 4 Balanced KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {KPI_DATA.map((kpi, idx) => (
+          <Card key={idx} className="border-border/70 bg-card shadow-xs">
+            <CardContent className="p-4 space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">
+                {kpi.title}
+              </p>
+              <div className="flex items-baseline justify-between">
+                <span className="text-2xl font-semibold tracking-tight text-foreground font-mono tabular-nums">
+                  {kpi.value}
+                </span>
+                <div className={`flex items-center text-xs font-medium font-mono ${
+                  kpi.isPositive ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'
+                }`}>
+                  {kpi.isPositive ? <ArrowUpRight className="size-3.5 mr-0.5" /> : <ArrowDownRight className="size-3.5 mr-0.5" />}
+                  {kpi.trend}
+                </div>
               </div>
-              <div className={`flex items-center text-xs font-semibold ${kpi.isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
-                {kpi.isPositive ? <ArrowUpRight className="h-3 w-3 mr-1" /> : <ArrowDownRight className="h-3 w-3 mr-1" />}
-                {kpi.trend}
-              </div>
+              <p className="text-[11px] font-mono text-muted-foreground pt-1 border-t border-border/40">
+                {kpi.benchmark}
+              </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Inquiry Tracking */}
-        <Card className="shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-base font-semibold">Inquiry Tracking</CardTitle>
-            <DropdownMenu>
-              <DropdownMenuTrigger render={
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground"><MoreHorizontal className="h-4 w-4" /></Button>
-              } />
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>View Details</DropdownMenuItem>
-                <DropdownMenuItem>Export Data</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+      {/* Dual Analytics Row: Volume Trend & Channel Attribution */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Main Lead Progression Area Chart (7 cols) */}
+        <Card className="lg:col-span-7 border-border/70 bg-card shadow-xs">
+          <CardHeader className="py-3.5 px-4 border-b border-border/60 bg-muted/20 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-sm font-semibold text-foreground">
+                Monthly Inbound & Qualification Volume
+              </CardTitle>
+              <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                Progression of raw inbound inquiries vs. sales-qualified opportunities.
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-primary" /> Inbound
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-muted-foreground" /> Qualified
+              </span>
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="h-[300px] mt-4">
+          <CardContent className="p-4 pt-6">
+            <div className="h-[280px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={trackingData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} tickFormatter={(val) => `${val/1000}K`} />
-                  <Tooltip 
-                    cursor={{fill: 'transparent'}}
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} 
+                <AreaChart data={MONTHLY_LEAD_TREND} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="leadWash" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.6} />
+                  <XAxis 
+                    dataKey="month" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} 
+                    dy={8} 
                   />
-                  <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={30} />
-                </BarChart>
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} 
+                    tickFormatter={(v) => `${v}`}
+                  />
+                  <Tooltip 
+                    cursor={{ stroke: 'var(--border)', strokeWidth: 1 }}
+                    contentStyle={{ 
+                      backgroundColor: 'var(--card)', 
+                      borderColor: 'var(--border)', 
+                      borderRadius: '8px',
+                      fontSize: '12px'
+                    }} 
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="inbound" 
+                    stroke="var(--primary)" 
+                    strokeWidth={2}
+                    fillOpacity={1} 
+                    fill="url(#leadWash)" 
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="qualified" 
+                    stroke="var(--muted-foreground)" 
+                    strokeWidth={1.5}
+                    strokeDasharray="4 4"
+                    fill="none" 
+                  />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
 
-        {/* Inquiry Channel */}
-        <Card className="shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-base font-semibold">Inquiry Channel</CardTitle>
-            <DropdownMenu>
-              <DropdownMenuTrigger render={
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground"><MoreHorizontal className="h-4 w-4" /></Button>
-              } />
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>View Details</DropdownMenuItem>
-                <DropdownMenuItem>Export Data</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] mt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={channelData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} tickFormatter={(val) => `${val/1000}K`} />
-                  <Tooltip 
-                    cursor={{fill: 'transparent'}}
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} 
-                  />
-                  <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                  <Bar dataKey="leads" stackId="a" fill="#1e3a8a" maxBarSize={30} />
-                  <Bar dataKey="active" stackId="a" fill="#3b82f6" maxBarSize={30} />
-                  <Bar dataKey="pending" stackId="a" fill="#f97316" maxBarSize={30} />
-                  <Bar dataKey="resolved" stackId="a" fill="#10b981" maxBarSize={30} />
-                  <Bar dataKey="cancelled" stackId="a" fill="#eab308" radius={[4, 4, 0, 0]} maxBarSize={30} />
-                </BarChart>
-              </ResponsiveContainer>
+        {/* Acquisition Channel Mix (5 cols) */}
+        <Card className="lg:col-span-5 border-border/70 bg-card shadow-xs">
+          <CardHeader className="py-3.5 px-4 border-b border-border/60 bg-muted/20 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-sm font-semibold text-foreground">
+                Attribution & Channel Efficiency
+              </CardTitle>
+              <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                Share of total lead volume alongside acquisition cost per lead (CPL).
+              </CardDescription>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Middle Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Leads Status */}
-        <Card className="shadow-sm lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base font-semibold">Leads Status</CardTitle>
-            <DropdownMenu>
-              <DropdownMenuTrigger render={
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground"><MoreHorizontal className="h-4 w-4" /></Button>
-              } />
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>View Details</DropdownMenuItem>
-                <DropdownMenuItem>Export Data</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <span className="text-xs font-mono text-muted-foreground">3,842 total</span>
           </CardHeader>
-          <CardContent className="p-0">
-            <DataTable
-              columns={leadStatusColumns}
-              data={leadsStatusData}
-              className="border-none shadow-none bg-transparent"
-              hidePagination
-            />
-            <div className="p-4 text-xs text-muted-foreground border-t">
-              UPDATE: 30 MIN AGO
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Upcoming Events */}
-        <Card className="shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base font-semibold">Upcoming Events</CardTitle>
-            <DropdownMenu>
-              <DropdownMenuTrigger render={
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground"><MoreHorizontal className="h-4 w-4" /></Button>
-              } />
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>View Details</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {upcomingEvents.map((event, idx) => (
-              <div key={idx} className="flex gap-4">
-                <div className="flex flex-col items-center justify-center bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 min-w-[70px] border border-blue-100 dark:border-blue-900/50 text-blue-700 dark:text-blue-400">
-                  <span className="text-lg font-bold leading-none">{event.date.split(" ")[0]}</span>
-                  <span className="text-xs uppercase font-medium">{event.date.split(" ")[1]}</span>
-                </div>
-                <div className="flex-1 space-y-1">
-                  <p className="text-xs text-muted-foreground font-medium">{event.time}</p>
-                  <p className="text-sm font-semibold line-clamp-2">{event.title}</p>
-                  <div className="flex items-center gap-2 pt-1">
-                    <div className="flex -space-x-2">
-                      <Avatar className="border-2 border-background w-6 h-6"><AvatarFallback className="text-[10px] bg-slate-200">S</AvatarFallback></Avatar>
-                      <Avatar className="border-2 border-background w-6 h-6"><AvatarFallback className="text-[10px] bg-slate-200">J</AvatarFallback></Avatar>
-                      <Avatar className="border-2 border-background w-6 h-6"><AvatarFallback className="text-[10px] bg-slate-200">K</AvatarFallback></Avatar>
-                    </div>
-                    <span className="text-xs text-muted-foreground font-medium bg-muted px-1.5 py-0.5 rounded-md">35+</span>
+          <CardContent className="p-4 space-y-3.5">
+            {CHANNEL_ATTRIBUTION.map((item, idx) => (
+              <div key={idx} className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-medium text-foreground">{item.channel}</span>
+                  <div className="flex items-center gap-2 font-mono text-muted-foreground">
+                    <span className="text-foreground font-semibold tabular-nums">{item.leads}</span>
+                    <span>({item.share}%)</span>
+                    <span>•</span>
+                    <span className="text-primary font-medium">{item.cpl} CPL</span>
                   </div>
+                </div>
+                <div className="w-full bg-muted/60 h-2 rounded-full overflow-hidden">
+                  <div 
+                    className="bg-primary h-full rounded-full transition-all duration-300"
+                    style={{ width: `${item.share}%` }} 
+                  />
                 </div>
               </div>
             ))}
           </CardContent>
-          <div className="p-4 text-xs text-muted-foreground border-t mt-2">
-            UPDATE: 20 MIN AGO
-          </div>
         </Card>
       </div>
 
-      {/* Project Leads */}
-      <Card className="shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base font-semibold">Project Leads</CardTitle>
-          <DropdownMenu>
-            <DropdownMenuTrigger render={
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground"><MoreHorizontal className="h-4 w-4" /></Button>
-            } />
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>View Details</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </CardHeader>
-        <CardContent className="p-0">
-          <DataTable
-            columns={projectLeadColumns}
-            data={projectLeads}
-            className="border-none shadow-none bg-transparent"
-            hidePagination
-          />
-        </CardContent>
-      </Card>
+      {/* Lower Section: Qualified Enterprise Leads & Discovery Schedule */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Enterprise Leads DataTable (8 cols) */}
+        <Card className="lg:col-span-8 border-border/70 bg-card shadow-xs overflow-hidden">
+          <CardHeader className="py-3.5 px-4 border-b border-border/60 bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <CardTitle className="text-sm font-semibold text-foreground">
+                Qualified Enterprise Leads
+              </CardTitle>
+              <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                High-intent prospects currently progressing through commercial discovery.
+              </CardDescription>
+            </div>
 
+            {/* Filter controls */}
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="size-3.5 text-muted-foreground absolute left-2.5 top-1/2 -translate-y-1/2" />
+                <Input 
+                  placeholder="Filter company or rep..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-8 pl-8 text-xs w-[170px] sm:w-[200px]"
+                />
+              </div>
+
+              <select
+                value={selectedStage}
+                onChange={(e) => setSelectedStage(e.target.value)}
+                className="h-8 rounded-lg border border-border/70 bg-card px-2.5 text-xs text-foreground font-medium focus:outline-none"
+              >
+                <option value="all">All Stages</option>
+                <option value="Discovery">Discovery</option>
+                <option value="Qualified">Qualified</option>
+                <option value="Proposal">Proposal</option>
+                <option value="Negotiation">Negotiation</option>
+                <option value="Won">Won</option>
+              </select>
+            </div>
+          </CardHeader>
+
+          <CardContent className="p-0">
+            <DataTable
+              columns={leadColumns}
+              data={filteredLeads}
+              className="border-none shadow-none bg-transparent"
+              hidePagination
+            />
+          </CardContent>
+        </Card>
+
+        {/* Discovery Calls Schedule (4 cols) */}
+        <Card className="lg:col-span-4 border-border/70 bg-card shadow-xs">
+          <CardHeader className="py-3.5 px-4 border-b border-border/60 bg-muted/20 flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Calendar className="size-4 text-primary" />
+              <CardTitle className="text-sm font-semibold text-foreground">
+                Upcoming Discovery
+              </CardTitle>
+            </div>
+            <span className="text-xs font-mono text-muted-foreground">3 scheduled</span>
+          </CardHeader>
+          <CardContent className="p-4 space-y-3.5">
+            {UPCOMING_DISCOVERY_CALLS.map((call, idx) => (
+              <div key={idx} className="p-3 rounded-lg border border-border/60 bg-muted/15 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs font-semibold text-primary">{call.date}</span>
+                  <span className="text-xs font-mono text-muted-foreground flex items-center gap-1">
+                    <Clock className="size-3" /> {call.time}
+                  </span>
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold text-foreground">{call.company}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{call.contact}</p>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t border-border/40 text-[11px] text-muted-foreground">
+                  <span>Source: {call.leadSource}</span>
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    onClick={() => toast.success(`Meeting details loaded for ${call.company}`)}
+                    className="p-0 h-auto text-xs text-primary font-medium"
+                  >
+                    View Brief
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
