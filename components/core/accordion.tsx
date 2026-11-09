@@ -214,16 +214,7 @@ export function AccordionItem({
         data-closed={!expanded ? '' : undefined}
         data-state={expanded ? 'open' : 'closed'}
       >
-        {React.Children.map(children, (child) => {
-          if (React.isValidElement(child)) {
-            return React.cloneElement(child, {
-              ...(child.props as Record<string, unknown>),
-              value: (child.props as { value?: React.Key }).value ?? value,
-              expanded,
-            } as any);
-          }
-          return child;
-        })}
+        {children}
       </div>
     </AccordionItemContext.Provider>
   );
@@ -234,6 +225,7 @@ export type AccordionTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement
   className?: string;
   value?: React.Key;
   hideChevron?: boolean;
+  expanded?: boolean;
 };
 
 export function AccordionTrigger({
@@ -241,14 +233,16 @@ export function AccordionTrigger({
   className,
   onClick,
   hideChevron = false,
+  value: valueProp,
+  expanded: expandedProp,
   ...props
 }: AccordionTriggerProps) {
   const { toggleItem, isExpanded } = useAccordion();
   const itemContext = useAccordionItem();
-  const value = (props as { value?: React.Key }).value ?? itemContext?.value;
-  const expanded = itemContext
-    ? itemContext.isExpanded
-    : value !== undefined && isExpanded(value);
+  const value = valueProp ?? itemContext?.value;
+  const expanded =
+    expandedProp ??
+    (itemContext ? itemContext.isExpanded : value !== undefined && isExpanded(value));
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     onClick?.(e);
@@ -283,19 +277,22 @@ export type AccordionContentProps = React.HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;
   className?: string;
   value?: React.Key;
+  expanded?: boolean;
 };
 
 export function AccordionContent({
   children,
   className,
+  value: valueProp,
+  expanded: expandedProp,
   ...props
 }: AccordionContentProps) {
   const { isExpanded, variants } = useAccordion();
   const itemContext = useAccordionItem();
-  const value = (props as { value?: React.Key }).value ?? itemContext?.value;
-  const expanded = itemContext
-    ? itemContext.isExpanded
-    : value !== undefined && isExpanded(value);
+  const value = valueProp ?? itemContext?.value;
+  const expanded =
+    expandedProp ??
+    (itemContext ? itemContext.isExpanded : value !== undefined && isExpanded(value));
 
   const BASE_VARIANTS: Variants = {
     expanded: {

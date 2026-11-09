@@ -1,27 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
+import * as React from "react";
 import { 
   Filter, 
-  LayoutGrid, 
   Clock, 
   Calendar as CalendarIcon, 
   CheckCircle2, 
   AlertCircle, 
   MoreVertical, 
-  User, 
-  ChevronRight, 
+  Users, 
   Briefcase,
   TrendingUp,
-  ChevronLeft,
+  ChevronRight,
   Eye,
   Pencil,
-  Trash2
+  Trash2,
+  ArrowDownToLine,
+  Layers,
+  Sparkles,
+  ArrowUpRight,
+  Check,
+  Search
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -45,445 +50,757 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  LineChart,
-  Line
 } from "recharts";
+import { AnimatedNumber } from "@/components/core/animated-number";
+import { toast } from "sonner";
 
-const projectBanners = [
+// ─── TYPES & DATA ─────────────────────────────────────────────────────────────
+
+interface ProjectKPI {
+  label: string;
+  value: number;
+  prefix?: string;
+  suffix?: string;
+  comparison: string;
+  isPositive: boolean;
+  benchmark: string;
+}
+
+const KPIS: ProjectKPI[] = [
   {
-    title: "NFT Mobile Apps Development",
-    client: "BlockChain Inc",
-    daysLeft: "20 Days Left",
-    progress: 75,
-    tasksCompleted: "32/45 Tasks",
-    team: ["AT", "HC", "KH"],
-    color: "from-blue-600 to-indigo-600"
+    label: "Active Deliverables",
+    value: 14,
+    suffix: " Projects",
+    comparison: "+3 vs last quarter",
+    isPositive: true,
+    benchmark: "98% client commit",
   },
   {
-    title: "SaaS CRM Dashboard Design",
+    label: "Milestone Clearance",
+    value: 92,
+    suffix: "%",
+    comparison: "+4.2% vs Q3 target",
+    isPositive: true,
+    benchmark: "Target: ≥ 90%",
+  },
+  {
+    label: "Committed Budget",
+    value: 348500,
+    prefix: "$",
+    comparison: "+12.8% vs last cycle",
+    isPositive: true,
+    benchmark: "82% total burn",
+  },
+  {
+    label: "Weekly Velocity",
+    value: 84,
+    suffix: ".2h",
+    comparison: "-1.5h unbillable",
+    isPositive: true,
+    benchmark: "91.2% billable ratio",
+  },
+];
+
+interface MonthlyDeliveryPoint {
+  month: string;
+  completed: number;
+  ongoing: number;
+}
+
+const MONTHLY_DELIVERY_DATA: MonthlyDeliveryPoint[] = [
+  { month: "Mar", completed: 18, ongoing: 22 },
+  { month: "Apr", completed: 21, ongoing: 24 },
+  { month: "May", completed: 26, ongoing: 27 },
+  { month: "Jun", completed: 32, ongoing: 29 },
+  { month: "Jul", completed: 30, ongoing: 26 },
+  { month: "Aug", completed: 36, ongoing: 30 },
+  { month: "Sep", completed: 34, ongoing: 25 },
+  { month: "Oct", completed: 39, ongoing: 21 },
+];
+
+interface MilestoneEvent {
+  id: string;
+  code: string;
+  title: string;
+  client: string;
+  dueDate: string;
+  relativeTime: string;
+  ownerName: string;
+  ownerAvatar: string;
+  status: "Due Soon" | "In Review" | "Scheduled" | "Completed";
+}
+
+const UPCOMING_MILESTONES: MilestoneEvent[] = [
+  {
+    id: "m-1",
+    code: "PRJ-101",
+    title: "Core Architecture Sign-Off",
     client: "Apex Enterprise",
-    daysLeft: "05 Days Left",
-    progress: 90,
-    tasksCompleted: "88/92 Tasks",
-    team: ["VM", "MH", "DR"],
-    color: "from-emerald-600 to-teal-600"
+    dueDate: "Oct 14, 2026",
+    relativeTime: "In 2 days",
+    ownerName: "Sarah Jenkins",
+    ownerAvatar: "SJ",
+    status: "Due Soon",
   },
   {
-    title: "E-Commerce Payment Gateway",
-    client: "PayGlobal Ltd",
-    daysLeft: "12 Days Left",
-    progress: 45,
-    tasksCompleted: "18/40 Tasks",
-    team: ["EW", "SJ", "MV"],
-    color: "from-purple-600 to-pink-600"
+    id: "m-2",
+    code: "PRJ-104",
+    title: "Multi-Tenant Stripe Billing Sync",
+    client: "Nova Financial",
+    dueDate: "Oct 19, 2026",
+    relativeTime: "Next week",
+    ownerName: "Michael Vance",
+    ownerAvatar: "MV",
+    status: "In Review",
+  },
+  {
+    id: "m-3",
+    code: "PRJ-102",
+    title: "SOC 2 Type II Directory Audit",
+    client: "SecureNet",
+    dueDate: "Oct 26, 2026",
+    relativeTime: "Oct 26",
+    ownerName: "Emma Watson",
+    ownerAvatar: "EW",
+    status: "Scheduled",
+  },
+  {
+    id: "m-4",
+    code: "PRJ-105",
+    title: "Terraform Infrastructure Cleared",
+    client: "CloudScale Systems",
+    dueDate: "Nov 02, 2026",
+    relativeTime: "Nov 02",
+    ownerName: "David Ray",
+    ownerAvatar: "DR",
+    status: "Scheduled",
   },
 ];
 
-const monthlyProjectData = [
-  { month: "Jan", completed: 12, ongoing: 18, pending: 5 },
-  { month: "Feb", completed: 15, ongoing: 22, pending: 8 },
-  { month: "Mar", completed: 20, ongoing: 25, pending: 6 },
-  { month: "Apr", completed: 18, ongoing: 20, pending: 9 },
-  { month: "May", completed: 24, ongoing: 28, pending: 4 },
-  { month: "Jun", completed: 30, ongoing: 32, pending: 7 },
-  { month: "Jul", completed: 28, ongoing: 26, pending: 10 },
-  { month: "Aug", completed: 35, ongoing: 30, pending: 6 },
+interface WeeklyHourPoint {
+  day: string;
+  billable: number;
+  unbillable: number;
+}
+
+const WEEKLY_HOURS_DATA: WeeklyHourPoint[] = [
+  { day: "Mon", billable: 8.0, unbillable: 1.0 },
+  { day: "Tue", billable: 7.5, unbillable: 1.5 },
+  { day: "Wed", billable: 8.5, unbillable: 0.5 },
+  { day: "Thu", billable: 8.0, unbillable: 1.0 },
+  { day: "Fri", billable: 7.0, unbillable: 1.0 },
 ];
 
-const weeklyHoursData = [
-  { day: "Mon", billable: 8, unbillable: 1.5 },
-  { day: "Tue", billable: 7.5, unbillable: 2 },
-  { day: "Wed", billable: 9, unbillable: 1 },
-  { day: "Thu", billable: 8.5, unbillable: 0.5 },
-  { day: "Fri", billable: 7, unbillable: 1 },
+interface TeamContributor {
+  name: string;
+  role: string;
+  tasksCompleted: string;
+  progressPercent: number;
+  avatar: string;
+}
+
+const TEAM_CONTRIBUTORS: TeamContributor[] = [
+  { name: "Sarah Jenkins", role: "Design Systems Lead", tasksCompleted: "28/32", progressPercent: 88, avatar: "SJ" },
+  { name: "Michael Vance", role: "Principal Frontend", tasksCompleted: "45/49", progressPercent: 92, avatar: "MV" },
+  { name: "Emma Watson", role: "Platform Engineer", tasksCompleted: "22/30", progressPercent: 73, avatar: "EW" },
+  { name: "David Ray", role: "DevOps & SRE", tasksCompleted: "18/22", progressPercent: 82, avatar: "DR" },
 ];
 
-const teamProgress = [
-  { name: "Sarah Jenkins", role: "UI/UX Lead", progress: 88, tasks: "24/28 Done", avatar: "SJ" },
-  { name: "Michael Vance", role: "Frontend Engineer", progress: 92, tasks: "45/49 Done", avatar: "MV" },
-  { name: "Emma Watson", role: "Fullstack Developer", progress: 65, tasks: "19/30 Done", avatar: "EW" },
-  { name: "David Ray", role: "DevOps Architect", progress: 78, tasks: "14/18 Done", avatar: "DR" },
-];
-
-const activeProjectsList = [
-  { name: "Cloud Infrastructure Setup", budget: "$35,000", progress: 82, status: "On Track" },
-  { name: "Mobile Banking App V2", budget: "$82,000", progress: 48, status: "Delayed" },
-  { name: "AI Analytics Microservice", budget: "$24,500", progress: 95, status: "Testing" },
-];
-
-const projectsTable = [
-  { id: "PRJ-101", title: "Apex CRM Theme Overhaul", client: "Apex Corp", budget: "$18,500", stage: "Frontend Dev", status: "In Progress", statusColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
-  { id: "PRJ-102", title: "Enterprise SSO Integration", client: "SecureNet", budget: "$12,000", stage: "Security Audit", status: "Review", statusColor: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
-  { id: "PRJ-103", title: "Realtime Analytics Engine", client: "DataStream", budget: "$45,000", stage: "Database Indexing", status: "In Progress", statusColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
-  { id: "PRJ-104", title: "Multi-tenant Billing Module", client: "FinTech Inc", budget: "$29,000", stage: "Stripe API Sync", status: "Completed", statusColor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
-];
-
-const upcomingEvents = [
-  { title: "Sprint Review & Demo", time: "10:00 AM - 11:30 AM", date: "TODAY", type: "Demo" },
-  { title: "Client Architecture Sync", time: "02:00 PM - 03:00 PM", date: "OCT 14", type: "Sync" },
-  { title: "Q4 Roadmap Brainstorming", time: "11:00 AM - 12:30 PM", date: "OCT 16", type: "Planning" },
-];
-
-interface ProjectReportItem {
+interface ProjectRow {
   id: string;
   title: string;
   client: string;
   budget: string;
   stage: string;
-  status: string;
-  statusColor: string;
+  progress: number;
+  status: "In Progress" | "In Review" | "Completed" | "Planning";
 }
 
-const projectReportColumns: ColumnDef<ProjectReportItem>[] = [
+const PROJECTS_DIRECTORY: ProjectRow[] = [
   {
-    header: "Project Code",
-    accessorKey: "id",
-    className: "font-mono text-xs font-semibold pl-6",
+    id: "PRJ-101",
+    title: "Apex CRM Design System Overhaul",
+    client: "Apex Enterprise",
+    budget: "$48,500",
+    stage: "Frontend Architecture",
+    progress: 88,
+    status: "In Progress",
   },
   {
-    header: "Title",
-    accessorKey: "title",
-    className: "font-semibold text-sm",
+    id: "PRJ-102",
+    title: "Enterprise SSO & Directory Sync",
+    client: "SecureNet Systems",
+    budget: "$32,000",
+    stage: "Security Compliance",
+    progress: 94,
+    status: "In Review",
   },
   {
-    header: "Client",
-    accessorKey: "client",
-    className: "text-xs text-muted-foreground",
+    id: "PRJ-103",
+    title: "Distributed Streaming Analytics",
+    client: "DataStream Global",
+    budget: "$65,000",
+    stage: "Database Indexing",
+    progress: 62,
+    status: "In Progress",
   },
   {
-    header: "Budget",
-    accessorKey: "budget",
-    className: "font-bold text-sm",
+    id: "PRJ-104",
+    title: "Multi-Tenant Stripe Connect Engine",
+    client: "Nova Financial",
+    budget: "$41,200",
+    stage: "Billing Orchestration",
+    progress: 100,
+    status: "Completed",
   },
   {
-    header: "Status",
-    render: (p) => (
-      <Badge className={`text-[11px] border-none font-medium px-2 py-0.5 ${p.statusColor}`}>
-        {p.status}
-      </Badge>
-    ),
+    id: "PRJ-105",
+    title: "Cloud Infrastructure Automation",
+    client: "CloudScale Systems",
+    budget: "$28,000",
+    stage: "Terraform Modules",
+    progress: 75,
+    status: "In Progress",
   },
   {
-    header: "",
-    id: "actions",
-    className: "text-right pr-6",
-    render: (p) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger render={
-          <Button variant="ghost" size="icon-sm">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
-        } />
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> Details</DropdownMenuItem>
-          <DropdownMenuItem className="gap-2"><Pencil className="h-4 w-4" /> Edit</DropdownMenuItem>
-          <DropdownMenuItem className="gap-2 text-rose-600"><Trash2 className="h-4 w-4" /> Delete</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    id: "PRJ-106",
+    title: "Real-time Telemetry Pipeline",
+    client: "OmniPulse Media",
+    budget: "$19,500",
+    stage: "Architecture Draft",
+    progress: 35,
+    status: "Planning",
   },
 ];
 
-export default function ProjectReportPage() {
-  return (
-    <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 max-w-[1600px] mx-auto w-full bg-slate-50/50 dark:bg-slate-950/20">
-      
-      {/* Header section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard">Reports</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Project Report</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <h2 className="text-2xl font-bold tracking-tight mt-2">Project Report</h2>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2">
-            <Filter className="h-4 w-4" /> Filter
-          </Button>
-          <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
-            <LayoutGrid className="h-4 w-4" /> Add Widgets
-          </Button>
-        </div>
-      </div>
+// ─── RECHARTS TOOLTIP ────────────────────────────────────────────────────────
 
-      {/* Featured Projects Banner Grid */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-bold tracking-tight">Active High-Priority Projects</h3>
-          <span className="text-xs text-muted-foreground">3 Projects in active milestone</span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {projectBanners.map((item, idx) => (
-            <Card key={idx} className="overflow-hidden border border-border/60 shadow-sm hover:shadow-md transition-all">
-              <div className={`p-4 bg-gradient-to-r ${item.color} text-white space-y-2`}>
-                <div className="flex items-center justify-between">
-                  <Badge className="bg-white/20 hover:bg-white/30 text-white border-none text-[11px]">
-                    {item.daysLeft}
-                  </Badge>
-                  <span className="text-xs font-medium opacity-90">{item.client}</span>
-                </div>
-                <h4 className="font-bold text-base leading-tight line-clamp-1">{item.title}</h4>
-              </div>
-              <CardContent className="p-4 space-y-3">
-                <div className="flex justify-between text-xs font-semibold text-muted-foreground">
-                  <span>Milestone Completion</span>
-                  <span className="text-foreground">{item.progress}%</span>
-                </div>
-                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-600 rounded-full" style={{ width: `${item.progress}%` }}></div>
-                </div>
-                <div className="flex items-center justify-between pt-2 text-xs border-t border-border/40 text-muted-foreground">
-                  <span>{item.tasksCompleted}</span>
-                  <div className="flex -space-x-2">
-                    {item.team.map((mem, i) => (
-                      <Avatar key={i} className="h-6 w-6 border-2 border-background">
-                        <AvatarFallback className="text-[10px] bg-primary/20 text-primary">{mem}</AvatarFallback>
-                      </Avatar>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+function CustomDeliveryTooltip({ active, payload, label }: any) {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border border-border/80 bg-popover px-3 py-2 text-xs shadow-md">
+        <p className="font-semibold text-foreground mb-1 font-heading">{label} 2026</p>
+        <div className="space-y-1">
+          {payload.map((entry: any, index: number) => (
+            <div key={`item-${index}`} className="flex items-center justify-between gap-4 text-[11px]">
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="size-2 rounded-xs" style={{ backgroundColor: entry.color }} />
+                {entry.name}
+              </span>
+              <span className="font-mono font-medium text-foreground tabular-nums">
+                {entry.value} Deliverables
+              </span>
+            </div>
           ))}
         </div>
       </div>
+    );
+  }
+  return null;
+}
 
-      {/* Project Report Chart & Inline Calendar */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Monthly Performance Chart */}
-        <Card className="lg:col-span-8 shadow-sm border border-border/60">
-          <CardHeader className="flex flex-row items-center justify-between pb-4">
-            <div>
-              <CardTitle className="text-lg font-bold">Project Completion Trends</CardTitle>
-              <CardDescription>Monthly status count of completed vs ongoing client projects</CardDescription>
+function CustomHoursTooltip({ active, payload, label }: any) {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border border-border/80 bg-popover px-3 py-2 text-xs shadow-md">
+        <p className="font-semibold text-foreground mb-1 font-heading">{label}</p>
+        <div className="space-y-1">
+          {payload.map((entry: any, index: number) => (
+            <div key={`item-${index}`} className="flex items-center justify-between gap-3 text-[11px]">
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="size-2 rounded-xs" style={{ backgroundColor: entry.color }} />
+                {entry.name}
+              </span>
+              <span className="font-mono font-medium text-foreground tabular-nums">
+                {entry.value}h
+              </span>
             </div>
-            <Badge variant="outline" className="text-xs">2026 YTD</Badge>
-          </CardHeader>
-          <CardContent className="pt-2">
-            <div className="h-[320px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyProjectData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted" />
-                  <XAxis dataKey="month" tickLine={false} axisLine={false} className="text-xs text-muted-foreground" />
-                  <YAxis tickLine={false} axisLine={false} className="text-xs text-muted-foreground" />
-                  <Tooltip contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', borderRadius: '8px', border: 'none', color: '#fff' }} />
-                  <Bar dataKey="completed" fill="#10b981" radius={[4, 4, 0, 0]} name="Completed" />
-                  <Bar dataKey="ongoing" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Ongoing" />
-                  <Bar dataKey="pending" fill="#f59e0b" radius={[4, 4, 0, 0]} name="Pending" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
+}
 
-        {/* Schedule & Deadlines Widget */}
-        <Card className="lg:col-span-4 shadow-sm border border-border/60">
-          <CardHeader className="pb-3 flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-bold">Calendar Deadlines</CardTitle>
-            <div className="flex gap-1">
-              <Button variant="ghost" size="icon-sm"><ChevronLeft className="h-4 w-4" /></Button>
-              <Button variant="ghost" size="icon-sm"><ChevronRight className="h-4 w-4" /></Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-3 bg-muted/40 rounded-xl flex items-center justify-between">
-              <span className="font-bold text-sm">October 2026</span>
-              <Badge className="bg-blue-600 text-white text-xs">Week 41</Badge>
-            </div>
+// ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
 
-            {/* Simulated mini calendar grid */}
-            <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-muted-foreground">
-              <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
-            </div>
-            <div className="grid grid-cols-7 gap-1 text-center text-xs">
-              <span className="p-1.5 text-muted-foreground/40">28</span>
-              <span className="p-1.5 text-muted-foreground/40">29</span>
-              <span className="p-1.5 text-muted-foreground/40">30</span>
-              <span className="p-1.5 font-medium">1</span>
-              <span className="p-1.5 font-medium">2</span>
-              <span className="p-1.5 font-medium">3</span>
-              <span className="p-1.5 font-medium">4</span>
-              <span className="p-1.5 font-medium">5</span>
-              <span className="p-1.5 font-medium">6</span>
-              <span className="p-1.5 font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400 font-bold rounded-lg">7</span>
-              <span className="p-1.5 font-medium">8</span>
-              <span className="p-1.5 font-medium">9</span>
-              <span className="p-1.5 font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400 font-bold rounded-lg">10</span>
-              <span className="p-1.5 font-medium">11</span>
-              <span className="p-1.5 font-medium">12</span>
-              <span className="p-1.5 font-bold bg-primary text-primary-foreground rounded-lg">13</span>
-              <span className="p-1.5 font-medium">14</span>
-              <span className="p-1.5 font-medium">15</span>
-              <span className="p-1.5 font-medium">16</span>
-              <span className="p-1.5 font-medium">17</span>
-            </div>
+export default function ProjectReportPage() {
+  const [selectedRange, setSelectedRange] = React.useState<"Q4" | "YTD">("Q4");
 
-            <div className="space-y-2 pt-2 border-t border-border/40">
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
-                  <span className="font-semibold">Sprint 14 Release</span>
-                </div>
-                <span className="text-muted-foreground">Oct 10</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                  <span className="font-semibold">Client Review Call</span>
-                </div>
-                <span className="text-muted-foreground">Today</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+  const projectTableColumns: ColumnDef<ProjectRow>[] = [
+    {
+      header: "Code",
+      accessorKey: "id",
+      className: "w-28 pl-6 font-mono text-xs text-muted-foreground",
+    },
+    {
+      header: "Project Title",
+      accessorKey: "title",
+      className: "min-w-[240px]",
+      render: (row) => (
+        <div className="space-y-0.5">
+          <p className="text-xs font-semibold text-foreground hover:text-primary transition-colors cursor-pointer">
+            {row.title}
+          </p>
+          <p className="text-[11px] text-muted-foreground font-mono">{row.client}</p>
+        </div>
+      ),
+    },
+    {
+      header: "Stage",
+      accessorKey: "stage",
+      className: "text-xs text-muted-foreground hidden md:table-cell",
+    },
+    {
+      header: "Milestone",
+      accessorKey: "progress",
+      className: "min-w-[140px]",
+      render: (row) => (
+        <div className="space-y-1.5 pr-4">
+          <div className="flex items-center justify-between text-[11px] font-mono">
+            <span className="text-muted-foreground">Burnup</span>
+            <span className="font-medium text-foreground tabular-nums">{row.progress}%</span>
+          </div>
+          <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-primary rounded-full transition-all duration-300"
+              style={{ width: `${row.progress}%` }} 
+            />
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Budget",
+      accessorKey: "budget",
+      className: "font-mono text-xs text-right tabular-nums pr-6",
+    },
+    {
+      header: "Status",
+      accessorKey: "status",
+      className: "w-28",
+      render: (row) => {
+        const variants = {
+          Completed: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
+          "In Progress": "bg-primary/10 text-primary border-primary/20",
+          "In Review": "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
+          Planning: "bg-muted text-muted-foreground border-border/80",
+        };
+        return (
+          <Badge variant="outline" className={`text-[10px] font-mono font-medium px-2 py-0.5 ${variants[row.status]}`}>
+            {row.status}
+          </Badge>
+        );
+      },
+    },
+    {
+      header: "",
+      id: "actions",
+      className: "text-right pr-6 w-12",
+      render: (row) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger render={
+            <Button variant="ghost" size="icon-sm" className="size-7">
+              <MoreVertical className="size-3.5 text-muted-foreground" />
+            </Button>
+          } />
+          <DropdownMenuContent align="end" className="w-36">
+            <DropdownMenuItem 
+              className="gap-2 text-xs cursor-pointer"
+              onClick={() => toast.info(`Viewing ${row.id}: ${row.title}`)}
+            >
+              <Eye className="size-3.5 text-muted-foreground" /> View Audit
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              className="gap-2 text-xs cursor-pointer"
+              onClick={() => toast.info(`Editing scope for ${row.id}`)}
+            >
+              <Pencil className="size-3.5 text-muted-foreground" /> Edit Scope
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              className="gap-2 text-xs text-destructive focus:text-destructive cursor-pointer"
+              onClick={() => toast.error(`Archived deliverable ${row.id}`)}
+            >
+              <Trash2 className="size-3.5" /> Archive
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
+
+  return (
+    <div className="flex-1 space-y-6 p-6 md:p-8 max-w-7xl mx-auto w-full">
+      
+      {/* ─── 1. TOP HEADER & BREADCRUMB ────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
+        <div className="space-y-1">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard" className="text-xs">Executive Reports</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-xs font-mono">Project Delivery</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground font-heading">
+            Project Delivery & Milestones
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            Production cycle health, milestone clearance rates, and resource utilization across client deliverables.
+          </p>
+        </div>
+
+        {/* Action Controls */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center rounded-lg border border-border/80 bg-muted/40 p-0.5 text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRange("Q4");
+                toast.success("Period set to Q4 2026");
+              }}
+              className={`rounded-md px-2.5 py-1 font-mono transition-colors ${
+                selectedRange === "Q4"
+                  ? "bg-card text-foreground font-semibold shadow-2xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Q4 2026
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRange("YTD");
+                toast.success("Period set to YTD 2026");
+              }}
+              className={`rounded-md px-2.5 py-1 font-mono transition-colors ${
+                selectedRange === "YTD"
+                  ? "bg-card text-foreground font-semibold shadow-2xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              YTD 2026
+            </button>
+          </div>
+
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-8 gap-1.5 text-xs border-border/80 font-mono"
+            onClick={() => toast.info("Filter parameters: All client tiers, Active deliverables")}
+          >
+            <Filter className="size-3.5 text-muted-foreground" /> Filter
+          </Button>
+          <Button 
+            size="sm" 
+            className="h-8 gap-1.5 text-xs bg-primary text-primary-foreground hover:bg-primary/90 font-mono shadow-2xs"
+            onClick={() => toast.success("Exporting project delivery summary (PDF/CSV)...")}
+          >
+            <ArrowDownToLine className="size-3.5" /> Export Report
+          </Button>
+        </div>
       </div>
 
-      {/* 3-Column Metrics: Hours Spent, Team Progress, Active Projects */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Hours Spent */}
-        <Card className="shadow-sm border border-border/60">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold flex items-center justify-between">
-              <span>Hours Spent Breakdown</span>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-2 text-center p-3 bg-muted/40 rounded-xl">
-              <div>
-                <p className="text-[11px] text-muted-foreground">Billable Time</p>
-                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">66H:35M</p>
+      {/* ─── 2. EXECUTIVE METRICS STRIP ───────────────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {KPIS.map((kpi, idx) => (
+          <Card key={idx} className="border-border/80 bg-card shadow-2xs">
+            <CardContent className="p-5 space-y-2">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span className="font-medium">{kpi.label}</span>
+                <span className="font-mono text-[10px] text-muted-foreground/80">{kpi.benchmark}</span>
               </div>
-              <div className="border-l border-border/60">
-                <p className="text-[11px] text-muted-foreground">Unbillable Time</p>
-                <p className="text-xl font-bold text-amber-600 dark:text-amber-400">06H:25M</p>
+              <div className="flex items-baseline gap-2">
+                <span className="font-mono text-2xl font-semibold tracking-tight text-foreground tabular-nums">
+                  {kpi.prefix}
+                  <AnimatedNumber value={kpi.value} />
+                  {kpi.suffix}
+                </span>
               </div>
-            </div>
+              <div className="flex items-center gap-1.5 pt-1 text-[11px] text-muted-foreground font-mono">
+                <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                  {kpi.comparison}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-            <div className="h-36 w-full">
+      {/* ─── 3. DELIVERY TRENDS & UPCOMING MILESTONES ──────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Main Chart (8-col) */}
+        <Card className="lg:col-span-8 border-border/80 bg-card shadow-2xs">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between border-b border-border/60">
+            <div>
+              <CardTitle className="text-sm font-semibold font-heading text-foreground">
+                Milestone Clearance & In-Flight Work
+              </CardTitle>
+              <CardDescription className="text-xs text-muted-foreground">
+                Monthly verified deliverables completed versus ongoing development sprints.
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-4 text-xs font-mono">
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="size-2 rounded-xs bg-primary" />
+                Completed
+              </span>
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="size-2 rounded-xs bg-muted-foreground/40" />
+                Ongoing
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="h-[280px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={weeklyHoursData}>
-                  <XAxis dataKey="day" tickLine={false} axisLine={false} className="text-[10px]" />
-                  <Tooltip />
-                  <Bar dataKey="billable" fill="#10b981" radius={[3, 3, 0, 0]} name="Billable (hrs)" />
-                  <Bar dataKey="unbillable" fill="#f59e0b" radius={[3, 3, 0, 0]} name="Unbillable (hrs)" />
+                <BarChart 
+                  data={MONTHLY_DELIVERY_DATA} 
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                  barGap={4}
+                >
+                  <CartesianGrid 
+                    strokeDasharray="2 2" 
+                    vertical={false} 
+                    stroke="var(--border)"
+                    opacity={0.5}
+                  />
+                  <XAxis 
+                    dataKey="month" 
+                    tickLine={false} 
+                    axisLine={false} 
+                    className="text-xs font-mono fill-muted-foreground" 
+                  />
+                  <YAxis 
+                    tickLine={false} 
+                    axisLine={false} 
+                    className="text-xs font-mono fill-muted-foreground" 
+                  />
+                  <Tooltip content={<CustomDeliveryTooltip />} />
+                  <Bar 
+                    dataKey="completed" 
+                    fill="var(--primary)" 
+                    radius={[3, 3, 0, 0]} 
+                    name="Completed" 
+                  />
+                  <Bar 
+                    dataKey="ongoing" 
+                    fill="var(--muted-foreground)" 
+                    fillOpacity={0.35}
+                    radius={[3, 3, 0, 0]} 
+                    name="Ongoing" 
+                  />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+
+            {/* Quiet Summary Footer */}
+            <div className="grid grid-cols-3 gap-2 pt-4 mt-2 border-t border-border/60 text-center">
+              <div>
+                <p className="text-[11px] text-muted-foreground font-mono">Delivered Milestones</p>
+                <p className="text-sm font-semibold font-mono text-foreground tabular-nums">245 YTD</p>
+              </div>
+              <div className="border-x border-border/60">
+                <p className="text-[11px] text-muted-foreground font-mono">Avg Cycle Duration</p>
+                <p className="text-sm font-semibold font-mono text-foreground tabular-nums">16.8 Days</p>
+              </div>
+              <div>
+                <p className="text-[11px] text-muted-foreground font-mono">Delivery Variance</p>
+                <p className="text-sm font-semibold font-mono text-emerald-700 dark:text-emerald-400 tabular-nums">-2.4% vs SLA</p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Team Progress */}
-        <Card className="shadow-sm border border-border/60">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold flex items-center justify-between">
-              <span>Team Member Progress</span>
-              <User className="h-4 w-4 text-muted-foreground" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3.5">
-            {teamProgress.map((member, i) => (
-              <div key={i} className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarFallback className="text-[10px] bg-primary/10 text-primary">{member.avatar}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <span className="font-semibold block leading-tight">{member.name}</span>
-                      <span className="text-[10px] text-muted-foreground">{member.role}</span>
+        {/* Upcoming Milestones Schedule (4-col) */}
+        <Card className="lg:col-span-4 border-border/80 bg-card shadow-2xs flex flex-col justify-between">
+          <div>
+            <CardHeader className="pb-3 border-b border-border/60">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-sm font-semibold font-heading text-foreground">
+                    Upcoming Milestones
+                  </CardTitle>
+                  <CardDescription className="text-xs text-muted-foreground">
+                    Scheduled client demos and release gates.
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="font-mono text-[10px] text-muted-foreground">
+                  Next 14d
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 space-y-3.5">
+              {UPCOMING_MILESTONES.map((item) => (
+                <div 
+                  key={item.id} 
+                  className="p-3 rounded-lg border border-border/70 bg-muted/20 hover:bg-muted/40 transition-colors space-y-2"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-[11px] font-semibold text-primary">
+                      {item.code}
+                    </span>
+                    <Badge 
+                      variant="outline" 
+                      className={`text-[10px] font-mono font-medium px-1.5 py-0 ${
+                        item.status === "Due Soon"
+                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                          : item.status === "In Review"
+                          ? "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20"
+                          : "bg-muted text-muted-foreground border-border/80"
+                      }`}
+                    >
+                      {item.relativeTime}
+                    </Badge>
+                  </div>
+                  <p className="text-xs font-medium text-foreground leading-snug line-clamp-1">
+                    {item.title}
+                  </p>
+                  <div className="flex items-center justify-between pt-1 text-[11px] text-muted-foreground border-t border-border/40 font-mono">
+                    <span className="truncate max-w-[150px]">{item.client}</span>
+                    <div className="flex items-center gap-1.5">
+                      <Avatar className="size-4.5 border border-border/80">
+                        <AvatarFallback className="text-[9px] bg-muted text-foreground font-mono">
+                          {item.ownerAvatar}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span>{item.dueDate.split(",")[0]}</span>
                     </div>
                   </div>
-                  <span className="font-bold text-muted-foreground">{member.tasks}</span>
                 </div>
-                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-600 rounded-full" style={{ width: `${member.progress}%` }}></div>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Active Projects Tracker */}
-        <Card className="shadow-sm border border-border/60">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold flex items-center justify-between">
-              <span>Active Projects Tracker</span>
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {activeProjectsList.map((prj, idx) => (
-              <div key={idx} className="p-3 border border-border/60 rounded-xl space-y-2 bg-card">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold">{prj.name}</span>
-                  <Badge variant="outline" className="text-[10px]">{prj.status}</Badge>
-                </div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Budget: {prj.budget}</span>
-                  <span className="font-bold text-foreground">{prj.progress}%</span>
-                </div>
-                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-purple-600 rounded-full" style={{ width: `${prj.progress}%` }}></div>
-                </div>
-              </div>
-            ))}
-          </CardContent>
+              ))}
+            </CardContent>
+          </div>
+          <div className="p-4 pt-0">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full text-xs font-mono border-border/80"
+              onClick={() => toast.info("Opening full calendar schedule")}
+            >
+              View Full Release Schedule
+            </Button>
+          </div>
         </Card>
       </div>
 
-      {/* Projects Table & Upcoming Schedule */}
+      {/* ─── 4. PROJECT DIRECTORY & RESOURCE UTILIZATION ───────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Table */}
-        <Card className="lg:col-span-8 shadow-sm border border-border/60">
-          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        {/* Project Directory Table (8-col) */}
+        <Card className="lg:col-span-8 border-border/80 bg-card shadow-2xs">
+          <CardHeader className="pb-3 border-b border-border/60 flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-lg font-bold">Project Directory & Status</CardTitle>
-              <CardDescription>Comprehensive view of ongoing deliverables and budgets</CardDescription>
+              <CardTitle className="text-sm font-semibold font-heading text-foreground">
+                Active Deliverables Directory
+              </CardTitle>
+              <CardDescription className="text-xs text-muted-foreground">
+                Tracked pipeline status, engineering stage, and committed project value.
+              </CardDescription>
             </div>
-            <Button variant="outline" size="sm">Export Report</Button>
+            <div className="text-xs text-muted-foreground font-mono">
+              6 Active Accounts
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             <DataTable
-              columns={projectReportColumns}
-              data={projectsTable}
+              columns={projectTableColumns}
+              data={PROJECTS_DIRECTORY}
               className="border-none shadow-none bg-transparent"
               hidePagination
             />
           </CardContent>
         </Card>
 
-        {/* Schedule */}
-        <Card className="lg:col-span-4 shadow-sm border border-border/60">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-bold">Upcoming Milestones</CardTitle>
-            <CardDescription>Scheduled demos and client syncs</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {upcomingEvents.map((evt, i) => (
-              <div key={i} className="flex items-start gap-3 p-3 bg-muted/30 rounded-xl border border-border/40">
-                <div className="p-2 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 rounded-lg text-center min-w-[54px]">
-                  <span className="text-[10px] uppercase font-bold block">{evt.date}</span>
-                </div>
-                <div className="space-y-0.5">
-                  <h4 className="font-bold text-sm leading-tight">{evt.title}</h4>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Clock className="h-3 w-3" /> {evt.time}
-                  </p>
-                </div>
+        {/* Engineering Resource Utilization (4-col) */}
+        <Card className="lg:col-span-4 border-border/80 bg-card shadow-2xs">
+          <CardHeader className="pb-3 border-b border-border/60">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-sm font-semibold font-heading text-foreground">
+                  Engineering Utilization
+                </CardTitle>
+                <CardDescription className="text-xs text-muted-foreground">
+                  Billable allocation and sprint throughput.
+                </CardDescription>
               </div>
-            ))}
+              <Clock className="size-4 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent className="p-5 space-y-5">
+            {/* Split Metrics */}
+            <div className="grid grid-cols-2 gap-2 text-center p-3 bg-muted/30 rounded-lg border border-border/70">
+              <div>
+                <p className="text-[11px] text-muted-foreground font-mono">Billable Hours</p>
+                <p className="text-lg font-semibold font-mono text-foreground tabular-nums">38.0h</p>
+                <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono">91.2% ratio</span>
+              </div>
+              <div className="border-l border-border/60">
+                <p className="text-[11px] text-muted-foreground font-mono">Internal Ops</p>
+                <p className="text-lg font-semibold font-mono text-muted-foreground tabular-nums">4.5h</p>
+                <span className="text-[10px] text-muted-foreground font-mono">8.8% ratio</span>
+              </div>
+            </div>
+
+            {/* Daily Hours Chart */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs text-muted-foreground font-mono">
+                <span>Daily Logged Hours</span>
+                <span>Mon – Fri</span>
+              </div>
+              <div className="h-32 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={WEEKLY_HOURS_DATA} margin={{ top: 5, right: 0, left: -25, bottom: 0 }}>
+                    <XAxis dataKey="day" tickLine={false} axisLine={false} className="text-[10px] font-mono fill-muted-foreground" />
+                    <YAxis tickLine={false} axisLine={false} className="text-[10px] font-mono fill-muted-foreground" />
+                    <Tooltip content={<CustomHoursTooltip />} />
+                    <Bar dataKey="billable" fill="var(--primary)" radius={[2, 2, 0, 0]} name="Billable" />
+                    <Bar dataKey="unbillable" fill="var(--muted-foreground)" fillOpacity={0.35} radius={[2, 2, 0, 0]} name="Internal" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Contributor Roster */}
+            <div className="space-y-3 pt-3 border-t border-border/60">
+              <p className="text-xs font-semibold text-foreground font-heading">
+                Squad Leads & Milestone Clearances
+              </p>
+              <div className="space-y-2.5">
+                {TEAM_CONTRIBUTORS.map((contributor, i) => (
+                  <div key={i} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="size-5 border border-border/80">
+                          <AvatarFallback className="text-[9px] bg-muted text-foreground font-mono">
+                            {contributor.avatar}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <span className="font-medium text-foreground block leading-tight">{contributor.name}</span>
+                          <span className="text-[10px] text-muted-foreground font-mono">{contributor.role}</span>
+                        </div>
+                      </div>
+                      <span className="text-xs font-mono font-medium text-muted-foreground tabular-nums">
+                        {contributor.tasksCompleted}
+                      </span>
+                    </div>
+                    <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-primary/80 rounded-full" 
+                        style={{ width: `${contributor.progressPercent}%` }} 
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

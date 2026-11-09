@@ -814,6 +814,63 @@ export const COMPONENTS_REGISTRY: ComponentItem[] = [
       { name: "renderColumnFooter", type: "(column: KanbanColumn<T>) => ReactNode", description: "Optional custom column footer renderer." },
     ],
   },
+  {
+    slug: "timeline",
+    title: "Timeline",
+    category: "Surfaces & Layouts",
+    categorySlug: "surfaces",
+    badge: "shadcn/ui",
+    description: "Modular, perfectly-aligned chronological timeline with customizable nodes, continuous connector lines, and flexible content containers.",
+    howItWorks: "Employs an items-centered flex separator structure where each node and connector line share a unified geometric column. This eliminates manual pixel offsets and alignment drift, seamlessly hiding the trailing connector on the terminal item while adapting dynamically to content height.",
+    importStatement: `import { Timeline, TimelineItem, TimelineSeparator, TimelineNode, TimelineConnector, TimelineContent, TimelineHeader, TimelineTitle, TimelineDescription, TimelineTime } from "@/components/ui/timeline";`,
+    codeUsage: `<Timeline size="md">
+  <TimelineItem>
+    <TimelineSeparator>
+      <TimelineNode status="completed">
+        <CheckCircle2 className="size-3.5 text-emerald-600" />
+      </TimelineNode>
+      <TimelineConnector />
+    </TimelineSeparator>
+    <TimelineContent>
+      <TimelineHeader>
+        <TimelineTitle>Contract Proposal Executed</TimelineTitle>
+        <TimelineTime>10m ago</TimelineTime>
+      </TimelineHeader>
+      <TimelineDescription>Client signed annual enterprise agreement.</TimelineDescription>
+    </TimelineContent>
+  </TimelineItem>
+
+  <TimelineItem>
+    <TimelineSeparator>
+      <TimelineNode status="active">
+        <Clock className="size-3.5 text-primary" />
+      </TimelineNode>
+      <TimelineConnector />
+    </TimelineSeparator>
+    <TimelineContent>
+      <TimelineHeader>
+        <TimelineTitle>Technical Architecture Review</TimelineTitle>
+        <TimelineTime>In 2 hours</TimelineTime>
+      </TimelineHeader>
+      <TimelineDescription>Database failover demo with engineering VP.</TimelineDescription>
+    </TimelineContent>
+  </TimelineItem>
+</Timeline>`,
+    features: [
+      "Mathematical node-to-connector centering with zero negative margin drift",
+      "Automatic terminal connector hiding on the last timeline item",
+      "Flexible usage: composable subcomponents or quick node shorthand",
+      "Custom sizes (sm, md, lg) and semantic status states (completed, active, pending)",
+      "Supports custom cards, badges, timestamps, and interactive feeds",
+    ],
+    props: [
+      { name: "size", type: '"sm" | "md" | "lg"', default: '"md"', description: "Controls the width of the separator column and node dimensions." },
+      { name: "node", type: "ReactNode", description: "Optional shorthand prop on TimelineItem to pass an icon or bullet element directly." },
+      { name: "dashed", type: "boolean", default: "false", description: "Whether to style the connector line with dashed borders." },
+      { name: "status", type: '"default" | "completed" | "active" | "pending"', default: '"default"', description: "Semantic status styling applied to TimelineNode." },
+      { name: "children", type: "ReactNode", description: "Child components (Separator, Node, Connector, Content)." },
+    ],
+  },
 
   // 5. OVERLAYS & DISCLOSURES
   {

@@ -91,15 +91,15 @@ export function NotificationPopover() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger render={
-        <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-accent hover:border hover:border-primary/50 transition-all duration-200">
-          <Bell size={22} />
+        <Button 
+          variant="ghost" 
+          size="icon-sm" 
+          className="relative size-8.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+          title="Notifications"
+        >
+          <Bell className="size-4" />
           {unreadCount > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold shadow-lg animate-pulse p-0 leading-none"
-            >
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </Badge>
+            <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-primary ring-2 ring-background" />
           )}
         </Button>
       } />

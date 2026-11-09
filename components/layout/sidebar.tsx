@@ -115,17 +115,37 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={
-              <Link href="/dashboard" onClick={() => { if (isMobile) setOpenMobile(false); }}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-tr from-primary to-primary/80 text-sidebar-primary-foreground shadow-md shadow-primary/20">
-                  <Sparkles className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-bold">Apex CRM</span>
-                  <span className="truncate text-xs">Admin Theme</span>
-                </div>
-              </Link>
-            } />
+            <SidebarMenuButton
+              size="lg"
+              tooltip="Apex CRM"
+              className="gap-3 transition-colors hover:bg-sidebar-accent/60"
+              render={
+                <Link
+                  href="/dashboard"
+                  onClick={() => {
+                    if (isMobile) setOpenMobile(false);
+                  }}
+                  className="flex items-center gap-3 w-full"
+                >
+                  <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-heading font-bold text-sm shadow-xs transition-transform group-hover/menu-button:scale-105">
+                    A
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+                    <div className="flex items-center gap-1.5">
+                      <span className="truncate font-semibold font-heading text-sidebar-foreground">
+                        Apex CRM
+                      </span>
+                      <span className="rounded-sm bg-primary/10 px-1 py-0.2 font-mono text-[9px] font-medium text-primary">
+                        v2.0
+                      </span>
+                    </div>
+                    <span className="truncate text-[11px] font-mono text-muted-foreground">
+                      Enterprise Suite
+                    </span>
+                  </div>
+                </Link>
+              }
+            />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

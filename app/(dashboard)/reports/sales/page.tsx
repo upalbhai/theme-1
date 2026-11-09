@@ -1,29 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
+import * as React from "react";
 import { 
   Filter, 
-  LayoutGrid, 
   ArrowUpRight, 
   ArrowDownRight, 
   DollarSign, 
   TrendingUp, 
-  TrendingDown, 
   Calendar, 
   MoreVertical, 
   Users, 
   Target, 
-  CheckCircle2, 
-  Briefcase,
+  Briefcase, 
+  Eye, 
+  Pencil, 
+  Trash2,
+  ArrowDownToLine,
+  CheckCircle2,
+  Layers,
+  Clock,
   ChevronRight,
-  Eye,
-  Pencil,
-  Trash2
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -40,472 +43,650 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTable, ColumnDef } from "@/components/ui/data-table";
 import { 
-  BarChart, 
-  Bar, 
+  AreaChart, 
+  Area, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  AreaChart,
-  Area
 } from "recharts";
+import { AnimatedNumber } from "@/components/core/animated-number";
+import { toast } from "sonner";
 
-const kpiCards = [
-  { 
-    title: "Active Deals", 
-    value: "$5,658 USD", 
-    change: "+23.65%", 
-    isPositive: true, 
-    comparison: "vs last month: $4,563 USD",
-    icon: Briefcase,
-    iconBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-  },
-  { 
-    title: "Revenue Deals", 
-    value: "$76,852 USD", 
-    change: "-06.32%", 
-    isPositive: false, 
-    comparison: "vs last month: $85,748 USD",
-    icon: DollarSign,
-    iconBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-  },
-  { 
-    title: "Deals Created", 
-    value: "$2,354 USD", 
-    change: "+30.47%", 
-    isPositive: true, 
-    comparison: "vs last month: $1,578 USD",
-    icon: TrendingUp,
-    iconBg: "bg-purple-500/10 text-purple-600 dark:text-purple-400"
-  },
-  { 
-    title: "Deals Closing", 
-    value: "$40,847 USD", 
-    change: "-08.55%", 
-    isPositive: false, 
-    comparison: "vs last month: $52,468 USD",
-    icon: Target,
-    iconBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-  },
-];
+// ─── DATA & TYPES ─────────────────────────────────────────────────────────────
 
-const pipelineTabsData: Record<string, { name: string; leads: number; closed: number; pending: number }[]> = {
-  Leads: [
-    { name: "Jan", leads: 4000, closed: 2400, pending: 1600 },
-    { name: "Feb", leads: 5000, closed: 3000, pending: 2000 },
-    { name: "Mar", leads: 7000, closed: 4500, pending: 2500 },
-    { name: "Apr", leads: 6000, closed: 3800, pending: 2200 },
-    { name: "May", leads: 8500, closed: 5200, pending: 3300 },
-    { name: "Jun", leads: 9500, closed: 6100, pending: 3400 },
-    { name: "Jul", leads: 7500, closed: 4800, pending: 2700 },
-    { name: "Aug", leads: 8800, closed: 5600, pending: 3200 },
-  ],
-  Proposal: [
-    { name: "Jan", leads: 3100, closed: 1800, pending: 1300 },
-    { name: "Feb", leads: 4200, closed: 2600, pending: 1600 },
-    { name: "Mar", leads: 5800, closed: 3900, pending: 1900 },
-    { name: "Apr", leads: 4900, closed: 3100, pending: 1800 },
-    { name: "May", leads: 6400, closed: 4100, pending: 2300 },
-    { name: "Jun", leads: 7800, closed: 5200, pending: 2600 },
-    { name: "Jul", leads: 6200, closed: 4000, pending: 2200 },
-    { name: "Aug", leads: 7100, closed: 4600, pending: 2500 },
-  ],
-  Contract: [
-    { name: "Jan", leads: 2200, closed: 1400, pending: 800 },
-    { name: "Feb", leads: 3100, closed: 2100, pending: 1000 },
-    { name: "Mar", leads: 4300, closed: 3000, pending: 1300 },
-    { name: "Apr", leads: 3800, closed: 2600, pending: 1200 },
-    { name: "May", leads: 4900, closed: 3400, pending: 1500 },
-    { name: "Jun", leads: 5600, closed: 4000, pending: 1600 },
-    { name: "Jul", leads: 4500, closed: 3100, pending: 1400 },
-    { name: "Aug", leads: 5200, closed: 3700, pending: 1500 },
-  ],
-  Project: [
-    { name: "Jan", leads: 4500, closed: 3200, pending: 1300 },
-    { name: "Feb", leads: 5900, closed: 4100, pending: 1800 },
-    { name: "Mar", leads: 7800, closed: 5600, pending: 2200 },
-    { name: "Apr", leads: 6900, closed: 4800, pending: 2100 },
-    { name: "May", leads: 8200, closed: 5900, pending: 2300 },
-    { name: "Jun", leads: 9900, closed: 7200, pending: 2700 },
-    { name: "Jul", leads: 8100, closed: 5800, pending: 2300 },
-    { name: "Aug", leads: 9400, closed: 6900, pending: 2500 },
-  ],
-};
-
-const earningsSparkline = [
-  { month: "M1", value: 40 },
-  { month: "M2", value: 65 },
-  { month: "M3", value: 50 },
-  { month: "M4", value: 85 },
-  { month: "M5", value: 75 },
-  { month: "M6", value: 95 },
-];
-
-const expensesSparkline = [
-  { month: "M1", value: 30 },
-  { month: "M2", value: 45 },
-  { month: "M3", value: 35 },
-  { month: "M4", value: 60 },
-  { month: "M5", value: 50 },
-  { month: "M6", value: 40 },
-];
-
-const upcomingDeals = [
-  { name: "SaaS Enterprise Deal", company: "Apex Corp", value: "$45,000", date: "Oct 24, 2026", owner: "Sarah Jenkins", avatar: "SJ" },
-  { name: "Cloud Migration", company: "Nexus Systems", value: "$28,500", date: "Oct 28, 2026", owner: "Michael Vance", avatar: "MV" },
-  { name: "UI/UX Redesign", company: "Acme Web", value: "$14,200", date: "Nov 02, 2026", owner: "Emma Watson", avatar: "EW" },
-  { name: "Mobile App Contract", company: "FinTech Labs", value: "$62,000", date: "Nov 05, 2026", owner: "David Ray", avatar: "DR" },
-];
-
-const contactLeads = [
-  { id: 1, name: "Alexandra Wright", company: "InnoTech Solutions", amount: "$15,400", stage: 85, status: "Contracting", statusColor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
-  { id: 2, name: "Marcus Brody", company: "Global Logistics", amount: "$32,100", stage: 60, status: "Proposal", statusColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
-  { id: 3, name: "Elena Rostova", company: "CyberShield Security", amount: "$24,500", stage: 40, status: "Discovery", statusColor: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
-  { id: 4, name: "Jonathan Sterling", company: "Vanguard Capital", amount: "$58,000", stage: 95, status: "Closing", statusColor: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
-  { id: 5, name: "Sophia Chen", company: "BioHealth Diagnostics", amount: "$19,800", stage: 25, status: "Qualified Lead", statusColor: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400" },
-];
-
-interface ContactLead {
-  id: number;
-  name: string;
-  company: string;
-  amount: string;
-  stage: number;
-  status: string;
-  statusColor: string;
+interface SalesKPI {
+  label: string;
+  value: number;
+  prefix?: string;
+  suffix?: string;
+  comparison: string;
+  isPositive: boolean;
+  benchmark: string;
 }
 
-const contactLeadsColumns: ColumnDef<ContactLead>[] = [
+const SALES_KPIS: SalesKPI[] = [
   {
-    header: "Contact Name",
-    accessorKey: "name",
-    className: "font-semibold text-sm pl-6",
+    label: "Closed Revenue",
+    value: 382450,
+    prefix: "$",
+    comparison: "+18.4% vs last quarter",
+    isPositive: true,
+    benchmark: "Target: $350K",
   },
   {
-    header: "Company",
-    accessorKey: "company",
-    className: "text-xs text-muted-foreground",
+    label: "Active Pipeline",
+    value: 1240000,
+    prefix: "$",
+    comparison: "+24.2% vs last cycle",
+    isPositive: true,
+    benchmark: "3.2x quota coverage",
   },
   {
-    header: "Est. Value",
-    accessorKey: "amount",
-    className: "font-bold text-sm",
+    label: "Deal Win Rate",
+    value: 28,
+    suffix: ".6%",
+    comparison: "+3.2% vs baseline",
+    isPositive: true,
+    benchmark: "Cohort avg: 22%",
   },
   {
-    header: "Stage",
-    className: "w-[140px]",
-    render: (lead) => (
-      <div className="space-y-1">
-        <div className="flex justify-between text-[10px] text-muted-foreground">
-          <span>Progress</span>
-          <span>{lead.stage}%</span>
-        </div>
-        <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-blue-600 rounded-full" 
-            style={{ width: `${lead.stage}%` }}
-          ></div>
-        </div>
-      </div>
-    ),
-  },
-  {
-    header: "Status",
-    render: (lead) => (
-      <Badge className={`text-[11px] border-none font-medium px-2 py-0.5 ${lead.statusColor}`}>
-        {lead.status}
-      </Badge>
-    ),
-  },
-  {
-    header: "",
-    id: "actions",
-    className: "text-right pr-6",
-    render: (lead) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger render={
-          <Button variant="ghost" size="icon-sm">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
-        } />
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> View Details</DropdownMenuItem>
-          <DropdownMenuItem className="gap-2"><Pencil className="h-4 w-4" /> Edit Lead</DropdownMenuItem>
-          <DropdownMenuItem className="gap-2 text-rose-600"><Trash2 className="h-4 w-4" /> Delete</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    label: "Avg Contract Value",
+    value: 48500,
+    prefix: "$",
+    comparison: "+12.1% vs Q3 cohort",
+    isPositive: true,
+    benchmark: "Enterprise tier",
   },
 ];
 
-export default function SalesReportPage() {
-  const [activeTab, setActiveTab] = useState<string>("Leads");
+interface MonthlyRevenuePoint {
+  month: string;
+  revenue: number;
+  pipeline: number;
+}
 
-  return (
-    <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 max-w-[1600px] mx-auto w-full bg-slate-50/50 dark:bg-slate-950/20">
-      
-      {/* Header section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard">Reports</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Sales Report</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <h2 className="text-2xl font-bold tracking-tight mt-2">Sales Report</h2>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2">
-            <Filter className="h-4 w-4" /> Filter
-          </Button>
-          <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
-            <LayoutGrid className="h-4 w-4" /> Add Widgets
-          </Button>
-        </div>
-      </div>
+const REVENUE_TREND_DATA: MonthlyRevenuePoint[] = [
+  { month: "Jan", revenue: 185, pipeline: 240 },
+  { month: "Feb", revenue: 210, pipeline: 270 },
+  { month: "Mar", revenue: 245, pipeline: 310 },
+  { month: "Apr", revenue: 228, pipeline: 300 },
+  { month: "May", revenue: 275, pipeline: 360 },
+  { month: "Jun", revenue: 315, pipeline: 410 },
+  { month: "Jul", revenue: 295, pipeline: 380 },
+  { month: "Aug", revenue: 340, pipeline: 440 },
+  { month: "Sep", revenue: 325, pipeline: 420 },
+  { month: "Oct", revenue: 382, pipeline: 490 },
+];
 
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpiCards.map((card, idx) => {
-          const Icon = card.icon;
-          return (
-            <Card key={idx} className="shadow-sm border border-border/60 hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className={`p-3 rounded-xl ${card.iconBg}`}>
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <Badge variant={card.isPositive ? "default" : "destructive"} className="gap-1 px-2.5 py-0.5 text-xs font-semibold">
-                    {card.isPositive ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
-                    {card.change}
-                  </Badge>
-                </div>
-                <div className="mt-4 space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">{card.title}</p>
-                  <h3 className="text-2xl font-bold tracking-tight">{card.value}</h3>
-                  <p className="text-xs text-muted-foreground pt-1">{card.comparison}</p>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+interface EnterpriseDeal {
+  id: string;
+  contactName: string;
+  company: string;
+  amount: string;
+  stageName: string;
+  stageProgress: number;
+  status: "Closing" | "Proposal" | "Contracting" | "Discovery";
+  ownerName: string;
+  ownerAvatar: string;
+}
 
-      {/* Interactive Sales Pipeline & Forecast Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Pipeline Chart Card */}
-        <Card className="lg:col-span-8 shadow-sm border border-border/60">
-          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
-            <div>
-              <CardTitle className="text-lg font-bold">Sales Pipeline Breakdown</CardTitle>
-              <CardDescription>Visual distribution of deal status across sales funnel stages</CardDescription>
+const ENTERPRISE_DEALS: EnterpriseDeal[] = [
+  {
+    id: "DL-301",
+    contactName: "Jonathan Sterling",
+    company: "Vanguard Capital",
+    amount: "$68,000",
+    stageName: "Executive Sign-Off",
+    stageProgress: 95,
+    status: "Closing",
+    ownerName: "Sarah Jenkins",
+    ownerAvatar: "SJ",
+  },
+  {
+    id: "DL-302",
+    contactName: "Alexandra Wright",
+    company: "InnoTech Solutions",
+    amount: "$52,400",
+    stageName: "Contract Review",
+    stageProgress: 85,
+    status: "Contracting",
+    ownerName: "Alex Morgan",
+    ownerAvatar: "AM",
+  },
+  {
+    id: "DL-303",
+    contactName: "Marcus Brody",
+    company: "Global Logistics Corp",
+    amount: "$42,100",
+    stageName: "Commercial Proposal",
+    stageProgress: 60,
+    status: "Proposal",
+    ownerName: "Michael Vance",
+    ownerAvatar: "MV",
+  },
+  {
+    id: "DL-304",
+    contactName: "Elena Rostova",
+    company: "CyberShield Security",
+    amount: "$38,500",
+    stageName: "Technical Discovery",
+    stageProgress: 40,
+    status: "Discovery",
+    ownerName: "Elena Rostova",
+    ownerAvatar: "ER",
+  },
+  {
+    id: "DL-305",
+    contactName: "Sophia Chen",
+    company: "BioHealth Diagnostics",
+    amount: "$29,800",
+    stageName: "Security Validation",
+    stageProgress: 75,
+    status: "Contracting",
+    ownerName: "David Ray",
+    ownerAvatar: "DR",
+  },
+  {
+    id: "DL-306",
+    contactName: "Robert Taylor",
+    company: "OmniData Mesh",
+    amount: "$45,000",
+    stageName: "Commercial Review",
+    stageProgress: 90,
+    status: "Closing",
+    ownerName: "Sarah Jenkins",
+    ownerAvatar: "SJ",
+  },
+];
+
+interface QuotaProgressItem {
+  team: string;
+  achieved: string;
+  target: string;
+  percent: number;
+  reps: string;
+}
+
+const QUOTA_PROGRESS: QuotaProgressItem[] = [
+  { team: "Enterprise North America", achieved: "$248K", target: "$260K", percent: 95, reps: "8 Reps" },
+  { team: "Strategic Accounts EMEA", achieved: "$182K", target: "$210K", percent: 86, reps: "6 Reps" },
+  { team: "Mid-Market Growth", achieved: "$94K", target: "$110K", percent: 85, reps: "5 Reps" },
+];
+
+const REVENUE_CHANNELS = [
+  { name: "Direct Enterprise", share: 62, value: "$237,100", change: "+14%" },
+  { name: "Strategic Partners", share: 24, value: "$91,800", change: "+22%" },
+  { name: "Self-Serve Expansion", share: 14, value: "$53,550", change: "+8%" },
+];
+
+// ─── RECHARTS TOOLTIP ────────────────────────────────────────────────────────
+
+function CustomSalesTooltip({ active, payload, label }: any) {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border border-border/80 bg-popover px-3 py-2 text-xs shadow-md">
+        <p className="font-semibold text-foreground mb-1 font-heading">{label} 2026</p>
+        <div className="space-y-1">
+          {payload.map((entry: any, index: number) => (
+            <div key={`item-${index}`} className="flex items-center justify-between gap-4 text-[11px]">
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="size-2 rounded-xs" style={{ backgroundColor: entry.stroke || entry.color }} />
+                {entry.name}
+              </span>
+              <span className="font-mono font-medium text-foreground tabular-nums">
+                ${entry.value}K USD
+              </span>
             </div>
-            
-            {/* Custom Tab Selector */}
-            <div className="flex bg-muted/60 p-1 rounded-xl text-xs font-medium">
-              {Object.keys(pipelineTabsData).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    activeTab === tab 
-                      ? "bg-background text-foreground shadow-xs font-semibold" 
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-          </CardHeader>
-          <CardContent className="pt-2">
-            <div className="h-[320px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={pipelineTabsData[activeTab]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted" />
-                  <XAxis dataKey="name" tickLine={false} axisLine={false} className="text-xs text-muted-foreground" />
-                  <YAxis tickLine={false} axisLine={false} className="text-xs text-muted-foreground" />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', borderRadius: '8px', border: 'none', color: '#fff' }}
-                    cursor={{ fill: 'var(--accent)' }}
-                  />
-                  <Bar dataKey="leads" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Leads Generated" />
-                  <Bar dataKey="closed" fill="#10b981" radius={[4, 4, 0, 0]} name="Deals Closed" />
-                  <Bar dataKey="pending" fill="#f59e0b" radius={[4, 4, 0, 0]} name="Pending Review" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Revenue Forecast Card */}
-        <Card className="lg:col-span-4 shadow-sm border border-border/60">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-bold">Revenue Forecast</CardTitle>
-            <CardDescription>Monthly target progression & collection forecast</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            
-            {/* Quick Metrics */}
-            <div className="grid grid-cols-3 gap-2 p-3 bg-muted/40 rounded-xl text-center">
-              <div>
-                <p className="text-[11px] text-muted-foreground">Current</p>
-                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">$65.6K</p>
-              </div>
-              <div className="border-x border-border/60">
-                <p className="text-[11px] text-muted-foreground">Overdue</p>
-                <p className="text-sm font-bold text-rose-600 dark:text-rose-400">$3.4K</p>
-              </div>
-              <div>
-                <p className="text-[11px] text-muted-foreground">Forecast</p>
-                <p className="text-sm font-bold text-blue-600 dark:text-blue-400">$86.1K</p>
-              </div>
-            </div>
-
-            {/* Goal Progress Bars */}
-            <div className="space-y-4 pt-1">
-              <div>
-                <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span>Marketing Goal</span>
-                  <span className="text-blue-600">44% ($550 / $1,250)</span>
-                </div>
-                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-full" style={{ width: '44%' }}></div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span>Sales Rep Target</span>
-                  <span className="text-purple-600">68% ($8,500 / $12,500)</span>
-                </div>
-                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-purple-500 rounded-full" style={{ width: '68%' }}></div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span>Annual Revenue Goal</span>
-                  <span className="text-emerald-600">89% ($890K / $1M)</span>
-                </div>
-                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: '89%' }}></div>
-                </div>
-              </div>
-            </div>
-
-            <Button className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900 gap-2">
-              Generate Detailed Report <ChevronRight className="h-4 w-4" />
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Upcoming Deals Grid */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold tracking-tight">Upcoming High-Value Deals</h3>
-          <Button variant="ghost" className="text-xs text-blue-600 hover:text-blue-700 gap-1">
-            View All Deals <ChevronRight className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {upcomingDeals.map((deal, idx) => (
-            <Card key={idx} className="shadow-sm border border-border/60 hover:border-primary/50 transition-colors">
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-0.5">
-                    <h4 className="font-bold text-sm leading-tight line-clamp-1">{deal.name}</h4>
-                    <p className="text-xs text-muted-foreground">{deal.company}</p>
-                  </div>
-                  <Badge variant="outline" className="font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200">
-                    {deal.value}
-                  </Badge>
-                </div>
-                <div className="pt-2 flex items-center justify-between text-xs text-muted-foreground border-t border-border/40">
-                  <div className="flex items-center gap-1.5">
-                    <Avatar className="h-5 w-5">
-                      <AvatarFallback className="text-[9px] bg-primary/10 text-primary">{deal.avatar}</AvatarFallback>
-                    </Avatar>
-                    <span>{deal.owner}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    <span>{deal.date}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           ))}
         </div>
       </div>
+    );
+  }
+  return null;
+}
 
-      {/* Earnings/Expenses & Contact Leads Table */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Earnings & Expenses Mini Cards */}
-        <div className="lg:col-span-4 space-y-6">
-          <Card className="shadow-sm border border-border/60">
-            <CardContent className="p-5 flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-muted-foreground uppercase">Net Earnings</p>
-                <h4 className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">+$55,236</h4>
-                <p className="text-xs text-muted-foreground">+14.2% from last month</p>
-              </div>
-              <div className="w-24 h-14">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={earningsSparkline}>
-                    <Area type="monotone" dataKey="value" stroke="#10b981" fill="#10b98120" strokeWidth={2} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+// ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
 
-          <Card className="shadow-sm border border-border/60">
-            <CardContent className="p-5 flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-muted-foreground uppercase">Operational Expenses</p>
-                <h4 className="text-2xl font-bold text-rose-600 dark:text-rose-400">-$16,845</h4>
-                <p className="text-xs text-muted-foreground">-4.8% reduction</p>
-              </div>
-              <div className="w-24 h-14">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={expensesSparkline}>
-                    <Area type="monotone" dataKey="value" stroke="#f43f5e" fill="#f43f5e20" strokeWidth={2} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+export default function SalesReportPage() {
+  const [selectedRange, setSelectedRange] = React.useState<"Q4" | "YTD">("Q4");
+
+  const dealsTableColumns: ColumnDef<EnterpriseDeal>[] = [
+    {
+      header: "Deal ID",
+      accessorKey: "id",
+      className: "w-24 pl-6 font-mono text-xs text-muted-foreground",
+    },
+    {
+      header: "Contact & Enterprise",
+      accessorKey: "contactName",
+      className: "min-w-[220px]",
+      render: (deal) => (
+        <div className="space-y-0.5">
+          <p className="text-xs font-semibold text-foreground hover:text-primary transition-colors cursor-pointer">
+            {deal.contactName}
+          </p>
+          <p className="text-[11px] text-muted-foreground font-mono">{deal.company}</p>
+        </div>
+      ),
+    },
+    {
+      header: "Contract Value",
+      accessorKey: "amount",
+      className: "font-mono text-xs font-semibold tabular-nums text-foreground",
+    },
+    {
+      header: "Pipeline Stage",
+      accessorKey: "stageName",
+      className: "min-w-[150px]",
+      render: (deal) => (
+        <div className="space-y-1 pr-4">
+          <div className="flex items-center justify-between text-[11px] font-mono">
+            <span className="text-muted-foreground truncate">{deal.stageName}</span>
+            <span className="font-medium text-foreground tabular-nums">{deal.stageProgress}%</span>
+          </div>
+          <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-primary rounded-full transition-all duration-300"
+              style={{ width: `${deal.stageProgress}%` }} 
+            />
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Status",
+      accessorKey: "status",
+      className: "w-28",
+      render: (deal) => {
+        const variants = {
+          Closing: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
+          Contracting: "bg-primary/10 text-primary border-primary/20",
+          Proposal: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
+          Discovery: "bg-muted text-muted-foreground border-border/80",
+        };
+        return (
+          <Badge variant="outline" className={`text-[10px] font-mono font-medium px-2 py-0.5 ${variants[deal.status]}`}>
+            {deal.status}
+          </Badge>
+        );
+      },
+    },
+    {
+      header: "Owner",
+      accessorKey: "ownerName",
+      className: "w-32",
+      render: (deal) => (
+        <div className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground">
+          <Avatar className="size-4.5 border border-border/80">
+            <AvatarFallback className="text-[9px] bg-muted text-foreground font-mono">
+              {deal.ownerAvatar}
+            </AvatarFallback>
+          </Avatar>
+          <span className="truncate">{deal.ownerName}</span>
+        </div>
+      ),
+    },
+    {
+      header: "",
+      id: "actions",
+      className: "text-right pr-6 w-12",
+      render: (deal) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger render={
+            <Button variant="ghost" size="icon-sm" className="size-7">
+              <MoreVertical className="size-3.5 text-muted-foreground" />
+            </Button>
+          } />
+          <DropdownMenuContent align="end" className="w-36">
+            <DropdownMenuItem 
+              className="gap-2 text-xs cursor-pointer"
+              onClick={() => toast.info(`Viewing deal ${deal.id} for ${deal.company}`)}
+            >
+              <Eye className="size-3.5 text-muted-foreground" /> View Audit
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              className="gap-2 text-xs cursor-pointer"
+              onClick={() => toast.info(`Editing deal scope for ${deal.id}`)}
+            >
+              <Pencil className="size-3.5 text-muted-foreground" /> Edit Scope
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              className="gap-2 text-xs text-destructive focus:text-destructive cursor-pointer"
+              onClick={() => toast.error(`Archived record ${deal.id}`)}
+            >
+              <Trash2 className="size-3.5" /> Archive
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
+
+  return (
+    <div className="flex-1 space-y-6 p-6 md:p-8 max-w-7xl mx-auto w-full">
+      
+      {/* ─── 1. TOP HEADER & BREADCRUMB ────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
+        <div className="space-y-1">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard" className="text-xs">Executive Reports</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-xs font-mono">Sales Velocity</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground font-heading">
+            Sales & Revenue Analytics
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            Pipeline velocity, closed enterprise revenue, and quota pacing across sales territories.
+          </p>
         </div>
 
-        {/* Contact Leads Table */}
-        <Card className="lg:col-span-8 shadow-sm border border-border/60">
-          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        {/* Action Controls */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center rounded-lg border border-border/80 bg-muted/40 p-0.5 text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRange("Q4");
+                toast.success("Period set to Q4 2026");
+              }}
+              className={`rounded-md px-2.5 py-1 font-mono transition-colors ${
+                selectedRange === "Q4"
+                  ? "bg-card text-foreground font-semibold shadow-2xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Q4 2026
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRange("YTD");
+                toast.success("Period set to YTD 2026");
+              }}
+              className={`rounded-md px-2.5 py-1 font-mono transition-colors ${
+                selectedRange === "YTD"
+                  ? "bg-card text-foreground font-semibold shadow-2xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              YTD 2026
+            </button>
+          </div>
+
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-8 gap-1.5 text-xs border-border/80 font-mono"
+            onClick={() => toast.info("Filter parameters: Enterprise tiers, Closed & In-Flight deals")}
+          >
+            <Filter className="size-3.5 text-muted-foreground" /> Filter
+          </Button>
+          <Button 
+            size="sm" 
+            className="h-8 gap-1.5 text-xs bg-primary text-primary-foreground hover:bg-primary/90 font-mono shadow-2xs"
+            onClick={() => toast.success("Exporting sales ledger summary (PDF/CSV)...")}
+          >
+            <ArrowDownToLine className="size-3.5" /> Export Ledger
+          </Button>
+        </div>
+      </div>
+
+      {/* ─── 2. EXECUTIVE METRICS STRIP ───────────────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {SALES_KPIS.map((kpi, idx) => (
+          <Card key={idx} className="border-border/80 bg-card shadow-2xs">
+            <CardContent className="p-5 space-y-2">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span className="font-medium">{kpi.label}</span>
+                <span className="font-mono text-[10px] text-muted-foreground/80">{kpi.benchmark}</span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="font-mono text-2xl font-semibold tracking-tight text-foreground tabular-nums">
+                  {kpi.prefix}
+                  <AnimatedNumber value={kpi.value} />
+                  {kpi.suffix}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 pt-1 text-[11px] text-muted-foreground font-mono">
+                <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                  {kpi.comparison}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* ─── 3. REVENUE TRAJECTORY & QUOTA ATTAINMENT ─────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Main Area Chart (8-col) */}
+        <Card className="lg:col-span-8 border-border/80 bg-card shadow-2xs">
+          <CardHeader className="pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/60">
             <div>
-              <CardTitle className="text-lg font-bold">Contact Leads Tracker</CardTitle>
-              <CardDescription>Recent enterprise inquiries and deal progression stages</CardDescription>
+              <CardTitle className="text-sm font-semibold font-heading text-foreground">
+                Revenue Trajectory & Forecast ($k)
+              </CardTitle>
+              <CardDescription className="text-xs text-muted-foreground">
+                Monthly actual closed revenue compared against weighted pipeline trajectory.
+              </CardDescription>
             </div>
-            <Button variant="outline" size="sm">Export CSV</Button>
+            <div className="flex items-center gap-4 text-xs font-mono">
+              <span className="flex items-center gap-1.5 text-foreground font-medium">
+                <span className="size-2 rounded-xs bg-primary" />
+                Closed ARR
+              </span>
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="size-2 rounded-xs bg-muted-foreground/50 border border-muted-foreground/60" />
+                Pipeline Pace
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="h-[280px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart 
+                  data={REVENUE_TREND_DATA} 
+                  margin={{ top: 12, right: 12, left: -15, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.22} />
+                      <stop offset="100%" stopColor="var(--primary)" stopOpacity={0.0} />
+                    </linearGradient>
+                    <linearGradient id="pipelineGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--muted-foreground)" stopOpacity={0.12} />
+                      <stop offset="100%" stopColor="var(--muted-foreground)" stopOpacity={0.0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid 
+                    strokeDasharray="2 2" 
+                    vertical={false} 
+                    stroke="var(--border)"
+                    opacity={0.5}
+                  />
+                  <XAxis 
+                    dataKey="month" 
+                    tickLine={false} 
+                    axisLine={false} 
+                    className="text-xs font-mono fill-muted-foreground" 
+                  />
+                  <YAxis 
+                    tickLine={false} 
+                    axisLine={false} 
+                    tickFormatter={(val) => `$${val}k`}
+                    className="text-xs font-mono fill-muted-foreground" 
+                  />
+                  <Tooltip content={<CustomSalesTooltip />} />
+                  <Area 
+                    type="monotone" 
+                    dataKey="pipeline" 
+                    stroke="var(--muted-foreground)" 
+                    strokeWidth={1.5}
+                    strokeDasharray="4 4"
+                    fill="url(#pipelineGrad)" 
+                    name="Pipeline Pace" 
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="revenue" 
+                    stroke="var(--primary)" 
+                    strokeWidth={2.5}
+                    fill="url(#revenueGrad)" 
+                    name="Closed Revenue" 
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Clean Summary Footer */}
+            <div className="grid grid-cols-3 gap-2 pt-4 mt-2 border-t border-border/60 text-center">
+              <div>
+                <p className="text-[11px] text-muted-foreground font-mono">Annualized Run Rate</p>
+                <p className="text-sm font-semibold font-mono text-foreground tabular-nums">$1.48M ARR</p>
+              </div>
+              <div className="border-x border-border/60">
+                <p className="text-[11px] text-muted-foreground font-mono">Q4 Quota Pacing</p>
+                <p className="text-sm font-semibold font-mono text-emerald-700 dark:text-emerald-400 tabular-nums">104.2%</p>
+              </div>
+              <div>
+                <p className="text-[11px] text-muted-foreground font-mono">Avg Sales Velocity</p>
+                <p className="text-sm font-semibold font-mono text-foreground tabular-nums">24.5 Days</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Territory Quota Progress (4-col) */}
+        <Card className="lg:col-span-4 border-border/80 bg-card shadow-2xs flex flex-col justify-between">
+          <div>
+            <CardHeader className="pb-3 border-b border-border/60">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-sm font-semibold font-heading text-foreground">
+                    Quarterly Quota Attainment
+                  </CardTitle>
+                  <CardDescription className="text-xs text-muted-foreground">
+                    Territory progress toward Q4 revenue goals.
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="font-mono text-[10px] text-muted-foreground">
+                  Week 41
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="p-5 space-y-5">
+              {QUOTA_PROGRESS.map((item, idx) => (
+                <div key={idx} className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="font-medium text-foreground">{item.team}</span>
+                    <span className="text-muted-foreground tabular-nums">{item.achieved} / {item.target}</span>
+                  </div>
+                  <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden border border-border/40">
+                    <div 
+                      className="h-full bg-primary rounded-full transition-all duration-500"
+                      style={{ width: `${item.percent}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+                    <span>{item.reps}</span>
+                    <span className="font-semibold text-emerald-700 dark:text-emerald-400 tabular-nums">
+                      {item.percent}% Attained
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </div>
+          <div className="p-4 pt-0">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full text-xs font-mono border-border/80"
+              onClick={() => toast.info("Opening territory performance breakdown")}
+            >
+              View Regional Breakdown
+            </Button>
+          </div>
+        </Card>
+      </div>
+
+      {/* ─── 4. REVENUE BY CHANNEL & ENTERPRISE DEALS ─────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Enterprise Deals Ledger (8-col) */}
+        <Card className="lg:col-span-8 border-border/80 bg-card shadow-2xs">
+          <CardHeader className="pb-3 border-b border-border/60 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-sm font-semibold font-heading text-foreground">
+                Enterprise Deals Ledger
+              </CardTitle>
+              <CardDescription className="text-xs text-muted-foreground">
+                In-flight high-value accounts, contract progression stages, and allocated deal owners.
+              </CardDescription>
+            </div>
+            <div className="text-xs text-muted-foreground font-mono">
+              6 Active Accounts
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             <DataTable
-              columns={contactLeadsColumns}
-              data={contactLeads}
+              columns={dealsTableColumns}
+              data={ENTERPRISE_DEALS}
               className="border-none shadow-none bg-transparent"
               hidePagination
             />
           </CardContent>
+        </Card>
+
+        {/* Channel Distribution & Retention (4-col) */}
+        <Card className="lg:col-span-4 border-border/80 bg-card shadow-2xs flex flex-col justify-between">
+          <div>
+            <CardHeader className="pb-3 border-b border-border/60">
+              <CardTitle className="text-sm font-semibold font-heading text-foreground">
+                Revenue by Segment
+              </CardTitle>
+              <CardDescription className="text-xs text-muted-foreground">
+                Contribution share by go-to-market channel.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-5 space-y-4">
+              {REVENUE_CHANNELS.map((ch, idx) => (
+                <div key={idx} className="space-y-1.5 p-3 rounded-lg border border-border/60 bg-muted/15">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="font-medium text-foreground">{ch.name}</span>
+                    <span className="font-semibold text-foreground tabular-nums">{ch.value}</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary rounded-full" 
+                      style={{ width: `${ch.share}%` }} 
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+                    <span>{ch.share}% of Total ARR</span>
+                    <span className="text-emerald-700 dark:text-emerald-400 font-medium">{ch.change} YoY</span>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </div>
+
+          <div className="p-4 pt-0 border-t border-border/60 mt-2">
+            <div className="flex items-center justify-between text-xs font-mono pt-3">
+              <span className="text-muted-foreground">Net Revenue Retention:</span>
+              <span className="font-semibold text-emerald-700 dark:text-emerald-400 tabular-nums">118.4% NRR</span>
+            </div>
+          </div>
         </Card>
       </div>
 

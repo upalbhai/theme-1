@@ -313,7 +313,7 @@ export default function MotionPrimitivesPage() {
             </Card>
 
             {/* Spotlight */}
-            <Card>
+            <Card className="flex flex-col">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">Spotlight Card</CardTitle>
@@ -321,11 +321,25 @@ export default function MotionPrimitivesPage() {
                 </div>
                 <CardDescription>Smooth radial glow following mouse position.</CardDescription>
               </CardHeader>
-              <CardContent className="h-48 flex items-center justify-center bg-muted/30 rounded-xl m-6 border border-dashed border-border/80 p-0 overflow-hidden">
-                <div className="relative w-full h-full p-6 flex flex-col justify-center items-center">
-                  <Spotlight size={180} className="from-primary/25 via-primary/5 to-transparent blur-2xl" />
-                  <span className="font-semibold text-sm">Move cursor here</span>
-                  <span className="text-xs text-muted-foreground mt-1">Glow tracks your mouse</span>
+              <CardContent className="flex-1 flex flex-col justify-between space-y-4">
+                <div className="relative min-h-[160px] flex flex-col items-center justify-center p-6 bg-card border border-border/80 rounded-xl overflow-hidden shadow-xs cursor-default select-none">
+                  <Spotlight size={220} fill="rgba(217, 84, 30, 0.45)" springOptions={{ stiffness: 120, damping: 20 }} />
+                  <div className="relative z-10 flex flex-col items-center justify-center text-center space-y-1">
+                    <span className="font-semibold text-sm text-foreground">Move cursor here</span>
+                    <span className="text-xs text-muted-foreground">Dynamic radial illumination follows pointer</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
+                  <span>Spring physics & boundary tracking</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => copySnippet(`<Spotlight size={220} fill="rgba(217, 84, 30, 0.45)" />`, "spotlight")}
+                  >
+                    {copiedCode === "spotlight" ? <Check className="size-3 text-emerald-500 mr-1" /> : <Copy className="size-3 mr-1" />}
+                    Copy Code
+                  </Button>
                 </div>
               </CardContent>
             </Card>

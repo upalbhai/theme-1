@@ -28,6 +28,7 @@ import {
   ChevronUp,
   Layers,
   Search,
+  Clock,
 } from "lucide-react";
 
 // Core Motion Primitives
@@ -65,6 +66,18 @@ import { InView } from "@/components/core/in-view";
 import { ProgressiveBlur } from "@/components/core/progressive-blur";
 import { Carousel, CarouselContent, CarouselItem, CarouselNavigation, CarouselIndicator } from "@/components/core/carousel";
 import { KanbanBoard, type KanbanColumn } from "@/components/ui/kanban";
+import {
+  Timeline,
+  TimelineItem,
+  TimelineSeparator,
+  TimelineNode,
+  TimelineConnector,
+  TimelineContent,
+  TimelineHeader,
+  TimelineTitle,
+  TimelineDescription,
+  TimelineTime,
+} from "@/components/ui/timeline";
 
 function KanbanDemoWrapper() {
   const [columns, setColumns] = React.useState<
@@ -131,6 +144,143 @@ function KanbanDemoWrapper() {
             </div>
           )}
         />
+      </div>
+    </div>
+  );
+}
+
+function TimelineDemoWrapper() {
+  const [size, setSize] = React.useState<"sm" | "md" | "lg">("md");
+  const [dashed, setDashed] = React.useState(false);
+  const [items, setItems] = React.useState([
+    {
+      id: "1",
+      title: "Discovery Call & Scoping",
+      time: "10m ago",
+      desc: "Conducted 30-min discovery call. Enterprise team confirmed Q3 scope.",
+      status: "completed" as const,
+      tag: "Sales",
+    },
+    {
+      id: "2",
+      title: "Architecture Security Audit",
+      time: "Just now",
+      desc: "Demonstrated multi-region database failover and SOC 2 directory compliance.",
+      status: "active" as const,
+      tag: "Security",
+    },
+    {
+      id: "3",
+      title: "Stripe Billing Connect & PO Sign-off",
+      time: "In 2 days",
+      desc: "Finalizing procurement contract and automated billing gateway.",
+      status: "pending" as const,
+      tag: "Finance",
+    },
+  ]);
+
+  const addStep = () => {
+    const newId = String(items.length + 1);
+    setItems([
+      ...items,
+      {
+        id: newId,
+        title: `Deliverable Milestone #${newId}`,
+        time: "Scheduled",
+        desc: "Automated production deployment and verified telemetry gate.",
+        status: "pending" as const,
+        tag: "DevOps",
+      },
+    ]);
+  };
+
+  return (
+    <div className="space-y-6 max-w-xl mx-auto w-full">
+      {/* Controls Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-muted/30 border border-border/80 rounded-xl">
+        <div className="flex items-center gap-1.5 text-xs font-mono">
+          <span className="text-muted-foreground mr-1">Size:</span>
+          {(["sm", "md", "lg"] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setSize(s)}
+              className={cn(
+                "px-2.5 py-1 rounded-md transition-colors",
+                size === s
+                  ? "bg-card text-foreground font-semibold shadow-2xs border border-border/80"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setDashed(!dashed)}
+            className={cn(
+              "px-2.5 py-1 text-xs font-mono rounded-md border transition-colors",
+              dashed
+                ? "bg-card text-foreground font-semibold border-border/80 shadow-2xs"
+                : "border-border/60 text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Line: {dashed ? "Dashed" : "Solid"}
+          </button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={addStep}
+            className="h-7 text-xs font-mono border-border/80 gap-1"
+          >
+            + Add Step
+          </Button>
+        </div>
+      </div>
+
+      {/* Live Timeline Display */}
+      <div className="p-5 border border-border/80 rounded-2xl bg-card shadow-2xs">
+        <Timeline size={size}>
+          {items.map((item) => (
+            <TimelineItem key={item.id} dashed={dashed}>
+              <TimelineSeparator>
+                <TimelineNode status={item.status}>
+                  {item.status === "completed" ? (
+                    <Check className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                  ) : item.status === "active" ? (
+                    <Clock className="size-3.5 text-primary" />
+                  ) : (
+                    <span className="size-2 rounded-full bg-muted-foreground/60" />
+                  )}
+                </TimelineNode>
+                <TimelineConnector dashed={dashed} />
+              </TimelineSeparator>
+              <TimelineContent>
+                <div className="p-3.5 border border-border/60 rounded-xl bg-muted/20 hover:bg-muted/30 transition-colors space-y-1">
+                  <div className="flex flex-wrap items-center justify-between gap-1.5">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs font-semibold text-foreground font-heading">
+                        {item.title}
+                      </h4>
+                      <span className="font-mono text-[10px] px-1.5 py-0 rounded bg-muted text-muted-foreground border border-border/60">
+                        {item.tag}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-mono text-muted-foreground">
+                      {item.time}
+                    </span>
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {item.desc}
+                  </p>
+                </div>
+              </TimelineContent>
+            </TimelineItem>
+          ))}
+        </Timeline>
       </div>
     </div>
   );
@@ -475,8 +625,8 @@ export function ComponentDemo({ slug }: { slug: string }) {
           <div className="min-h-[220px] relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-8 flex flex-col justify-center items-center text-center">
             <Spotlight
               size={260}
-              springOptions={{ stiffness: 60, damping: 15 }}
-              className="from-blue-500/30 via-blue-500/10 to-transparent"
+              fill="rgba(59, 130, 246, 0.45)"
+              springOptions={{ stiffness: 80, damping: 18 }}
             />
             <div className="relative z-10 space-y-2">
               <div className="inline-flex size-10 rounded-full bg-blue-500/10 text-blue-400 items-center justify-center border border-blue-500/20 mb-2">
@@ -1120,6 +1270,9 @@ export function ComponentDemo({ slug }: { slug: string }) {
 
     case "kanban":
       return <KanbanDemoWrapper />;
+
+    case "timeline":
+      return <TimelineDemoWrapper />;
 
     default:
       return (

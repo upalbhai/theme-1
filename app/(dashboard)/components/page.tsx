@@ -27,6 +27,7 @@ import {
   Eye,
   SlidersHorizontal,
   ExternalLink,
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -61,6 +62,7 @@ import { ImageComparison } from "@/components/core/image-comparison";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/core/accordion";
 import { Dock, DockIcon, DockItem } from "@/components/core/dock";
 import { TransitionPanel } from "@/components/core/transition-panel";
+import { Timeline, TimelineItem, TimelineSeparator, TimelineNode, TimelineConnector, TimelineContent } from "@/components/ui/timeline";
 
 export default function ComponentsDirectoryPage() {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -404,9 +406,9 @@ import { TextShimmerWave } from "@/components/core/text-shimmer-wave";
                 id="c-spotlight"
               >
                 <div className="min-h-[120px] relative overflow-hidden flex flex-col items-center justify-center p-4 bg-muted/30 rounded-lg">
-                  <Spotlight size={140} className="from-primary/30 via-primary/10 to-transparent blur-xl" />
-                  <span className="text-xs font-semibold">Hover to illuminate</span>
-                  <span className="text-[10px] text-muted-foreground mt-0.5">Tracks pointer coordinates</span>
+                  <Spotlight size={160} fill="rgba(217, 84, 30, 0.45)" />
+                  <span className="relative z-10 text-xs font-semibold">Hover to illuminate</span>
+                  <span className="relative z-10 text-[10px] text-muted-foreground mt-0.5">Tracks pointer coordinates</span>
                 </div>
               </ComponentCard>
 
@@ -650,6 +652,91 @@ import { TextShimmerWave } from "@/components/core/text-shimmer-wave";
                       </span>
                     ))}
                   </InfiniteSlider>
+                </div>
+              </ComponentCard>
+
+              {/* Timeline */}
+              <ComponentCard
+                title="Timeline"
+                badge="shadcn/ui"
+                description="Chronological step timeline with mathematically centered nodes and continuous connectors."
+                codeSnippet={`import { 
+  Timeline, 
+  TimelineItem, 
+  TimelineSeparator, 
+  TimelineNode, 
+  TimelineConnector, 
+  TimelineContent 
+} from "@/components/ui/timeline";
+
+<Timeline size="sm">
+  <TimelineItem>
+    <TimelineSeparator>
+      <TimelineNode status="completed">
+        <Check className="size-3 text-emerald-600" />
+      </TimelineNode>
+      <TimelineConnector />
+    </TimelineSeparator>
+    <TimelineContent>
+      <p className="text-xs font-semibold">Discovery Call</p>
+      <p className="text-[11px] text-muted-foreground">Scoping confirmed for Q3.</p>
+    </TimelineContent>
+  </TimelineItem>
+</Timeline>`}
+                copiedId={copiedId}
+                onCopy={copyCode}
+                id="c-timeline"
+              >
+                <div className="p-3 bg-muted/20 rounded-lg">
+                  <Timeline size="sm">
+                    <TimelineItem>
+                      <TimelineSeparator>
+                        <TimelineNode status="completed">
+                          <Check className="size-3 text-emerald-600 dark:text-emerald-400" />
+                        </TimelineNode>
+                        <TimelineConnector />
+                      </TimelineSeparator>
+                      <TimelineContent>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold text-foreground">Discovery Call</p>
+                          <span className="text-[10px] font-mono text-muted-foreground">10m ago</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">Scoping confirmed for Q3.</p>
+                      </TimelineContent>
+                    </TimelineItem>
+
+                    <TimelineItem>
+                      <TimelineSeparator>
+                        <TimelineNode status="active">
+                          <Clock className="size-3 text-primary" />
+                        </TimelineNode>
+                        <TimelineConnector />
+                      </TimelineSeparator>
+                      <TimelineContent>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold text-foreground">Architecture Review</p>
+                          <span className="text-[10px] font-mono text-muted-foreground">Just now</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">Multi-region failover verified.</p>
+                      </TimelineContent>
+                    </TimelineItem>
+
+                    <TimelineItem>
+                      <TimelineSeparator>
+                        <TimelineNode status="pending">
+                          <span className="size-1.5 rounded-full bg-muted-foreground/60" />
+                        </TimelineNode>
+                        <TimelineConnector />
+                      </TimelineSeparator>
+                      <TimelineContent>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold text-foreground">Contract Executed</p>
+                          <span className="text-[10px] font-mono text-muted-foreground">Scheduled</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">PO procurement awaiting sign-off.</p>
+                      </TimelineContent>
+                    </TimelineItem>
+                  </Timeline>
                 </div>
               </ComponentCard>
 
