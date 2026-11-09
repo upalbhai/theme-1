@@ -1226,7 +1226,14 @@ export function getAllComponents(): ComponentItem[] {
 }
 
 export function getComponentBySlug(slug: string): ComponentItem | undefined {
-  return COMPONENTS_REGISTRY.find((c) => c.slug === slug);
+  if (!slug) return undefined;
+  const exact = COMPONENTS_REGISTRY.find((c) => c.slug === slug);
+  if (exact) return exact;
+
+  const normalized = slug.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return COMPONENTS_REGISTRY.find(
+    (c) => c.slug.toLowerCase().replace(/[^a-z0-9]/g, "") === normalized
+  );
 }
 
 export function getComponentsByCategory(category: ComponentCategory): ComponentItem[] {
@@ -1248,7 +1255,9 @@ export function getAdjacentComponents(currentSlug: string): {
   prev: ComponentItem | null;
   next: ComponentItem | null;
 } {
-  const index = COMPONENTS_REGISTRY.findIndex((c) => c.slug === currentSlug);
+  const item = getComponentBySlug(currentSlug);
+  if (!item) return { prev: null, next: null };
+  const index = COMPONENTS_REGISTRY.findIndex((c) => c.slug === item.slug);
   if (index === -1) return { prev: null, next: null };
 
   const prev = index > 0 ? COMPONENTS_REGISTRY[index - 1] : null;

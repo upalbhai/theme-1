@@ -996,7 +996,22 @@ function ComponentCard({
   slug?: string;
 }) {
   const [showCode, setShowCode] = React.useState(false);
-  const componentSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const componentSlug =
+    slug ||
+    (id === "c-anim-number"
+      ? "animated-number"
+      : id === "c-image-comp"
+      ? "image-comparison"
+      : id === "c-trans-panel"
+      ? "transition-panel"
+      : id && id.startsWith("c-")
+      ? id.replace(/^c-/, "")
+      : "") ||
+    title
+      .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
 
   return (
     <Card className="flex flex-col justify-between overflow-hidden shadow-xs hover:shadow-sm transition-shadow">

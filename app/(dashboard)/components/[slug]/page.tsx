@@ -26,9 +26,15 @@ import {
 } from "lucide-react";
 
 export function generateStaticParams() {
-  return getAllComponents().map((c) => ({
-    slug: c.slug,
-  }));
+  const params: { slug: string }[] = [];
+  for (const c of getAllComponents()) {
+    params.push({ slug: c.slug });
+    const noHyphen = c.slug.replace(/-/g, "");
+    if (noHyphen !== c.slug) {
+      params.push({ slug: noHyphen });
+    }
+  }
+  return params;
 }
 
 interface ComponentPageProps {
